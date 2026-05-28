@@ -1,11 +1,12 @@
 import pandas as pd
 from docxtpl import DocxTemplate
+import html
 
 def phan_loai_don_vi(chi_doan):
-    """Tự động phân loại Chi bộ và Đoàn trường/LCĐ dựa trên tên Chi đoàn hệ Chính quy"""
+    """Phân loại Chi bộ và Đoàn trường dựa trên tên chi đoàn."""
     cd = str(chi_doan).lower()
     
-    # 1. Nhóm ngành đặc thù dễ trùng lặp (Cần kiểm tra trước)
+    # Nhóm đặc thù (Kiểm tra trước)
     if 'troy' in cd or 'hệ thống thông tin quản lý' in cd:
         return "Chi bộ sinh viên Toán - Tin", "Liên chi đoàn Khoa Toán - Tin"
     if 'y sinh' in cd:
@@ -13,7 +14,7 @@ def phan_loai_don_vi(chi_doan):
     if 'quản lý năng lượng' in cd:
         return "Chi bộ sinh viên Kinh tế", "Đoàn trường Kinh tế"
 
-    # 2. Nhóm các Đoàn trường có Chi bộ riêng
+    # Nhóm Đoàn trường/LCĐ
     if any(x in cd for x in ['điện', 'điều khiển', 'tự động hóa', 'truyền thông', 'đa phương tiện', 'viễn thông', 'nhúng', 'iot', 'ee', 'et']):
         return "Chi bộ sinh viên Điện Điện tử", "Đoàn trường Điện - Điện tử"
     elif any(x in cd for x in ['thực phẩm', 'sinh học', 'hóa', 'môi trường', 'tài nguyên', 'bf', 'ch', 'ev']):
@@ -28,110 +29,69 @@ def phan_loai_don_vi(chi_doan):
         return "Chi bộ sinh viên Kinh tế", "Đoàn trường Kinh tế"
     elif any(x in cd for x in ['tính toán', 'toán', 'mi']):
         return "Chi bộ sinh viên Toán - Tin", "Liên chi đoàn Khoa Toán - Tin"
-
-    # 3. Nhóm gộp chung "Chi bộ sinh viên"
+    
+    # Nhóm gộp
     elif any(x in cd for x in ['tiếng anh', 'tiếng trung', 'tiếng hàn', 'ngoại ngữ', 'fl']):
         return "Chi bộ sinh viên", "Liên chi đoàn Khoa Ngoại ngữ"
     elif any(x in cd for x in ['công nghệ giáo dục', 'quản lý giáo dục', 'tâm lý học', 'ed']):
         return "Chi bộ sinh viên", "Liên chi đoàn Khoa Khoa học và Công nghệ giáo dục"
     elif any(x in cd for x in ['vật lý', 'hạt nhân', 'ph']):
         return "Chi bộ sinh viên", "Liên chi đoàn Khoa Vật lý Kỹ thuật"
-    else:
-        return "[Tên Chi bộ]", "[Tên Đoàn trường/LCĐ]"
-
-def get_muc_hoc_tap(gpa):
-    try:
-        gpa = float(gpa)
-    except:
-        return "trung bình"
-    if gpa >= 3.6: return "xuất sắc"
-    elif gpa >= 3.2: return "giỏi"
-    elif gpa >= 2.5: return "khá"
-    else: return "trung bình"
-
-def get_muc_ren_luyen(chuoi_diem_rl):
-    try:
-        cac_ky = [float(x.strip()) for x in str(chuoi_diem_rl).split('-') if x.strip().isdigit()]
-        if not cac_ky: return "tốt" 
-        diem_tb_rl = sum(cac_ky) / len(cac_ky)
-        if diem_tb_rl >= 90: return "xuất sắc"
-        elif diem_tb_rl >= 80: return "tốt"
-        elif diem_tb_rl >= 65: return "khá"
-        else: return "trung bình"
-    except:
-        return "tốt"
+    
+    return "[Tên Chi bộ]", "[Tên Đoàn trường/LCĐ]"
 
 def get_nhan_xet_toan_dien(gpa, chuoi_diem_rl):
-    muc_hoc_tap = get_muc_hoc_tap(gpa)
-    muc_ren_luyen = get_muc_ren_luyen(chuoi_diem_rl)
+    """Tính toán logic nhận xét và mã hóa ký tự để tránh lỗi Word XML"""
+    try:
+        gpa = float(gpa)
+    except: gpa = 0.0
     
-    nang_luc = f"Có kết quả học tập {muc_hoc_tap} và rèn luyện {muc_ren_luyen}, có tinh thần học để nâng cao trình độ chuyên môn. Hoàn thành tốt nhiệm vụ được giao."
+    # Xác định mức
+    muc_ht = "xuất sắc" if gpa >= 3.6 else "giỏi" if gpa >= 3.2 else "khá" if gpa >= 2.5 else "trung bình"
+    
+    # Tính điểm RL
+    try:
+        ky = [float(x.strip()) for x in str(chuoi_diem_rl).split('-') if x.strip().isdigit()]
+        tb_rl = sum(ky)/len(ky) if ky else 80
+    except: tb_rl = 80
+    muc_rl = "xuất sắc" if tb_rl >= 90 else "tốt" if tb_rl >= 80 else "khá" if tb_rl >= 65 else "trung bình"
+    
+    nang_luc = f"Có kết quả học tập {muc_ht} và rèn luyện {muc_rl}, có tinh thần học để nâng cao trình độ chuyên môn. Hoàn thành tốt nhiệm vụ được giao."
     khuyet_diem = "Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình."
     
-    if muc_hoc_tap == "trung bình":
-        khuyet_diem += " Cần cố gắng hơn trong học tập để đạt kết quả tốt."
-    elif muc_hoc_tap == "khá":
-        khuyet_diem += " Cần cố gắng hơn trong học tập để đạt kết quả tốt."
-        
-    if muc_ren_luyen in ["khá", "trung bình"]:
-        khuyet_diem += " Cần tích cực tham gia các hoạt động phong trào Đoàn - Hội để nâng cao điểm rèn luyện."
-        
-    return nang_luc, khuyet_diem
-
-def get_thoi_gian_bnx(chuoi_ngay_hop, ten_doan_truong):
-    try:
-        ngay_thang_raw = str(chuoi_ngay_hop).split(',')[0].strip()
-        parts = ngay_thang_raw.split('.')
-        if len(parts) == 3:
-            ngay_chuoi = f"ngày {parts[0]} tháng {parts[1]} năm {parts[2]}"
-        else:
-            ngay_chuoi = "ngày .... tháng .... năm 2026"
-    except:
-        ngay_chuoi = "ngày .... tháng .... năm 2026"
-        
-    if "Liên chi đoàn" in ten_doan_truong:
-        ky_hieu = "- BNX/LCĐ"
-    elif "Đoàn trường" in ten_doan_truong:
-        ky_hieu = "- BNX/ĐT"
-    else:
-        ky_hieu = "- BNX/ĐT"
-        
-    return f"{ky_hieu} {ngay_chuoi}"
+    if gpa < 3.2: khuyet_diem += " Cần cố gắng hơn trong học tập để đạt kết quả tốt."
+    if tb_rl < 80: khuyet_diem += " Cần tích cực tham gia các hoạt động phong trào Đoàn - Hội để nâng cao điểm rèn luyện."
+    
+    # MÃ HÓA KÝ TỰ ĐẶC BIỆT ĐỂ KHÔNG LỖI WORD
+    return html.escape(nang_luc), html.escape(khuyet_diem)
 
 def tao_file_nhan_xet_hang_loat(excel_path, template_path, output_path):
-    """Hàm lõi gọi từ FastAPI để tổng hợp và xuất tệp Word"""
-    # Đọc dữ liệu, bỏ qua 2 dòng tiêu đề đầu tiên
     df = pd.read_excel(excel_path, skiprows=2)
     df = df.dropna(subset=['Họ tên'])
     
     danh_sach = []
-    
-    for index, row in df.iterrows():
-        ho_ten = str(row['Họ tên']).strip()
-        gpa = row['TB 2 kỳ gần nhất']
-        chuoi_diem_rl = row['Điểm rèn luyện']
-        chi_doan = str(row['Chi đoàn, khóa'])
-        chuoi_ngay_hop = row.get('Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV', '')
+    for _, row in df.iterrows():
+        # Xử lý an toàn dữ liệu
+        ho_ten = html.escape(str(row['Họ tên']).strip())
+        nang_luc, khuyet_diem = get_nhan_xet_toan_dien(row['TB 2 kỳ gần nhất'], row['Điểm rèn luyện'])
+        cb, dt = phan_loai_don_vi(row['Chi đoàn, khóa'])
         
-        try:
-            stt = f"{int(float(row['TT'])):02d}"
-        except:
-            stt = "00"
-            
-        ten_chi_bo, ten_doan_truong = phan_loai_don_vi(chi_doan)
-        nang_luc, khuyet_diem = get_nhan_xet_toan_dien(gpa, chuoi_diem_rl)
-        thoi_gian_bnx = get_thoi_gian_bnx(chuoi_ngay_hop, ten_doan_truong)
+        # Xử lý thời gian và ký hiệu
+        ngay = str(row.get('Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV', '')).split(',')[0].replace('.', '/')
+        ky_hieu = "- BNX/LCĐ" if "Liên chi đoàn" in dt else "- BNX/ĐT"
+        stt = f"{int(float(row['TT'])):02d}" if pd.notnull(row['TT']) else "00"
         
         danh_sach.append({
             'stt': stt,
-            'thoi_gian_BNX': thoi_gian_bnx,
+            'thoi_gian_BNX': f"{ky_hieu} ngày {ngay}",
             'ho_ten': ho_ten,
-            'ten_chi_bo': ten_chi_bo,
-            'ten_doan_truong': ten_doan_truong,
+            'ten_chi_bo': html.escape(cb),
+            'ten_doan_truong': html.escape(dt),
             'nhan_xet_nang_luc': nang_luc,
             'nhan_xet_khuyet_diem': khuyet_diem
         })
     
+    # Xuất file
     doc = DocxTemplate(template_path)
     doc.render({'students': danh_sach})
     doc.save(output_path)
