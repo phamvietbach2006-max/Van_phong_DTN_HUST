@@ -20,34 +20,47 @@
             background-color: #e9ecef;
             border-color: #146c43;
         }
+        .text-sm {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body class="bg-light">
-    <div class="container py-5" style="max-width: 800px;">
+    <div class="container py-5" style="max-width: 900px;">
         <a href="index.html" class="btn btn-outline-secondary mb-3">&larr; Quay lại Dashboard</a>
         
         <div class="card shadow border-0 p-4 mb-4">
             <h3 class="text-success fw-bold text-center mb-2">XUẤT BẢN NHẬN XÉT HÀNG LOẠT</h3>
-            <p class="text-center text-muted mb-4">Hệ thống tự động phân tích điểm CPA, Điểm rèn luyện từ Excel và xuất ra file ZIP chứa các bản nhận xét (Word).</p>
+            <p class="text-center text-muted mb-4">Hệ thống tự động phân tích điểm từ Excel và xuất ra file ZIP chứa các bản nhận xét (Word).</p>
             
             <div class="alert alert-warning" role="alert">
-                <h6 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle"></i> Yêu cầu File Excel:</h6>
-                <p class="mb-0 text-sm">Dòng đầu tiên của file Excel bắt buộc phải có các cột tiêu đề sau (phân biệt hoa/thường):</p>
-                <ul class="mb-0 mt-2">
-                    <li><strong>Số bản nhận xét</strong> <em>(VD: 01-BNX/ĐT)</em></li>
-                    <li><strong>Tên chi bộ</strong> <em>(VD: Chi bộ Sinh viên 1)</em></li>
-                    <li><strong>Thời gian</strong> <em>(VD: ngày 15 tháng 05 năm 2026)</em></li>
-                    <li><strong>Tên Đoàn trường</strong> <em>(VD: Đoàn Thanh niên Trường CNTT)</em></li>
-                    <li><strong>Họ và tên</strong> <em>(VD: Nguyễn Văn A)</em></li>
-                    <li><strong>CPA</strong> <em>(VD: 3.42)</em></li>
-                    <li><strong>Điểm rèn luyện</strong> <em>(VD: 85)</em></li>
-                </ul>
-                <p class="mt-3 mb-0 text-success fw-bold"><i class="bi bi-magic"></i> Hệ thống sẽ tự động sinh nội dung Nhận xét Năng lực và Khuyết điểm dựa trên 2 cột Điểm!</p>
+                <h6 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle"></i> Yêu cầu File Excel Đầu Vào:</h6>
+                <p class="mb-2 text-sm">Dòng số 1 của file Excel bắt buộc phải có các cột tiêu đề sau (phân biệt hoa/thường, phải viết chính xác):</p>
+                <div class="row text-sm">
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li><strong>Số BNX</strong></li>
+                            <li><strong>Họ tên</strong></li>
+                            <li><strong>Mã số Sinh viên</strong></li>
+                            <li><strong>Ngày sinh</strong></li>
+                            <li><strong>Chi đoàn, khóa</strong></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li><strong>TB 2 kỳ gần nhất</strong> <em>(Ví dụ: 3.42)</em></li>
+                            <li><strong>Điểm rèn luyện</strong> <em>(Ví dụ: 85)</em></li>
+                            <li><strong>Ngày lấy ý kiến chi đoàn</strong></li>
+                            <li><strong>Ngày họp Đoàn trường/LCĐ; số phiếu</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-success fw-bold"><i class="bi bi-magic"></i> Hệ thống sẽ tự động sinh nội dung Nhận xét Năng lực và Khuyết điểm dựa trên cột "TB 2 kỳ gần nhất" và "Điểm rèn luyện"!</p>
             </div>
 
             <form action="/api/nhan-xet-hang-loat" method="POST" enctype="multipart/form-data" id="uploadForm">
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Tải lên danh sách Đảng viên (File .xlsx, .xls)</label>
+                    <label class="form-label fw-bold">Tải lên danh sách xét duyệt (File .xlsx, .xls)</label>
                     <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
                         <i class="bi bi-file-earmark-spreadsheet text-success" style="font-size: 3rem;"></i>
                         <h5 class="mt-3">Kéo thả file Excel vào đây hoặc click để chọn file</h5>
@@ -57,7 +70,7 @@
                 </div>
                 
                 <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-5" id="submitBtn">
-                    <i class="bi bi-printer"></i> XUẤT FILE ZIP
+                    <i class="bi bi-printer"></i> XUẤT FILE ZIP HỒ SƠ
                 </button>
             </form>
         </div>
@@ -104,7 +117,7 @@
                 submitBtn.classList.add('disabled');
                 
                 setTimeout(() => {
-                    submitBtn.innerHTML = '<i class="bi bi-printer"></i> XUẤT FILE ZIP';
+                    submitBtn.innerHTML = '<i class="bi bi-printer"></i> XUẤT FILE ZIP HỒ SƠ';
                     submitBtn.classList.remove('disabled');
                 }, 3000);
             }
