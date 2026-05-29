@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo Bản Nhận Xét Chuyển Đảng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5" style="max-width: 700px;">
+        <a href="index.html" class="btn btn-outline-secondary mb-3">&larr; Quay lại Dashboard</a>
+        <div class="card shadow border-0 p-4">
+            <h3 class="text-success fw-bold text-center mb-4">TỰ ĐỘNG TẠO BẢN NHẬN XÉT CHUYỂN ĐẢNG</h3>
+            <form action="/api/nhan-xet" method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Họ và tên Đảng viên dự bị</label>
+                    <input type="text" name="hoTen" class="form-placeholder form-control" required placeholder="Ví dụ: Nguyễn Văn A">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Ngày vào Đảng dự bị</label>
+                        <input type="date" name="ngayVaoDang" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Chi đoàn / Lớp</label>
+                        <input type="text" name="chiDoan" class="form-control" required placeholder="Ví dụ: K65-ĐTVT">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ưu điểm nổi bật (Đoàn thanh niên nhận xét)</label>
+                    <textarea name="uuDiem" class="form-control" rows="3" placeholder="- Luôn gương mẫu trong các phong trào Đoàn..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Hạn chế cần khắc phục</label>
+                    <textarea name="khuyetDiem" class="form-control" rows="2" placeholder="- Cần chủ động hơn trong sinh hoạt Chi đoàn..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success w-100 py-2">Xuất File Word (.docx)</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
