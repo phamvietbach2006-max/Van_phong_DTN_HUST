@@ -9,14 +9,16 @@ const archiver = require('archiver');
 
 const app = express();
 
-// Cấu hình Multer lưu file upload tạm thời
+// Cấu hình Multer để lưu tạm file upload vào thư mục 'uploads/'
 const upload = multer({ dest: 'uploads/' });
 
+// Cấu hình Express
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+// Mở thư mục public chứa giao diện web (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Đảm bảo thư mục 'uploads' tồn tại
+// Đảm bảo thư mục 'uploads' tồn tại (tránh lỗi khi Multer lưu file tạm)
 if (!fs.existsSync('uploads')) {
     fs.mkdirSync('uploads');
 }
@@ -64,6 +66,7 @@ app.post('/api/nhan-xet-hang-loat', upload.single('fileExcel'), (req, res) => {
     try {
         if (!req.file) return res.status(400).send('Vui lòng chọn file Excel.');
 
+        // 1. Đọc file Excel upload lên
         const workbook = xlsx.readFile(req.file.path);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         
@@ -80,58 +83,69 @@ app.post('/api/nhan-xet-hang-loat', upload.single('fileExcel'), (req, res) => {
             return rowSach;
         });
 
-        // Chuẩn bị file Zip
+        // 2. Chuẩn bị file Zip
         const zipFileName = `Ban_Nhan_Xet_${Date.now()}.zip`;
         const zipFilePath = path.join(__dirname, zipFileName);
         const output = fs.createWriteStream(zipFilePath);
-        const archive = archiver('zip', { zlib: { level: 9 } });
+        const archive = archiver('zip', { zlib: { level: 9 } }); // Nén mức tối đa
         
         archive.pipe(output);
 
+        // Đọc sẵn template Word
         const templateContent = fs.readFileSync(path.resolve(__dirname, 'templates/Mau_Ban_Nhan_Xet.docx'), 'binary');
 
-        // Vòng lặp xử lý từng Đảng viên
+        // 3. Vòng lặp: Duyệt qua từng người trong Excel, tạo file Word và ném vào file Zip
         danhSachDangVien.forEach((dangVien) => {
-            // Bỏ qua nếu dòng đó không có Tên (dòng trống)
-            if (!dangVien['Họ và tên']) return;
+            // Bỏ qua nếu dòng đó không có 'Họ tên' (dòng trống cuối file)
+            if (!dangVien['Họ tên']) return;
 
             const zipWord = new PizZip(templateContent);
             const doc = new Docxtemplater(zipWord, { paragraphLoop: true, linebreaks: true });
 
-            // Tự động sinh nhận xét
-            const ketQuaNhanXet = sinhNhanXet(dangVien['CPA'], dangVien['Điểm rèn luyện']);
+            // Tự động sinh nhận xét dựa trên cột điểm TB 2 kỳ và Điểm rèn luyện
+            const ketQuaNhanXet = sinhNhanXet(dangVien['TB 2 kỳ gần nhất'], dangVien['Điểm rèn luyện']);
 
+            // Gắn dữ liệu từ tên cột Excel vào biến trong Word
             doc.render({
-                stt: dangVien['Số bản nhận xét'], 
-                ten_chi_bo: dangVien['Tên chi bộ'],
-                thoi_gian_BNX: dangVien['Thời gian'],
-                ten_doan_truong: dangVien['Tên Đoàn trường'],
-                ho_ten: dangVien['Họ và tên'],
+                stt: dangVien['Số BNX'], 
+                ho_ten: dangVien['Họ tên'],
+                mssv: dangVien['Mã số Sinh viên'],
+                ngay_sinh: dangVien['Ngày sinh'],
+                chi_doan: dangVien['Chi đoàn, khóa'],
+                gpa_1: dangVien['GPA 2024.2'],
+                gpa_2: dangVien['GPA 2025.1'],
+                ngay_y_kien_cd: dangVien['Ngày lấy ý kiến chi đoàn'],
+                ngay_hop_doan: dangVien['Ngày họp Đoàn trường/LCĐ; số phiếu'],
+                tinh_trang: dangVien['Tình trạng hồ sơ: ngày nhận, được thông qua/trả lại ngày, lý do'],
+                
+                // Dữ liệu lấy từ hàm tự động
                 nhan_xet_nang_luc: ketQuaNhanXet.nangLuc,
                 nhan_xet_khuyet_diem: ketQuaNhanXet.khuyetDiem
             });
 
             const buf = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
             
-            // Xóa ký tự cấm trong tên file
-            let tenAnToan = dangVien['Họ và tên'].replace(/[/\\?%*:|"<>]/g, '');
+            // Xóa ký tự cấm trong tên file Windows/Mac
+            let tenAnToan = dangVien['Họ tên'].replace(/[/\\?%*:|"<>]/g, '');
             const tenFileWord = `BNX_${tenAnToan}.docx`;
             
             archive.append(buf, { name: tenFileWord });
         });
 
+        // 4. Hoàn tất nén
         archive.finalize();
 
-        // Gửi file Zip về trình duyệt
+        // 5. Sau khi nén xong, gửi file Zip về cho người dùng
         output.on('close', () => {
             res.download(zipFilePath, zipFileName, (err) => {
-                // Dọn rác
+                // Xóa file tạm để dọn rác cho Server
                 if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
                 if (fs.existsSync(zipFilePath)) fs.unlinkSync(zipFilePath);
             });
         });
 
     } catch (error) {
+        // Trong trường hợp lỗi cũng cần dọn rác file tạm
         if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
         res.status(500).send("Có lỗi xảy ra khi tạo bản nhận xét: " + error.message);
     }
@@ -144,6 +158,7 @@ app.post('/api/nghi-quyet', (req, res) => {
     try {
         const { hoTen, ngaySinh, chiDoan, tongSo, coMat, tanThanh } = req.body;
         
+        // Tự động tính phần trăm tỷ lệ tán thành
         const tyLe = ((parseInt(tanThanh) / parseInt(coMat)) * 100).toFixed(1) + "%";
 
         const content = fs.readFileSync(path.resolve(__dirname, 'templates/Mau_Nghi_Quyet.docx'), 'binary');
@@ -163,7 +178,7 @@ app.post('/api/nghi-quyet', (req, res) => {
 });
 
 // =========================================================
-// KHỞI ĐỘNG SERVER
+// KHỞI ĐỘNG SERVER (CẤU HÌNH PORT ĐỘNG CHO RENDER)
 // =========================================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
