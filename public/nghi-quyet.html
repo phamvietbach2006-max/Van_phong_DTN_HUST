@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo Nghị Quyết Kết Nạp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5" style="max-width: 700px;">
+        <a href="index.html" class="btn btn-outline-secondary mb-3">&larr; Quay lại Dashboard</a>
+        <div class="card shadow border-0 p-4">
+            <h3 class="text-danger fw-bold text-center mb-4">TỰ ĐỘNG TẠO NGHỊ QUYẾT KẾT NẠP ĐẢNG</h3>
+            <form action="/api/nghi-quyet" method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Họ và tên Quần chúng ưu tú</label>
+                    <input type="text" name="hoTen" class="form-control" required placeholder="Ví dụ: Trần Thị B">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Ngày sinh</label>
+                        <input type="date" name="ngaySinh" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Chi đoàn</label>
+                        <input type="text" name="chiDoan" class="form-control" required placeholder="Ví dụ: K66-Luật">
+                    </div>
+                </div>
+                <hr>
+                <h5 class="fw-bold text-muted mb-3">Số liệu biểu quyết Hội nghị</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Tổng số đoàn viên</label>
+                        <input type="number" name="tongSo" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Có mặt dự họp</label>
+                        <input type="number" name="coMat" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Số phiếu tán thành</label>
+                        <input type="number" name="tanThanh" class="form-control" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-danger w-100 py-2">Xuất Nghị Quyết (.docx)</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
