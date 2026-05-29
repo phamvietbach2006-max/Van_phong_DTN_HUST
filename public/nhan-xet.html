@@ -28,20 +28,21 @@
         
         <div class="card shadow border-0 p-4 mb-4">
             <h3 class="text-success fw-bold text-center mb-2">XUẤT BẢN NHẬN XÉT HÀNG LOẠT</h3>
-            <p class="text-center text-muted mb-4">Hệ thống sẽ tự động đọc file Excel và xuất ra file ZIP chứa các bản nhận xét (Word).</p>
+            <p class="text-center text-muted mb-4">Hệ thống tự động phân tích điểm CPA, Điểm rèn luyện từ Excel và xuất ra file ZIP chứa các bản nhận xét (Word).</p>
             
             <div class="alert alert-warning" role="alert">
                 <h6 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle"></i> Yêu cầu File Excel:</h6>
-                <p class="mb-0 text-sm">Dòng đầu tiên của file Excel bắt buộc phải có các cột tiêu đề sau (có phân biệt hoa/thường):</p>
+                <p class="mb-0 text-sm">Dòng đầu tiên của file Excel bắt buộc phải có các cột tiêu đề sau (phân biệt hoa/thường):</p>
                 <ul class="mb-0 mt-2">
                     <li><strong>Số bản nhận xét</strong> <em>(VD: 01-BNX/ĐT)</em></li>
                     <li><strong>Tên chi bộ</strong> <em>(VD: Chi bộ Sinh viên 1)</em></li>
                     <li><strong>Thời gian</strong> <em>(VD: ngày 15 tháng 05 năm 2026)</em></li>
                     <li><strong>Tên Đoàn trường</strong> <em>(VD: Đoàn Thanh niên Trường CNTT)</em></li>
                     <li><strong>Họ và tên</strong> <em>(VD: Nguyễn Văn A)</em></li>
-                    <li><strong>Nhận xét năng lực</strong></li>
-                    <li><strong>Nhận xét khuyết điểm</strong></li>
+                    <li><strong>CPA</strong> <em>(VD: 3.42)</em></li>
+                    <li><strong>Điểm rèn luyện</strong> <em>(VD: 85)</em></li>
                 </ul>
+                <p class="mt-3 mb-0 text-success fw-bold"><i class="bi bi-magic"></i> Hệ thống sẽ tự động sinh nội dung Nhận xét Năng lực và Khuyết điểm dựa trên 2 cột Điểm!</p>
             </div>
 
             <form action="/api/nhan-xet-hang-loat" method="POST" enctype="multipart/form-data" id="uploadForm">
@@ -69,7 +70,6 @@
         const uploadForm = document.getElementById('uploadForm');
         const submitBtn = document.getElementById('submitBtn');
 
-        // Hiển thị tên file khi người dùng chọn
         fileInput.addEventListener('change', function() {
             if (this.files && this.files.length > 0) {
                 fileNameDisplay.innerHTML = `<strong>Đã chọn:</strong> ${this.files[0].name}`;
@@ -80,7 +80,6 @@
             }
         });
 
-        // Hiệu ứng kéo thả
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('dragover');
@@ -95,17 +94,15 @@
             dropZone.classList.remove('dragover');
             if (e.dataTransfer.files.length > 0) {
                 fileInput.files = e.dataTransfer.files;
-                fileInput.dispatchEvent(new Event('change')); // Kích hoạt sự kiện change
+                fileInput.dispatchEvent(new Event('change'));
             }
         });
 
-        // Hiệu ứng nút bấm khi submit (để báo hiệu đang tạo file ZIP)
         uploadForm.addEventListener('submit', function() {
             if (fileInput.files.length > 0) {
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang tạo file ZIP, vui lòng đợi...';
                 submitBtn.classList.add('disabled');
                 
-                // Trả lại trạng thái nút sau khoảng 3 giây (thời gian ước tính tải xong)
                 setTimeout(() => {
                     submitBtn.innerHTML = '<i class="bi bi-printer"></i> XUẤT FILE ZIP';
                     submitBtn.classList.remove('disabled');
