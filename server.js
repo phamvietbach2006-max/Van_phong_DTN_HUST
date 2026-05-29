@@ -115,49 +115,6 @@ app.post('/api/nghi-quyet', (req, res) => {
 });
 
 // =========================================================
-// 3. TÍNH NĂNG: TRA CỨU SỐ TÀI KHOẢN & MSSV
-// =========================================================
-let DATABASE_SINH_VIEN = []; // Lưu vào RAM
-
-// A. Nhận file Excel Danh sách từ Admin
-app.post('/api/upload-excel', upload.single('fileExcel'), (req, res) => {
-    try {
-        if (!req.file) return res.status(400).send('Vui lòng chọn file Excel.');
-        
-        const workbook = xlsx.readFile(req.file.path);
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        
-        // Chuyển dữ liệu Excel thành Array JSON
-        DATABASE_SINH_VIEN = xlsx.utils.sheet_to_json(sheet);
-        
-        // Xóa file tạm
-        fs.unlinkSync(req.file.path);
-
-        res.send("<script>alert('Tải lên dữ liệu sinh viên thành công!'); window.location.href='/tra-cuu.html';</script>");
-    } catch (error) {
-        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        res.status(500).send("Lỗi đọc file Excel: " + error.message);
-    }
-});
-
-// B. Trả về kết quả khi gõ MSSV tìm kiếm
-app.get('/api/tra-cuu', (req, res) => {
-    const mssvCanTim = req.query.mssv;
-    if (!mssvCanTim) {
-        return res.json({ success: false, message: "Thiếu tham số mã số sinh viên." });
-    }
-
-    const sinhVien = DATABASE_SINH_VIEN.find(sv => String(sv.MSSV).trim() === String(mssvCanTim).trim());
-
-    if (sinhVien) {
-        res.json({ success: true, data: sinhVien });
-    } else {
-        res.json({ success: false, message: "Không tìm thấy thông tin của sinh viên này trong hệ thống. Liên hệ Admin cập nhật danh sách." });
-    }
-});
-
-// =========================================================
 // KHỞI ĐỘNG SERVER (CẤU HÌNH PORT ĐỘNG CHO RENDER)
 // =========================================================
 const PORT = process.env.PORT || 3000;
