@@ -1,0 +1,59 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f9;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header: Logo góc trái, tên tiếng Việt chính giữa */
+header {
+    background-color: #ce1616;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 10px 40px;
+    justify-content: space-between;
+}
+header img { height: 60px; }
+header h1 { flex-grow: 1; text-align: center; margin: 0; font-size: 24px;}
+
+/* Taskbar / Navigation */
+nav {
+    background-color: #1a365d;
+    padding: 10px 40px;
+}
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-right: 20px;
+    font-weight: bold;
+    padding: 8px 15px;
+    border-radius: 4px;
+}
+nav a:hover { background-color: #2b5c9e; }
+
+/* Main Content */
+.container {
+    flex: 1;
+    padding: 40px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+.card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+/* Footer */
+footer {
+    background-color: #e9ecef;
+    padding: 30px 40px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+.footer-col h4 { margin-top: 0; color: #1a365d; }
+.footer-col ul { list-style: none; padding: 0; }
+.footer-col li { margin-bottom: 8px; }
