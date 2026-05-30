@@ -2,21 +2,22 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bản Nhận Xét - YUMOFFICE</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="logo.png" type="image/x-icon">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
     <header>
-        <img src="logo.png" alt="Logo">
+        <img src="logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
         <h1>VĂN PHÒNG ĐOÀN THANH NIÊN ĐẠI HỌC BÁCH KHOA HÀ NỘI</h1>
         <div style="width: 60px;"></div>
     </header>
+    
     <nav>
         <a href="index.html">Trang chủ</a>
         <a href="ban-nhan-xet.html">Bản Nhận Xét</a>
@@ -38,12 +39,30 @@
             </div>
 
             <button onclick="processData()" style="padding: 10px 20px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Xử lý & Tải xuống Bản Nhận Xét</button>
-            <p id="status" style="color: green; margin-top: 15px;"></p>
+            <p id="status" style="color: green; margin-top: 15px; font-weight: bold;"></p>
         </div>
     </div>
 
     <footer>
-        </footer>
+        <div class="footer-col">
+            <img src="logo.png" alt="Logo" style="height: 50px;" onerror="this.style.display='none'">
+            <p>Hệ thống hỗ trợ nghiệp vụ YUMOFFICE.</p>
+        </div>
+        <div class="footer-col">
+            <h4>GIỚI THIỆU</h4>
+            <ul>
+                <li>Về Đoàn Bách khoa</li>
+                <li>Đội ngũ phát triển</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>LIÊN HỆ</h4>
+            <ul>
+                <li>📍 Nguyễn Khánh Toàn, Nghĩa Đô, Hà Nội</li>
+                <li>📧 phamvietbach2006@gmail.com</li>
+            </ul>
+        </div>
+    </footer>
 
     <script>
         function parseDate(raw) {
@@ -58,7 +77,7 @@
 
         function evaluateHocTap(gpa) {
             if (gpa < 2.5) return "trung bình";
-            if (gpa < 3.2) return "khá";
+            if (gpa <= 3.2) return "khá";
             if (gpa <= 3.6) return "tốt";
             return "xuất sắc";
         }
@@ -87,52 +106,65 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang xử lý...";
+            statusLabel.innerText = "Đang xử lý dữ liệu... Vui lòng đợi!";
+            statusLabel.style.color = "blue";
 
-            // Đọc Excel
-            const excelReader = new FileReader();
-            excelReader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(sheet);
+            try {
+                // Đọc Excel
+                const excelReader = new FileReader();
+                excelReader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-                let studentsData = jsonData.map(row => {
-                    const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
-                    const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
-                    
-                    return {
-                        stt: row["Số BNX"] || "",
-                        thoi_gian_BNX: parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]),
-                        ten_chi_bo: row["Chi bộ"] || "",
-                        ten_doan_truong: row["Đoàn trường/ Liên chi Đoàn"] || "",
-                        ho_ten: row["Họ tên"] || "",
-                        nhan_xet_nang_luc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
-                        nhan_xet_khuyet_diem: evaluateKhuyetDiem(gpa, drl)
-                    };
-                });
-
-                // Đọc Template Word
-                const templateReader = new FileReader();
-                templateReader.onload = function(evt) {
-                    const content = evt.target.result;
-                    const zip = new PizZip(content);
-                    const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-
-                    // Đổ toàn bộ mảng students vào biến "students" trong Word
-                    doc.render({ students: studentsData });
-
-                    const out = doc.getZip().generate({
-                        type: "blob",
-                        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    let studentsData = jsonData.map(row => {
+                        const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
+                        const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
+                        
+                        return {
+                            stt: row["Số BNX"] || "",
+                            thoi_gian_BNX: parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]),
+                            ten_chi_bo: row["Chi bộ"] || "",
+                            ten_doan_truong: row["Đoàn trường/ Liên chi Đoàn"] || "",
+                            ho_ten: row["Họ tên"] || "",
+                            nhan_xet_nang_luc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
+                            nhan_xet_khuyet_diem: evaluateKhuyetDiem(gpa, drl)
+                        };
                     });
-                    
-                    saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
-                    statusLabel.innerText = "Xử lý thành công! File đã được tải xuống.";
+
+                    // Đọc Template Word
+                    const templateReader = new FileReader();
+                    templateReader.onload = function(evt) {
+                        try {
+                            const content = evt.target.result;
+                            const zip = new PizZip(content);
+                            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+                            doc.render({ students: studentsData });
+
+                            const out = doc.getZip().generate({
+                                type: "blob",
+                                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            });
+                            
+                            saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
+                            statusLabel.innerText = "Xử lý thành công! File đã được tải xuống.";
+                            statusLabel.style.color = "green";
+                        } catch (error) {
+                            console.error(error);
+                            statusLabel.innerText = "Lỗi khi xử lý file Word. Hãy chắc chắn file mẫu có chứa thẻ {#students} và {/students}.";
+                            statusLabel.style.color = "red";
+                        }
+                    };
+                    templateReader.readAsBinaryString(templateInput.files[0]);
                 };
-                templateReader.readAsBinaryString(templateInput.files[0]);
-            };
-            excelReader.readAsArrayBuffer(excelInput.files[0]);
+                excelReader.readAsArrayBuffer(excelInput.files[0]);
+            } catch (err) {
+                statusLabel.innerText = "Đã xảy ra lỗi trong quá trình đọc file.";
+                statusLabel.style.color = "red";
+                console.error(err);
+            }
         }
     </script>
 </body>
