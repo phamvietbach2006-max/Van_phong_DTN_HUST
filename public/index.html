@@ -3,137 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Văn phòng Đoàn Thanh niên - ĐHBK Hà Nội</title>
+    <title>YUMOFFICE - Văn phòng Đoàn HUST</title>
     <style>
-        :root {
-            --primary-red: #cc0000;
-            --primary-yellow: #ffcc00;
-            --light-gray: #f4f4f9;
-            --text-dark: #333;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--light-gray);
-            color: var(--text-dark);
-        }
-        header {
-            background-color: var(--primary-red);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 5px solid var(--primary-yellow);
-        }
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-            text-transform: uppercase;
-        }
-        nav {
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        nav a {
-            padding: 15px 20px;
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        nav a:hover {
-            background-color: var(--primary-yellow);
-            color: var(--primary-red);
-        }
-        .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            color: var(--primary-red);
-            border-bottom: 2px solid var(--primary-yellow);
-            padding-bottom: 10px;
-            margin-top: 0;
-        }
-        .btn {
-            display: inline-block;
-            background: var(--primary-red);
-            color: white;
-            padding: 10px 15px;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        footer {
-            text-align: center;
-            padding: 20px;
-            background: var(--text-dark);
-            color: white;
-            margin-top: 40px;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #c00; }
+        .nav-links a { display: inline-block; margin: 15px; padding: 15px 25px; background: #c00; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .nav-links a:hover { background: #900; }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>Văn phòng Đoàn Thanh niên</h1>
-        <p>Đại học Bách khoa Hà Nội</p>
-    </header>
-
-    <nav>
-        <a href="#home">Trang chủ</a>
-        <a href="#yumoffice">YUMOFFICE</a>
-        <a href="#ban-to-chuc">Ban Tổ chức - Kiểm tra</a>
-        <a href="#tips">Góc Kỹ năng</a>
-        <a href="#sodo">Sơ đồ Phòng</a>
-    </nav>
-
     <div class="container">
-        <main>
-            <div class="card" id="yumoffice">
-                <h2>Cổng quản lý YUMOFFICE</h2>
-                <p>Hệ thống quản lý nội bộ dành cho các cán bộ Đoàn. Hỗ trợ đặt lịch phòng họp, quản lý hồ sơ nhân sự, và điều phối công việc giữa các ban chuyên môn.</p>
-                <a href="#" class="btn">Đăng nhập hệ thống</a>
+        <h1>Văn phòng Đoàn Thanh niên Đại học Bách khoa Hà Nội</h1>
+        <p>Hệ thống YUMOFFICE - Hỗ trợ nghiệp vụ công tác Đoàn và Đảng</p>
+        
+        <div class="nav-links">
+            <a href="ban-nhan-xet.html">Công cụ tạo Bản nhận xét Đảng viên dự bị</a>
             </div>
-
-            <div class="card" id="tips" style="margin-top: 20px;">
-                <h2>Cẩm nang Hội thoại & Kỹ năng (Conve Tips)</h2>
-                <ul>
-                    <li>Kịch bản phỏng vấn tuyển CTV truyền thông.</li>
-                    <li>Hướng dẫn quy trình xét cảm tình Đảng nhanh gọn, chính xác.</li>
-                    <li>Kỹ năng đọc tài liệu kỹ thuật tốc độ cao (Fast Reading).</li>
-                </ul>
-                <a href="#" class="btn">Đọc thêm</a>
-            </div>
-        </main>
-
-        <aside>
-            <div class="card" id="sodo">
-                <h2>Không gian Văn phòng (间)</h2>
-                <p>Sơ đồ bố trí các khu vực làm việc và tiếp khách của Văn phòng Đoàn Thanh niên.</p>
-                <div style="background: #eee; height: 150px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc;">
-                    [ Bản đồ / Hình ảnh ]
-                </div>
-            </div>
-        </aside>
     </div>
-
-    <footer>
-        <p>&copy; 2026 Văn phòng Đoàn Thanh niên - Đại học Bách khoa Hà Nội.</p>
-    </footer>
-
 </body>
 </html>
