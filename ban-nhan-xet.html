@@ -26,8 +26,8 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét Tự Động</h2>
-            <p><em>Hệ thống đã nâng cấp lõi quét dữ liệu. Tự động bỏ qua các dòng tiêu đề thừa trong Excel.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét Tự Động (Bản Tối Thượng)</h2>
+            <p><em>Tự động hàn gắn cấu trúc Word và lột bỏ ký tự rác trong Excel.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
@@ -119,11 +119,11 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang quét dữ liệu đa tầng... Vui lòng đợi!";
+            statusLabel.innerText = "Đang xử lý cấu trúc Word và dọn dẹp dữ liệu Excel... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             try {
-                // Tải file Word mẫu
+                // Tải template
                 const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx?v=' + new Date().getTime());
                 if (!templateResponse.ok) throw new Error("Không tải được file mẫu Word.");
                 const templateArrayBuffer = await templateResponse.arrayBuffer();
@@ -134,10 +134,9 @@
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, {type: 'array'});
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        
-                        // Đọc Excel dưới dạng mảng 2 chiều để tự dò tìm dòng tiêu đề thật
                         const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
                         
+                        // Tự động dò dòng tiêu đề thật sự (Bỏ qua 2 dòng thừa phía trên)
                         let headerRowIndex = -1;
                         for (let i = 0; i < rows.length; i++) {
                             const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
@@ -148,16 +147,13 @@
                         }
 
                         if (headerRowIndex === -1) {
-                            statusLabel.innerText = "Lỗi: Không tìm thấy cột 'Họ tên' trong file Excel!";
-                            statusLabel.style.color = "red";
-                            return;
+                            throw new Error("Không tìm thấy cột Họ tên trong Excel!");
                         }
 
-                        // Lấy mảng tiêu đề chuẩn
                         const headers = rows[headerRowIndex];
                         const validStudents = [];
 
-                        // Bắt đầu bốc dữ liệu từ dòng dưới dòng tiêu đề
+                        // Quét từ dưới dòng tiêu đề
                         for (let i = headerRowIndex + 1; i < rows.length; i++) {
                             const rowData = rows[i];
                             if (!rowData || rowData.length === 0) continue;
@@ -168,24 +164,13 @@
                             });
 
                             let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
-                            
-                            // Lọc cực gắt: Phải có tên và tên không được chứa chữ "Đồng ý" (loại bỏ dòng phụ)
                             if (name && String(name).trim() !== "" && !String(name).includes('Đồng ý')) {
                                 validStudents.push(rowObj);
                             }
                         }
 
-                        if (validStudents.length === 0) {
-                            statusLabel.innerText = "Lỗi: Không có dữ liệu sinh viên hợp lệ!";
-                            statusLabel.style.color = "red";
-                            return;
-                        }
-
-                        // Ánh xạ dữ liệu
                         let studentsData = validStudents.map(row => {
                             const gpa = parseFloat(getColValue(row, ['tb2ky', 'gpa', 'trungbinh'])) || 0;
-                            
-                            // Xử lý cột Điểm Rèn Luyện nếu có dải điểm (VD: "82-93")
                             let drlStr = String(getColValue(row, ['diemrenluyen', 'renluyen', 'drl']));
                             let drlMatch = drlStr.match(/\d+/);
                             const drl = drlMatch ? parseFloat(drlMatch[0]) : 0;
@@ -201,10 +186,28 @@
                             };
                         });
 
-                        // Đổ vào template Word
                         const zip = new PizZip(templateArrayBuffer);
-                        const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
+                        // --- THUỐC GIẢI XML TỰ ĐỘNG ---
+                        // Đoạn mã này sẽ lùng sục trong file Word và khâu lại mọi thẻ {{ }} bị nát
+                        for (let fileName in zip.files) {
+                            if (fileName.endsWith('.xml')) {
+                                let xml = zip.file(fileName).asText();
+                                xml = xml.replace(/<w:proofErr[^>]*>/g, '');
+                                xml = xml.replace(/<w:lastRenderedPageBreak[^>]*>/g, '');
+                                
+                                for (let i = 0; i < 3; i++) {
+                                    xml = xml.replace(/\{([^{}]+)\}/g, function(match, inner) {
+                                        if (inner.includes('<')) return '{' + inner.replace(/<[^>]+>/g, '') + '}';
+                                        return match;
+                                    });
+                                }
+                                zip.file(fileName, xml);
+                            }
+                        }
+                        // ------------------------------
+
+                        const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
                         doc.render({ students: studentsData });
 
                         const out = doc.getZip().generate({
@@ -214,12 +217,12 @@
                         
                         saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
                         
-                        statusLabel.innerText = `Xử lý thành công! Đã xuất chuẩn xác ${validStudents.length} bản nhận xét.`;
+                        statusLabel.innerText = `Xuất xắc! Hệ thống đã tạo thành công ${validStudents.length} bản nhận xét với đầy đủ nội dung.`;
                         statusLabel.style.color = "green";
 
                     } catch (error) {
                         console.error(error);
-                        statusLabel.innerText = "Lỗi tạo Word. Vui lòng bật F12 để xem chi tiết.";
+                        statusLabel.innerText = "Lỗi xử lý: " + error.message;
                         statusLabel.style.color = "red";
                     }
                 };
