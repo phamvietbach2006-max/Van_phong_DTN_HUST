@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
-    <script src="https://unpkg.com/docxtemplater@3.37.11/build/docxtemplater.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
 <body>
@@ -26,8 +24,8 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét Tự Động</h2>
-            <p><em>Hệ thống đã tích hợp sẵn mẫu văn bản chuẩn. Đồng chí chỉ cần tải lên danh sách dữ liệu.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét (Phiên bản mới)</h2>
+            <p><em>Sử dụng lõi HTML-to-Word siêu tốc, chống lỗi định dạng. Đồng chí chỉ cần tải lên danh sách Excel.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
@@ -92,7 +90,7 @@
             return "Hoàn thành tốt nhiệm vụ được giao.";
         }
 
-        async function processData() {
+        function processData() {
             const excelInput = document.getElementById('excelFile');
             const statusLabel = document.getElementById('status');
 
@@ -101,66 +99,124 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang tải mẫu văn bản và xử lý dữ liệu... Vui lòng đợi!";
+            statusLabel.innerText = "Đang tạo văn bản... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
-            try {
-                // Mã chống cache ép lấy Word mới nhất
-                const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx?v=' + new Date().getTime());
-                if (!templateResponse.ok) {
-                    throw new Error("Không thể tải file mẫu. Vui lòng kiểm tra lại tên file trên máy chủ.");
-                }
-                const templateArrayBuffer = await templateResponse.arrayBuffer();
+            const excelReader = new FileReader();
+            excelReader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-                const excelReader = new FileReader();
-                excelReader.onload = function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, {type: 'array'});
-                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const jsonData = XLSX.utils.sheet_to_json(sheet);
+                    // Khởi tạo mã HTML chuẩn của file Word
+                    let wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head>
+                        <meta charset='utf-8'>
+                        <style>
+                            body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
+                            .page-break { page-break-before: always; }
+                            p { margin: 6pt 0; text-align: justify; }
+                            table { width: 100%; border-collapse: collapse; }
+                            td { vertical-align: top; }
+                        </style>
+                    </head><body>`;
 
-                        // Ánh xạ dữ liệu vào CÁC BIẾN MỚI KHÔNG CÓ DẤU GẠCH DƯỚI
-                        let studentsData = jsonData.map(row => {
-                            const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
-                            const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
-                            
-                            return {
-                                STT: row["Số BNX"] || "",
-                                ThoiGian: parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]),
-                                TenChiBo: row["Chi bộ"] || "",
-                                TenDoanTruong: row["Đoàn trường/ Liên chi Đoàn"] || "",
-                                HoTen: row["Họ tên"] || "",
-                                NangLuc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
-                                KhuyetDiem: evaluateKhuyetDiem(gpa, drl)
-                            };
-                        });
-
-                        const zip = new PizZip(templateArrayBuffer);
-                        const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-
-                        doc.render({ students: studentsData });
-
-                        const out = doc.getZip().generate({
-                            type: "blob",
-                            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        });
+                    // Lặp qua từng sinh viên và vẽ ra Bản nhận xét
+                    jsonData.forEach((row, index) => {
+                        const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
+                        const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
                         
-                        saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
-                        statusLabel.innerText = "Xử lý thành công! File đã được tự động tải xuống.";
-                        statusLabel.style.color = "green";
-                    } catch (error) {
-                        console.error(error);
-                        statusLabel.innerText = "Lỗi trong quá trình tạo Word. Kiểm tra lại Console (F12).";
-                        statusLabel.style.color = "red";
-                    }
-                };
-                excelReader.readAsArrayBuffer(excelInput.files[0]);
-            } catch (err) {
-                statusLabel.innerText = "Đã xảy ra lỗi: " + err.message;
-                statusLabel.style.color = "red";
-                console.error(err);
-            }
+                        const STT = row["Số BNX"] || "";
+                        const ThoiGian = parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]);
+                        const TenChiBo = row["Chi bộ"] || "";
+                        const TenDoanTruong = row["Đoàn trường/ Liên chi Đoàn"] || "";
+                        const HoTen = row["Họ tên"] || "";
+                        const NangLuc = `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`;
+                        const KhuyetDiem = evaluateKhuyetDiem(gpa, drl);
+
+                        // Thêm ngắt trang nếu không phải người đầu tiên
+                        if (index > 0) {
+                            wordContent += `<div class="page-break"></div>`;
+                        }
+
+                        // Chèn dữ liệu vào khung mẫu HTML
+                        wordContent += `
+                        <table>
+                            <tr>
+                                <td style="text-align: center; width: 50%;">
+                                    THÀNH ĐOÀN HÀ NỘI<br>
+                                    <b>BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</b><br>
+                                    ***<br>
+                                    Số: ${STT} -BNX/ĐTN
+                                </td>
+                                <td style="text-align: center; width: 50%;">
+                                    <b>ĐOÀN TNCS HỒ CHÍ MINH</b><br><br><br>
+                                    <i>Hà Nội, ngày......tháng......năm 2026</i>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <h2 style="text-align: center; margin-top: 30px;">
+                            BẢN NHẬN XÉT<br>
+                            KẾT QUẢ PHẤN ĐẤU CỦA ĐẢNG VIÊN DỰ BỊ
+                        </h2>
+
+                        <p><b>Kính gửi:</b> - Chi ủy Chi bộ Sinh viên <b>${TenChiBo}</b>;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Đảng uỷ Đại học Bách khoa Hà Nội.</p>
+
+                        <p>Căn cứ Điểm 1, Điều 4, Chương I Điều lệ Đảng Cộng Sản Việt Nam về thủ tục, quyền hạn của BCH Đoàn cơ sở giới thiệu Đoàn viên ưu tú cho Đảng.</p>
+                        <p>Căn cứ Điểm 1, Điều 5, Chương I Điều lệ Đảng Cộng Sản Việt Nam quy định về thời kỳ dự bị đối với người được kết nạp Đảng.</p>
+                        <p>Căn cứ Bản Nhận xét số ${STT} ${ThoiGian} của ${TenDoanTruong};</p>
+                        <p>Ban Thường vụ Đoàn TNCS Hồ Chí Minh Đại học Bách khoa Hà Nội xin báo cáo với Chi bộ và Đảng ủy Đại học những vấn đề chủ yếu về Đảng viên dự bị <b>${HoTen}</b> như sau:</p>
+                        
+                        <p><b>- Ưu điểm:</b><br>
+                        + Phẩm chất chính trị: Có phẩm chất chính trị vững vàng, chấp hành và thực hiện đúng chủ trương đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Nhà trường, của tổ chức Đoàn.<br>
+                        + Đạo đức lối sống: Có phẩm chất đạo đức tốt, có lối sống lành mạnh, trong sáng, thật thà, giản dị. Sống nghiêm túc và có trách nhiệm với bản thân, gia đình, xã hội. Có ý thức đoàn kết xây dựng tập thể.<br>
+                        + Năng lực công tác: ${NangLuc}, có tinh thần học để nâng cao trình độ chuyên môn. ${KhuyetDiem}.<br>
+                        + Quan hệ quần chúng: Sống hòa nhã với mọi người, sẵn sàng giúp đỡ bạn bè, đồng chí. Tôn trọng và biết lắng nghe ý kiến của người khác, giữ gìn sự đoàn kết của tập thể.</p>
+
+                        <p><b>- Khuyết điểm và những vấn đề cần lưu ý:</b> Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình.</p>
+                        
+                        <p>Đối chiếu với các tiêu chuẩn Đảng viên và kết quả phấn đấu rèn luyện của đồng chí, chúng tôi đề nghị Chi bộ xét chuyển Đảng chính thức cho đồng chí <b>${HoTen}</b> với sự tán thành của 09/09 đ/c Thường vụ dự họp.</p>
+
+                        <p style="text-align: right; margin-bottom: 30px;"><i>Chúng tôi xin chịu trách nhiệm trước Đảng về lời nhận xét của mình.</i></p>
+
+                        <table>
+                            <tr>
+                                <td style="width: 50%;">
+                                    <b><u>Nơi nhận:</u></b><br>
+                                    - Như kính gửi;<br>
+                                    - Lưu VP.
+                                </td>
+                                <td style="width: 50%; text-align: center;">
+                                    <b>TM. BAN THƯỜNG VỤ ĐOÀN ĐẠI HỌC</b><br>
+                                </td>
+                            </tr>
+                        </table>
+                        `;
+                    });
+
+                    wordContent += `</body></html>`;
+
+                    // Xuất ra file .doc
+                    const blob = new Blob(['\ufeff', wordContent], {
+                        type: 'application/msword'
+                    });
+                    
+                    saveAs(blob, "Ban_Nhan_Xet_Hoan_Thanh.doc");
+                    
+                    statusLabel.innerText = "Xử lý thành công rực rỡ! File đã được tải xuống.";
+                    statusLabel.style.color = "green";
+
+                } catch (error) {
+                    console.error(error);
+                    statusLabel.innerText = "Lỗi trong quá trình xử lý file Excel.";
+                    statusLabel.style.color = "red";
+                }
+            };
+            excelReader.readAsArrayBuffer(excelInput.files[0]);
         }
     </script>
 </body>
