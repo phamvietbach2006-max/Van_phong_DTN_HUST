@@ -24,8 +24,8 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét (Phiên bản mới)</h2>
-            <p><em>Sử dụng lõi HTML-to-Word siêu tốc, chống lỗi định dạng. Đồng chí chỉ cần tải lên danh sách Excel.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét (Chuẩn Thể thức)</h2>
+            <p><em>Hệ thống đã nâng cấp: Tự động loại bỏ dòng trống trong Excel và xuất văn bản chuẩn Quốc hiệu, Tiêu ngữ.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
@@ -59,14 +59,18 @@
     </footer>
 
     <script>
+        // Hàm trích xuất ngày tháng loại bỏ phần "/50 UV"
         function parseDate(raw) {
             if (!raw) return "";
-            let datePart = String(raw).split(',')[0].trim();
-            let parts = datePart.split('.');
-            if (parts.length === 3) {
-                return `ngày ${parts[0].padStart(2, '0')} tháng ${parts[1].padStart(2, '0')} năm ${parts[2]}`;
+            let str = String(raw).split(',')[0].split(' ')[0].trim();
+            let parts = str.split(/[./\-]/); 
+            if (parts.length >= 3) {
+                let d = parts[0].padStart(2, '0');
+                let m = parts[1].padStart(2, '0');
+                let y = parts[2];
+                return `ngày ${d} tháng ${m} năm ${y}`;
             }
-            return datePart;
+            return raw;
         }
 
         function evaluateHocTap(gpa) {
@@ -84,10 +88,21 @@
         }
 
         function evaluateKhuyetDiem(gpa, drl) {
-            if (gpa < 3.2 && drl < 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
-            if (gpa >= 3.2 && drl < 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
-            if (gpa < 3.2 && drl >= 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
+            if (gpa <= 3.2 && drl <= 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
+            if (gpa > 3.2 && drl <= 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
+            if (gpa <= 3.2 && drl > 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
             return "Hoàn thành tốt nhiệm vụ được giao.";
+        }
+
+        // Hàm thông minh tự tìm đúng cột dù Excel có thừa dấu cách
+        function getColValue(row, possibleKeys) {
+            for (let key in row) {
+                let normalizedKey = key.toLowerCase().replace(/[\s.,/;\-()]/g, '');
+                for (let pKey of possibleKeys) {
+                    if (normalizedKey.includes(pKey)) return row[key];
+                }
+            }
+            return "";
         }
 
         function processData() {
@@ -99,7 +114,7 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang tạo văn bản... Vui lòng đợi!";
+            statusLabel.innerText = "Đang tạo văn bản chuẩn thể thức... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             const excelReader = new FileReader();
@@ -110,88 +125,105 @@
                     const sheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-                    // Khởi tạo mã HTML chuẩn của file Word
+                    // 1. Lọc bỏ các dòng rác/dòng trống trong Excel (Sửa lỗi 42 thay vì 38)
+                    const validStudents = jsonData.filter(row => {
+                        let name = getColValue(row, ['họtên', 'hovaten', 'hoten']);
+                        return name && String(name).trim() !== "";
+                    });
+
                     let wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                     <head>
                         <meta charset='utf-8'>
                         <style>
-                            body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
-                            .page-break { page-break-before: always; }
+                            @page { size: 21cm 29.7cm; margin: 2cm 2cm 2cm 3cm; }
+                            body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.3; }
                             p { margin: 6pt 0; text-align: justify; }
-                            table { width: 100%; border-collapse: collapse; }
-                            td { vertical-align: top; }
+                            .indent { text-indent: 1.27cm; }
+                            table { width: 100%; border-collapse: collapse; border: none; }
+                            td { vertical-align: top; padding: 0; }
+                            .center { text-align: center; }
+                            .bold { font-weight: bold; }
+                            .italic { font-style: italic; }
+                            .page-break { page-break-before: always; }
                         </style>
                     </head><body>`;
 
-                    // Lặp qua từng sinh viên và vẽ ra Bản nhận xét
-                    jsonData.forEach((row, index) => {
-                        const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
-                        const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
+                    // 2. Tạo nội dung cho từng sinh viên hợp lệ
+                    validStudents.forEach((row, index) => {
+                        const gpa = parseFloat(getColValue(row, ['tb2kỳ', 'tb2ky', 'gpa'])) || 0;
+                        const drl = parseFloat(getColValue(row, ['điểmrènluyện', 'diemrenluyen', 'rènluyện'])) || 0;
                         
-                        const STT = row["Số BNX"] || "";
-                        const ThoiGian = parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]);
-                        const TenChiBo = row["Chi bộ"] || "";
-                        const TenDoanTruong = row["Đoàn trường/ Liên chi Đoàn"] || "";
-                        const HoTen = row["Họ tên"] || "";
+                        const STT = getColValue(row, ['sốbnx', 'sobnx', 'bnx']);
+                        const ThoiGianRaw = getColValue(row, ['ngàyhọpđoàntrường', 'ngayhopdoan', 'lcđ', 'lcd']);
+                        const ThoiGian = parseDate(ThoiGianRaw);
+                        const TenChiBo = getColValue(row, ['chibộ', 'chibo']);
+                        const TenDoanTruong = getColValue(row, ['đoàntrường', 'liênchi', 'doantruong', 'lienchi']);
+                        const HoTen = getColValue(row, ['họtên', 'hovaten', 'hoten']);
+                        
                         const NangLuc = `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`;
                         const KhuyetDiem = evaluateKhuyetDiem(gpa, drl);
 
-                        // Thêm ngắt trang nếu không phải người đầu tiên
                         if (index > 0) {
                             wordContent += `<div class="page-break"></div>`;
                         }
 
-                        // Chèn dữ liệu vào khung mẫu HTML
+                        // 3. Khung HTML tuân thủ tuyệt đối định dạng MS Word
                         wordContent += `
                         <table>
                             <tr>
-                                <td style="text-align: center; width: 50%;">
-                                    THÀNH ĐOÀN HÀ NỘI<br>
-                                    <b>BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</b><br>
-                                    ***<br>
-                                    Số: ${STT} -BNX/ĐTN
+                                <td style="width: 50%; text-align: center;">
+                                    <p style="margin: 0; font-size: 13pt;">THÀNH ĐOÀN HÀ NỘI</p>
+                                    <p class="bold" style="margin: 0; font-size: 13pt;">BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</p>
+                                    <p style="margin: 0;">***</p>
+                                    <p style="margin: 0; font-size: 13pt;">Số: ${STT} -BNX/ĐTN</p>
                                 </td>
-                                <td style="text-align: center; width: 50%;">
-                                    <b>ĐOÀN TNCS HỒ CHÍ MINH</b><br><br><br>
-                                    <i>Hà Nội, ngày......tháng......năm 2026</i>
+                                <td style="width: 50%; text-align: center;">
+                                    <p class="bold" style="margin: 0; font-size: 13pt;"><span style="border-bottom: 1px solid black;">ĐOÀN TNCS HỒ CHÍ MINH</span></p>
+                                    <p class="italic" style="margin: 0; font-size: 13pt; margin-top: 6pt;">Hà Nội, ngày &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tháng &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; năm 2026</p>
                                 </td>
                             </tr>
                         </table>
 
-                        <h2 style="text-align: center; margin-top: 30px;">
-                            BẢN NHẬN XÉT<br>
-                            KẾT QUẢ PHẤN ĐẤU CỦA ĐẢNG VIÊN DỰ BỊ
-                        </h2>
+                        <p class="center bold" style="margin-top: 24pt; margin-bottom: 0;">BẢN NHẬN XÉT</p>
+                        <p class="center bold" style="margin-top: 0; margin-bottom: 12pt;">KẾT QUẢ PHẤN ĐẤU CỦA ĐẢNG VIÊN DỰ BỊ</p>
 
-                        <p><b>Kính gửi:</b> - Chi ủy Chi bộ Sinh viên <b>${TenChiBo}</b>;<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Đảng uỷ Đại học Bách khoa Hà Nội.</p>
+                        <table style="margin-bottom: 6pt;">
+                            <tr>
+                                <td class="italic bold" style="width: 2cm; padding-left: 1.27cm;">Kính gửi:</td>
+                                <td>
+                                    <p style="margin: 0;">- Chi ủy Chi bộ Sinh viên <span class="bold">${TenChiBo}</span>;</p>
+                                    <p style="margin: 0;">- Đảng uỷ Đại học Bách khoa Hà Nội.</p>
+                                </td>
+                            </tr>
+                        </table>
 
-                        <p>Căn cứ Điểm 1, Điều 4, Chương I Điều lệ Đảng Cộng Sản Việt Nam về thủ tục, quyền hạn của BCH Đoàn cơ sở giới thiệu Đoàn viên ưu tú cho Đảng.</p>
-                        <p>Căn cứ Điểm 1, Điều 5, Chương I Điều lệ Đảng Cộng Sản Việt Nam quy định về thời kỳ dự bị đối với người được kết nạp Đảng.</p>
-                        <p>Căn cứ Bản Nhận xét số ${STT} ${ThoiGian} của ${TenDoanTruong};</p>
-                        <p>Ban Thường vụ Đoàn TNCS Hồ Chí Minh Đại học Bách khoa Hà Nội xin báo cáo với Chi bộ và Đảng ủy Đại học những vấn đề chủ yếu về Đảng viên dự bị <b>${HoTen}</b> như sau:</p>
+                        <p class="indent">- Căn cứ Điểm 1, Điều 4, Chương I Điều lệ Đảng Cộng Sản Việt Nam về thủ tục, quyền hạn của BCH Đoàn cơ sở giới thiệu Đoàn viên ưu tú cho Đảng.</p>
+                        <p class="indent">- Căn cứ Điểm 1, Điều 5, Chương I Điều lệ Đảng Cộng Sản Việt Nam quy định về thời kỳ dự bị đối với người được kết nạp Đảng.</p>
+                        <p class="indent">- Căn cứ Bản Nhận xét số ${STT} ${ThoiGian} của ${TenDoanTruong};</p>
+
+                        <p class="indent">Ban Thường vụ Đoàn TNCS Hồ Chí Minh Đại học Bách khoa Hà Nội xin báo cáo với Chi bộ và Đảng ủy Đại học những vấn đề chủ yếu về Đảng viên dự bị <span class="bold">${HoTen}</span> như sau:</p>
                         
-                        <p><b>- Ưu điểm:</b><br>
-                        + Phẩm chất chính trị: Có phẩm chất chính trị vững vàng, chấp hành và thực hiện đúng chủ trương đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Nhà trường, của tổ chức Đoàn.<br>
-                        + Đạo đức lối sống: Có phẩm chất đạo đức tốt, có lối sống lành mạnh, trong sáng, thật thà, giản dị. Sống nghiêm túc và có trách nhiệm với bản thân, gia đình, xã hội. Có ý thức đoàn kết xây dựng tập thể.<br>
-                        + Năng lực công tác: ${NangLuc}, có tinh thần học để nâng cao trình độ chuyên môn. ${KhuyetDiem}.<br>
-                        + Quan hệ quần chúng: Sống hòa nhã với mọi người, sẵn sàng giúp đỡ bạn bè, đồng chí. Tôn trọng và biết lắng nghe ý kiến của người khác, giữ gìn sự đoàn kết của tập thể.</p>
+                        <p class="indent"><span class="italic bold">- Ưu điểm:</span></p>
+                        <p class="indent">+ Phẩm chất chính trị: Có phẩm chất chính trị vững vàng, chấp hành và thực hiện đúng chủ trương đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Nhà trường, của tổ chức Đoàn.</p>
+                        <p class="indent">+ Đạo đức lối sống: Có phẩm chất đạo đức tốt, có lối sống lành mạnh, trong sáng, thật thà, giản dị. Sống nghiêm túc và có trách nhiệm với bản thân, gia đình, xã hội. Có ý thức đoàn kết xây dựng tập thể.</p>
+                        <p class="indent">+ Năng lực công tác: ${NangLuc}, có tinh thần học để nâng cao trình độ chuyên môn. ${KhuyetDiem}.</p>
+                        <p class="indent">+ Quan hệ quần chúng: Sống hòa nhã với mọi người, sẵn sàng giúp đỡ bạn bè, đồng chí. Tôn trọng và biết lắng nghe ý kiến của người khác, giữ gìn sự đoàn kết của tập thể.</p>
 
-                        <p><b>- Khuyết điểm và những vấn đề cần lưu ý:</b> Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình.</p>
+                        <p class="indent"><span class="italic bold">- Khuyết điểm và những vấn đề cần lưu ý:</span> Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình.</p>
                         
-                        <p>Đối chiếu với các tiêu chuẩn Đảng viên và kết quả phấn đấu rèn luyện của đồng chí, chúng tôi đề nghị Chi bộ xét chuyển Đảng chính thức cho đồng chí <b>${HoTen}</b> với sự tán thành của 09/09 đ/c Thường vụ dự họp.</p>
+                        <p class="indent">Đối chiếu với các tiêu chuẩn Đảng viên và kết quả phấn đấu rèn luyện của đồng chí, chúng tôi đề nghị Chi bộ xét chuyển Đảng chính thức cho đồng chí <span class="bold">${HoTen}</span> với sự tán thành của 09/09 đ/c Thường vụ dự họp.</p>
 
-                        <p style="text-align: right; margin-bottom: 30px;"><i>Chúng tôi xin chịu trách nhiệm trước Đảng về lời nhận xét của mình.</i></p>
+                        <p class="center" style="margin-top: 12pt; margin-bottom: 12pt;">Chúng tôi xin chịu trách nhiệm trước Đảng về lời nhận xét của mình.</p>
 
                         <table>
                             <tr>
-                                <td style="width: 50%;">
-                                    <b><u>Nơi nhận:</u></b><br>
-                                    - Như kính gửi;<br>
-                                    - Lưu VP.
+                                <td style="width: 50%; padding-left: 1.27cm;">
+                                    <p class="bold italic" style="margin: 0; text-decoration: underline;">Nơi nhận:</p>
+                                    <p style="margin: 0;">- Như kính gửi;</p>
+                                    <p style="margin: 0;">- Lưu VP.</p>
                                 </td>
                                 <td style="width: 50%; text-align: center;">
-                                    <b>TM. BAN THƯỜNG VỤ ĐOÀN ĐẠI HỌC</b><br>
+                                    <p class="bold" style="margin: 0;">TM. BAN THƯỜNG VỤ ĐOÀN ĐẠI HỌC</p>
                                 </td>
                             </tr>
                         </table>
@@ -200,14 +232,11 @@
 
                     wordContent += `</body></html>`;
 
-                    // Xuất ra file .doc
-                    const blob = new Blob(['\ufeff', wordContent], {
-                        type: 'application/msword'
-                    });
-                    
+                    const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
                     saveAs(blob, "Ban_Nhan_Xet_Hoan_Thanh.doc");
                     
-                    statusLabel.innerText = "Xử lý thành công rực rỡ! File đã được tải xuống.";
+                    // Báo cáo số lượng bản đã xuất thành công
+                    statusLabel.innerText = `Xử lý thành công! Đã xuất đúng ${validStudents.length} bản nhận xét.`;
                     statusLabel.style.color = "green";
 
                 } catch (error) {
