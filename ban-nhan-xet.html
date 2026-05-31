@@ -27,19 +27,15 @@
     <div class="container">
         <div class="card">
             <h2>Hệ thống Tạo Bản Nhận Xét Tự Động</h2>
+            <p><em>Hệ thống đã tích hợp sẵn mẫu văn bản chuẩn. Đồng chí chỉ cần tải lên danh sách dữ liệu.</em></p>
             
-            <div style="margin-bottom: 20px;">
-                <label><strong>1. Tải lên file Word mẫu (Mau_Ban_Nhan_Xet.docx):</strong></label><br><br>
-                <input type="file" id="templateFile" accept=".docx">
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label><strong>2. Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
+            <div style="margin-bottom: 25px; margin-top: 20px;">
+                <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
                 <input type="file" id="excelFile" accept=".xlsx">
             </div>
 
-            <button onclick="processData()" style="padding: 10px 20px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Xử lý & Tải xuống Bản Nhận Xét</button>
-            <p id="status" style="color: green; margin-top: 15px; font-weight: bold;"></p>
+            <button onclick="processData()" style="padding: 12px 24px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 16px;">Xử lý & Tải xuống Bản Nhận Xét</button>
+            <p id="status" style="margin-top: 20px; font-weight: bold;"></p>
         </div>
     </div>
 
@@ -97,71 +93,72 @@
         }
 
         async function processData() {
-            const templateInput = document.getElementById('templateFile');
             const excelInput = document.getElementById('excelFile');
             const statusLabel = document.getElementById('status');
 
-            if (!templateInput.files.length || !excelInput.files.length) {
-                alert("Vui lòng tải lên cả file Mẫu Word và file Excel!");
+            if (!excelInput.files.length) {
+                alert("Vui lòng tải lên file Excel dữ liệu!");
                 return;
             }
 
-            statusLabel.innerText = "Đang xử lý dữ liệu... Vui lòng đợi!";
+            statusLabel.innerText = "Đang tải mẫu văn bản và xử lý dữ liệu... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             try {
-                // Đọc Excel
+                // 1. Dùng fetch API để tự động lấy file Word mẫu từ máy chủ
+                const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx');
+                if (!templateResponse.ok) {
+                    throw new Error("Không thể tải file mẫu. Vui lòng kiểm tra lại tên file trên máy chủ.");
+                }
+                const templateArrayBuffer = await templateResponse.arrayBuffer();
+
+                // 2. Đọc file Excel người dùng tải lên
                 const excelReader = new FileReader();
                 excelReader.onload = function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(sheet);
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-                    let studentsData = jsonData.map(row => {
-                        const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
-                        const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
-                        
-                        return {
-                            stt: row["Số BNX"] || "",
-                            thoi_gian_BNX: parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]),
-                            ten_chi_bo: row["Chi bộ"] || "",
-                            ten_doan_truong: row["Đoàn trường/ Liên chi Đoàn"] || "",
-                            ho_ten: row["Họ tên"] || "",
-                            nhan_xet_nang_luc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
-                            nhan_xet_khuyet_diem: evaluateKhuyetDiem(gpa, drl)
-                        };
-                    });
-
-                    // Đọc Template Word
-                    const templateReader = new FileReader();
-                    templateReader.onload = function(evt) {
-                        try {
-                            const content = evt.target.result;
-                            const zip = new PizZip(content);
-                            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-
-                            doc.render({ students: studentsData });
-
-                            const out = doc.getZip().generate({
-                                type: "blob",
-                                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                            });
+                        let studentsData = jsonData.map(row => {
+                            const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
+                            const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
                             
-                            saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
-                            statusLabel.innerText = "Xử lý thành công! File đã được tải xuống.";
-                            statusLabel.style.color = "green";
-                        } catch (error) {
-                            console.error(error);
-                            statusLabel.innerText = "Lỗi cấu trúc file Word. Hãy chắc chắn thẻ {#students} đứng độc lập ngoài bảng (table).";
-                            statusLabel.style.color = "red";
-                        }
-                    };
-                    templateReader.readAsBinaryString(templateInput.files[0]);
+                            return {
+                                stt: row["Số BNX"] || "",
+                                thoi_gian_BNX: parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]),
+                                ten_chi_bo: row["Chi bộ"] || "",
+                                ten_doan_truong: row["Đoàn trường/ Liên chi Đoàn"] || "",
+                                ho_ten: row["Họ tên"] || "",
+                                nhan_xet_nang_luc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
+                                nhan_xet_khuyet_diem: evaluateKhuyetDiem(gpa, drl)
+                            };
+                        });
+
+                        // 3. Tiến hành gộp dữ liệu vào template Word
+                        const zip = new PizZip(templateArrayBuffer);
+                        const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+                        doc.render({ students: studentsData });
+
+                        const out = doc.getZip().generate({
+                            type: "blob",
+                            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        });
+                        
+                        saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
+                        statusLabel.innerText = "Xử lý thành công! File đã được tự động tải xuống.";
+                        statusLabel.style.color = "green";
+                    } catch (error) {
+                        console.error(error);
+                        statusLabel.innerText = "Lỗi trong quá trình tạo Word. Kiểm tra lại cấu trúc file mẫu trên GitHub.";
+                        statusLabel.style.color = "red";
+                    }
                 };
                 excelReader.readAsArrayBuffer(excelInput.files[0]);
             } catch (err) {
-                statusLabel.innerText = "Đã xảy ra lỗi trong quá trình đọc file.";
+                statusLabel.innerText = "Đã xảy ra lỗi: " + err.message;
                 statusLabel.style.color = "red";
                 console.error(err);
             }
