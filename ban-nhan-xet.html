@@ -27,7 +27,7 @@
     <div class="container">
         <div class="card">
             <h2>Hệ thống Tạo Bản Nhận Xét Tự Động</h2>
-            <p><em>Hệ thống đã nâng cấp lõi AI chống lỗi dữ liệu. Đồng chí chỉ cần tải lên danh sách Excel.</em></p>
+            <p><em>Hệ thống đã nâng cấp lõi quét dữ liệu. Tự động bỏ qua các dòng tiêu đề thừa trong Excel.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
@@ -61,7 +61,6 @@
     </footer>
 
     <script>
-        // Xử lý ngày tháng loại bỏ phần "/50 UV"
         function parseDate(raw) {
             if (!raw) return "";
             let str = String(raw).split(',')[0].split(' ')[0].trim();
@@ -70,12 +69,12 @@
                 let d = parts[0].padStart(2, '0');
                 let m = parts[1].padStart(2, '0');
                 let y = parts[2];
+                if (y.length === 2) y = "20" + y;
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
             return raw;
         }
 
-        // Logic đánh giá học tập
         function evaluateHocTap(gpa) {
             if (gpa < 2.5) return "trung bình";
             if (gpa <= 3.2) return "khá";
@@ -83,7 +82,6 @@
             return "xuất sắc";
         }
 
-        // Logic đánh giá rèn luyện
         function evaluateRenLuyen(drl) {
             if (drl < 65) return "trung bình";
             if (drl <= 80) return "khá";
@@ -91,7 +89,6 @@
             return "xuất sắc";
         }
 
-        // Logic xuất khuyết điểm
         function evaluateKhuyetDiem(gpa, drl) {
             if (gpa <= 3.2 && drl <= 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
             if (gpa > 3.2 && drl <= 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
@@ -99,16 +96,15 @@
             return "Hoàn thành tốt nhiệm vụ được giao.";
         }
 
-        // BỘ DÒ TÌM BỌC THÉP: Tẩy sạch dấu tiếng Việt, khoảng trắng, Enter
         function removeAccents(str) {
             return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
         }
 
-        function getColValue(row, possibleKeys) {
-            for (let key in row) {
+        function getColValue(rowObj, possibleKeys) {
+            for (let key in rowObj) {
                 let normalizedKey = removeAccents(key).toLowerCase().replace(/[^a-z0-9]/g, '');
                 for (let pKey of possibleKeys) {
-                    if (normalizedKey.includes(pKey)) return row[key];
+                    if (normalizedKey.includes(pKey)) return rowObj[key];
                 }
             }
             return "";
@@ -123,11 +119,11 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang xử lý dữ liệu... Vui lòng đợi!";
+            statusLabel.innerText = "Đang quét dữ liệu đa tầng... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             try {
-                // Tải file Word mẫu trực tiếp từ GitHub
+                // Tải file Word mẫu
                 const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx?v=' + new Date().getTime());
                 if (!templateResponse.ok) throw new Error("Không tải được file mẫu Word.");
                 const templateArrayBuffer = await templateResponse.arrayBuffer();
@@ -138,24 +134,61 @@
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, {type: 'array'});
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const jsonData = XLSX.utils.sheet_to_json(sheet);
+                        
+                        // Đọc Excel dưới dạng mảng 2 chiều để tự dò tìm dòng tiêu đề thật
+                        const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                        
+                        let headerRowIndex = -1;
+                        for (let i = 0; i < rows.length; i++) {
+                            const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
+                            if (rowText.includes('hoten') || rowText.includes('hovaten')) {
+                                headerRowIndex = i;
+                                break;
+                            }
+                        }
 
-                        // 1. Lọc bỏ dòng trống/rác (Fix lỗi 42 bản)
-                        const validStudents = jsonData.filter(row => {
-                            let name = getColValue(row, ['hoten', 'hovaten', 'ten']);
-                            return name && String(name).trim() !== "";
-                        });
-
-                        if (validStudents.length === 0) {
-                            statusLabel.innerText = "Lỗi: Không tìm thấy dữ liệu sinh viên trong Excel!";
+                        if (headerRowIndex === -1) {
+                            statusLabel.innerText = "Lỗi: Không tìm thấy cột 'Họ tên' trong file Excel!";
                             statusLabel.style.color = "red";
                             return;
                         }
 
-                        // 2. Chèn dữ liệu bất chấp lỗi font/dấu câu của Excel (Fix lỗi không điền chữ)
+                        // Lấy mảng tiêu đề chuẩn
+                        const headers = rows[headerRowIndex];
+                        const validStudents = [];
+
+                        // Bắt đầu bốc dữ liệu từ dòng dưới dòng tiêu đề
+                        for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                            const rowData = rows[i];
+                            if (!rowData || rowData.length === 0) continue;
+                            
+                            let rowObj = {};
+                            headers.forEach((h, index) => {
+                                if (h) rowObj[h] = rowData[index];
+                            });
+
+                            let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
+                            
+                            // Lọc cực gắt: Phải có tên và tên không được chứa chữ "Đồng ý" (loại bỏ dòng phụ)
+                            if (name && String(name).trim() !== "" && !String(name).includes('Đồng ý')) {
+                                validStudents.push(rowObj);
+                            }
+                        }
+
+                        if (validStudents.length === 0) {
+                            statusLabel.innerText = "Lỗi: Không có dữ liệu sinh viên hợp lệ!";
+                            statusLabel.style.color = "red";
+                            return;
+                        }
+
+                        // Ánh xạ dữ liệu
                         let studentsData = validStudents.map(row => {
                             const gpa = parseFloat(getColValue(row, ['tb2ky', 'gpa', 'trungbinh'])) || 0;
-                            const drl = parseFloat(getColValue(row, ['diemrenluyen', 'renluyen', 'drl'])) || 0;
+                            
+                            // Xử lý cột Điểm Rèn Luyện nếu có dải điểm (VD: "82-93")
+                            let drlStr = String(getColValue(row, ['diemrenluyen', 'renluyen', 'drl']));
+                            let drlMatch = drlStr.match(/\d+/);
+                            const drl = drlMatch ? parseFloat(drlMatch[0]) : 0;
                             
                             return {
                                 STT: getColValue(row, ['sobnx', 'bnx', 'stt']),
@@ -168,7 +201,7 @@
                             };
                         });
 
-                        // 3. Đổ vào template Word
+                        // Đổ vào template Word
                         const zip = new PizZip(templateArrayBuffer);
                         const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
@@ -181,12 +214,12 @@
                         
                         saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
                         
-                        statusLabel.innerText = `Xử lý thành công! Đã xuất chính xác ${validStudents.length} bản nhận xét, giữ nguyên 100% thể thức gốc.`;
+                        statusLabel.innerText = `Xử lý thành công! Đã xuất chuẩn xác ${validStudents.length} bản nhận xét.`;
                         statusLabel.style.color = "green";
 
                     } catch (error) {
                         console.error(error);
-                        statusLabel.innerText = "Lỗi đọc dữ liệu Word. Hãy kiểm tra lại file mẫu trên GitHub.";
+                        statusLabel.innerText = "Lỗi tạo Word. Vui lòng bật F12 để xem chi tiết.";
                         statusLabel.style.color = "red";
                     }
                 };
