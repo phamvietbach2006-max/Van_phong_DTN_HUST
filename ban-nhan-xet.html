@@ -27,7 +27,7 @@
     <div class="container">
         <div class="card">
             <h2>Hệ thống Tạo Bản Nhận Xét Tự Động (Bản Tối Thượng)</h2>
-            <p><em>Tự động hàn gắn cấu trúc Word và lột bỏ ký tự rác trong Excel.</em></p>
+            <p><em>Hệ thống đã tích hợp "Thuốc giải XML" chống vỡ định dạng Word và lõi quét Excel thông minh.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
@@ -123,7 +123,7 @@
             statusLabel.style.color = "blue";
 
             try {
-                // Tải template
+                // Tải template Word
                 const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx?v=' + new Date().getTime());
                 if (!templateResponse.ok) throw new Error("Không tải được file mẫu Word.");
                 const templateArrayBuffer = await templateResponse.arrayBuffer();
@@ -136,24 +136,25 @@
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
                         
-                        // Tự động dò dòng tiêu đề thật sự (Bỏ qua 2 dòng thừa phía trên)
+                        // BỘ DÒ TÌM TIÊU ĐỀ (Bỏ qua các dòng rác phía trên)
                         let headerRowIndex = -1;
                         for (let i = 0; i < rows.length; i++) {
+                            if (!rows[i]) continue;
                             const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
-                            if (rowText.includes('hoten') || rowText.includes('hovaten')) {
+                            if (rowText.includes('hoten') || rowText.includes('hovaten') || rowText.includes('masosinhvien')) {
                                 headerRowIndex = i;
                                 break;
                             }
                         }
 
                         if (headerRowIndex === -1) {
-                            throw new Error("Không tìm thấy cột Họ tên trong Excel!");
+                            throw new Error("Không tìm thấy cột 'Họ tên' trong file Excel!");
                         }
 
                         const headers = rows[headerRowIndex];
                         const validStudents = [];
 
-                        // Quét từ dưới dòng tiêu đề
+                        // Quét dữ liệu từ dưới dòng tiêu đề
                         for (let i = headerRowIndex + 1; i < rows.length; i++) {
                             const rowData = rows[i];
                             if (!rowData || rowData.length === 0) continue;
@@ -164,10 +165,15 @@
                             });
 
                             let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
-                            if (name && String(name).trim() !== "" && !String(name).includes('Đồng ý')) {
+                            let normalizedName = name ? removeAccents(String(name)).toLowerCase() : "";
+                            
+                            // Lọc cực gắt: Bỏ dòng trống và dòng phụ "Đồng ý"
+                            if (name && normalizedName.trim() !== "" && !normalizedName.includes('dong y')) {
                                 validStudents.push(rowObj);
                             }
                         }
+
+                        if (validStudents.length === 0) throw new Error("Không có dữ liệu sinh viên hợp lệ!");
 
                         let studentsData = validStudents.map(row => {
                             const gpa = parseFloat(getColValue(row, ['tb2ky', 'gpa', 'trungbinh'])) || 0;
@@ -188,24 +194,29 @@
 
                         const zip = new PizZip(templateArrayBuffer);
 
-                        // --- THUỐC GIẢI XML TỰ ĐỘNG ---
-                        // Đoạn mã này sẽ lùng sục trong file Word và khâu lại mọi thẻ {{ }} bị nát
+                        // --- THUỐC GIẢI XML TỰ ĐỘNG KHÂU VẾT RÁCH WORD ---
                         for (let fileName in zip.files) {
                             if (fileName.endsWith('.xml')) {
                                 let xml = zip.file(fileName).asText();
-                                xml = xml.replace(/<w:proofErr[^>]*>/g, '');
-                                xml = xml.replace(/<w:lastRenderedPageBreak[^>]*>/g, '');
                                 
-                                for (let i = 0; i < 3; i++) {
-                                    xml = xml.replace(/\{([^{}]+)\}/g, function(match, inner) {
-                                        if (inner.includes('<')) return '{' + inner.replace(/<[^>]+>/g, '') + '}';
-                                        return match;
-                                    });
-                                }
+                                // Danh sách các biến cần bảo vệ (cả bản cũ và bản mới CamelCase)
+                                const vars = ['{#students}', '{/students}', '{{STT}}', '{{ThoiGian}}', '{{TenChiBo}}', '{{TenDoanTruong}}', '{{HoTen}}', '{{NangLuc}}', '{{KhuyetDiem}}', '{{stt}}', '{{thoi_gian_BNX}}', '{{ten_chi_bo}}', '{{ten_doan_truong}}', '{{ho_ten}}', '{{nhan_xet_nang_luc}}', '{{nhan_xet_khuyet_diem}}'];
+                                
+                                vars.forEach(v => {
+                                    // Tạo biểu thức Regex lùng sục các ký tự bị tách rời bởi thẻ XML
+                                    let patternStr = v.split('').map(char => {
+                                        return char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                    }).join('(?:<[^>]+>|\\s)*');
+                                    let regex = new RegExp(patternStr, 'g');
+                                    
+                                    // Thay thế các mảng rách nát bằng 1 biến nguyên khối
+                                    xml = xml.replace(regex, v);
+                                });
+
                                 zip.file(fileName, xml);
                             }
                         }
-                        // ------------------------------
+                        // -------------------------------------------------
 
                         const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
                         doc.render({ students: studentsData });
@@ -217,7 +228,7 @@
                         
                         saveAs(out, "Ban_Nhan_Xet_Hoan_Thanh.docx");
                         
-                        statusLabel.innerText = `Xuất xắc! Hệ thống đã tạo thành công ${validStudents.length} bản nhận xét với đầy đủ nội dung.`;
+                        statusLabel.innerText = `Xuất sắc! Hệ thống đã tạo thành công ${validStudents.length} bản nhận xét với đầy đủ nội dung.`;
                         statusLabel.style.color = "green";
 
                     } catch (error) {
