@@ -28,7 +28,7 @@
         <div class="card">
             <h2>Hệ thống Tạo Bản Nhận Xét Tự Động</h2>
             <p><em>Hệ thống đã tích hợp sẵn mẫu văn bản chuẩn. Đồng chí chỉ cần tải lên danh sách dữ liệu.</em></p>
-            
+
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
                 <input type="file" id="excelFile" accept=".xlsx">
@@ -105,14 +105,13 @@
             statusLabel.style.color = "blue";
 
             try {
-                // 1. Dùng fetch API để tự động lấy file Word mẫu từ máy chủ
-                const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx');
+                // Mã chống cache ép lấy Word mới nhất
+                const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx?v=' + new Date().getTime());
                 if (!templateResponse.ok) {
                     throw new Error("Không thể tải file mẫu. Vui lòng kiểm tra lại tên file trên máy chủ.");
                 }
                 const templateArrayBuffer = await templateResponse.arrayBuffer();
 
-                // 2. Đọc file Excel người dùng tải lên
                 const excelReader = new FileReader();
                 excelReader.onload = function(e) {
                     try {
@@ -121,22 +120,22 @@
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         const jsonData = XLSX.utils.sheet_to_json(sheet);
 
+                        // Ánh xạ dữ liệu vào CÁC BIẾN MỚI KHÔNG CÓ DẤU GẠCH DƯỚI
                         let studentsData = jsonData.map(row => {
                             const gpa = parseFloat(row["TB 2 kỳ gần nhất."]) || 0;
                             const drl = parseFloat(row["Điểm rèn luyện"]) || 0;
                             
                             return {
-                                stt: row["Số BNX"] || "",
-                                thoi_gian_BNX: parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]),
-                                ten_chi_bo: row["Chi bộ"] || "",
-                                ten_doan_truong: row["Đoàn trường/ Liên chi Đoàn"] || "",
-                                ho_ten: row["Họ tên"] || "",
-                                nhan_xet_nang_luc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
-                                nhan_xet_khuyet_diem: evaluateKhuyetDiem(gpa, drl)
+                                STT: row["Số BNX"] || "",
+                                ThoiGian: parseDate(row["Ngày họp Đoàn trường/ LCĐ; Đồng ý/Số UV"]),
+                                TenChiBo: row["Chi bộ"] || "",
+                                TenDoanTruong: row["Đoàn trường/ Liên chi Đoàn"] || "",
+                                HoTen: row["Họ tên"] || "",
+                                NangLuc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
+                                KhuyetDiem: evaluateKhuyetDiem(gpa, drl)
                             };
                         });
 
-                        // 3. Tiến hành gộp dữ liệu vào template Word
                         const zip = new PizZip(templateArrayBuffer);
                         const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
@@ -152,7 +151,7 @@
                         statusLabel.style.color = "green";
                     } catch (error) {
                         console.error(error);
-                        statusLabel.innerText = "Lỗi trong quá trình tạo Word. Kiểm tra lại cấu trúc file mẫu trên GitHub.";
+                        statusLabel.innerText = "Lỗi trong quá trình tạo Word. Kiểm tra lại Console (F12).";
                         statusLabel.style.color = "red";
                     }
                 };
