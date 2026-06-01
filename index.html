@@ -8,19 +8,16 @@
 </head>
 <body>
     <header class="top-header">
-        <div class="header-right-overlay">
-            <div class="search-box">
-                <input type="text" placeholder="Tìm kiếm...">
-                <button>🔍</button>
-            </div>
+        <div class="header-container">
+            <!-- Hiển thị logo.png -->
+            <img src="logo.png" alt="Logo YUMOFFICE" style="height: 90px; object-fit: contain;" onerror="this.style.display='none'">
+            
             <div class="action-buttons">
-                <a href="#" class="btn-red">ĐĂNG NHẬP</a>
-                <a href="#" class="btn-dark-red">YUMOFFICE v2.0</a>
+                <a href="#">YUMOFFICE v2.0</a>
             </div>
         </div>
     </header>
 
-    <!-- THANH TÁC VỤ MỚI -->
     <nav class="main-nav">
         <div class="nav-container">
             <a href="index.html" class="active">TRANG CHỦ</a>
@@ -28,16 +25,9 @@
             <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="#">KHO TÀI LIỆU</a>
             <a href="#">LỊCH SỬ TẠO VĂN BẢN</a>
+            <a href="#">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
         </div>
     </nav>
-
-    <div class="sub-nav">
-        <div class="sub-nav-container">
-            <a href="#" class="active">Tổng quan hệ thống</a>
-            <a href="#">Tài liệu mẫu nghiệp vụ</a>
-            <a href="#">Văn bản hướng dẫn</a>
-        </div>
-    </div>
 
     <div class="content-wrapper">
         <h2 class="section-title">HỆ THỐNG QUẢN LÝ NGHIỆP VỤ VĂN PHÒNG ĐOÀN - YUMOFFICE</h2>
@@ -47,17 +37,15 @@
         </div>
 
         <div class="upload-grid">
-            <!-- Phân hệ 1 -->
             <div class="upload-box" onclick="location.href='ban-nhan-xet.html'" style="text-align: left; padding: 30px 25px;">
                 <div class="box-icon" style="text-align: left; margin-bottom: 10px;">📋</div>
-                <div class="box-title" style="font-size: 16px; color: #b71a1a;">BẢN NHẬN XÉT ĐẢNG VIÊN</div>
+                <div class="box-title" style="font-size: 16px; color: #b71a1a;">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</div>
                 <div class="box-desc">
                     Hỗ trợ sinh tự động và đóng gói hàng loạt Bản nhận xét kết quả phấn đấu của Đảng viên dự bị từ dữ liệu Excel. Hồ sơ xuất ra dưới dạng tệp nén ZIP chứa các file Word riêng lẻ chuẩn lề lối hành chính.
                 </div>
                 <div style="margin-top: 15px; font-size: 12px; color: #b71a1a; font-weight: bold; text-align: right;">Truy cập phân hệ &rarr;</div>
             </div>
 
-            <!-- Phân hệ 2 -->
             <div class="upload-box" style="text-align: left; padding: 30px 25px; cursor: not-allowed; background-color: #f1f5f9; border-color: #e2e8f0;">
                 <div class="box-icon" style="text-align: left; margin-bottom: 10px; opacity: 0.6;">📜</div>
                 <div class="box-title" style="font-size: 16px; color: #64748b;">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</div>
@@ -66,10 +54,6 @@
                 </div>
                 <div style="margin-top: 15px; font-size: 12px; color: #94a3b8; font-weight: bold; text-align: right;">Phân hệ đang phát triển...</div>
             </div>
-        </div>
-
-        <div class="tool-description" style="margin-top: 20px; border-left: 4px solid #fbc05b; background-color: #fffbeb;">
-            <strong>📌 Quy trình xử lý hồ sơ chuẩn:</strong> Đảm bảo file Word mẫu tải lên sử dụng cấu trúc dấu ngoặc vuông <code>[[ ]]</code> (ví dụ: <code>[[HoTen]]</code>, <code>[[STT]]</code>) để triệt tiêu hoàn toàn hiện tượng phân mảnh XML ngầm do tính năng soát lỗi chính tả của Microsoft Word gây ra.
         </div>
     </div>
 
