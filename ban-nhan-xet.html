@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo Bản Nhận Xét - HUST Portal</title>
+    <title>Tạo Bản Nhận Xét - YUMOFFICE</title>
     <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -23,6 +23,7 @@
                     <div class="sub-title">Đại học Bách khoa Hà Nội</div>
                 </div>
             </div>
+            
             <div class="action-buttons">
                 <a href="#">YUMOFFICE v2.0</a>
             </div>
@@ -36,17 +37,9 @@
             <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="#">KHO TÀI LIỆU</a>
             <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
-            <a href="huong-dan.html" class="active">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
+            <a href="huong-dan.html">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
         </div>
     </nav>
-
-    <div class="sub-nav">
-        <div class="sub-nav-container">
-            <a href="#" class="active">Tạo tự động</a>
-            <a href="#">Quản lý mẫu</a>
-            <a href="#">Hướng dẫn sử dụng trang web</a>
-        </div>
-    </div>
 
     <div class="content-wrapper">
         <h2 class="section-title">HỆ THỐNG TẠO BẢN NHẬN XÉT ĐẢNG VIÊN</h2>
@@ -240,19 +233,16 @@
                             outZip.file(docName, docOutput);
                         }
 
-                        // TẠO TÊN FILE CÓ NGÀY THÁNG NĂM
                         const now = new Date();
                         const dateStr = `${String(now.getDate()).padStart(2, '0')}_${String(now.getMonth() + 1).padStart(2, '0')}_${now.getFullYear()}`;
                         const zipName = `Ho_So_Ban_Nhan_Xet_${dateStr}.zip`;
 
                         const content = await outZip.generateAsync({type:"blob"});
-                        saveAs(content, zipName); // Tải xuống máy tính
+                        saveAs(content, zipName);
                         
-                        // LƯU TRỮ VÀO Ổ ĐĨA ẢO ĐỂ TẢI LẠI SAU
                         const fileId = 'zip_' + Date.now();
-                        await localforage.setItem(fileId, content); // Lưu file Blob thật vào bộ nhớ trình duyệt
+                        await localforage.setItem(fileId, content);
 
-                        // Ghi lại thông tin vào Lịch sử
                         const timeString = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
                         const historyRecord = {
                             id: fileId,
