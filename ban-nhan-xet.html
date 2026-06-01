@@ -28,10 +28,10 @@
     <div class="container">
         <div class="card">
             <h2>Hệ thống Tạo Bản Nhận Xét (Bản ZIP Nạp Kép)</h2>
-            <p><em>Hệ thống điền dữ liệu trực tiếp vào file Word mẫu. Đảm bảo giữ nguyên 100% định dạng, căn lề.</em></p>
+            <p><em>Hệ thống điền dữ liệu trực tiếp vào file Word mẫu. Được trang bị lõi Khâu XML diệt lỗi phân mảnh chữ.</em></p>
 
             <div style="margin-bottom: 20px; padding: 15px; border: 2px dashed #ce1616; border-radius: 8px; background-color: #fff9f9;">
-                <label style="color: #ce1616;"><strong>Bước 1: Tải lên file WORD mẫu (.docx) đã làm sạch</strong></label><br><br>
+                <label style="color: #ce1616;"><strong>Bước 1: Tải lên file WORD mẫu (.docx)</strong></label><br><br>
                 <input type="file" id="wordFile" accept=".docx">
             </div>
 
@@ -44,6 +44,27 @@
             <p id="status" style="margin-top: 20px; font-weight: bold; text-align: center; font-size: 16px;"></p>
         </div>
     </div>
+
+    <footer>
+        <div class="footer-col">
+            <img src="logo.png" alt="Logo" style="height: 50px;" onerror="this.style.display='none'">
+            <p>Hệ thống hỗ trợ nghiệp vụ YUMOFFICE.</p>
+        </div>
+        <div class="footer-col">
+            <h4>GIỚI THIỆU</h4>
+            <ul>
+                <li>Về Đoàn Bách khoa</li>
+                <li>Đội ngũ phát triển</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>LIÊN HỆ</h4>
+            <ul>
+                <li>📍 Nguyễn Khánh Toàn, Nghĩa Đô, Hà Nội</li>
+                <li>📧 phamvietbach2006@gmail.com</li>
+            </ul>
+        </div>
+    </footer>
 
     <script>
         function parseDate(raw) {
@@ -105,7 +126,7 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang trích xuất dữ liệu và tạo hồ sơ ZIP... Vui lòng đợi!";
+            statusLabel.innerText = "Đang vá lỗi phân mảnh XML của Word và tạo ZIP... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             try {
@@ -172,6 +193,44 @@
                             };
 
                             const zip = new PizZip(wordBuffer);
+
+                            // =======================================================
+                            // CỖ MÁY KHÂU XML TỐI THƯỢNG - ĐƯỢC THIẾT KẾ ĐO NI ĐÓNG GIÀY
+                            // =======================================================
+                            for (let fileName in zip.files) {
+                                if (fileName.endsWith('.xml')) {
+                                    let xml = zip.files[fileName].asText();
+                                    
+                                    // 1. Dọn dẹp lỗi chính tả
+                                    xml = xml.replace(/<w:proofErr[^>]*>/g, '');
+                                    xml = xml.replace(/<w:lang[^>]*>/g, '');
+
+                                    // 2. Khâu nối các mảnh vỡ chính xác theo log của bạn
+                                    xml = xml.replace(/\{\{(?:<[^>]+>|\s)*TenC(?:<[^>]+>|\s)*hiBo\}\}/g, '{{TenChiBo}}');
+                                    xml = xml.replace(/\{\{(?:<[^>]+>|\s)*STT\}(?:<[^>]+>|\s)*\{STT\}\}/g, '{{STT}}');
+                                    xml = xml.replace(/\{\{(?:<[^>]+>|\s)*Thoi(?:<[^>]+>|\s)*Gian\}\}/g, '{{ThoiGian}}');
+                                    xml = xml.replace(/\{\{(?:<[^>]+>|\s)*TenD(?:<[^>]+>|\s)*uong\}\}/g, '{{TenDoanTruong}}');
+                                    xml = xml.replace(/\{\{(?:<[^>]+>|\s)*HoTe(?:<[^>]+>|\s)*oTen\}\}/g, '{{HoTen}}');
+                                    xml = xml.replace(/\{\{(?:<[^>]+>|\s)*Nang(?:<[^>]+>|\s)*gLuc\}\}/g, '{{NangLuc}}');
+                                    xml = xml.replace(/\{\{(?:<[^>]+>|\s)*Khuy(?:<[^>]+>|\s)*Diem\}\}/g, '{{KhuyetDiem}}');
+
+                                    // 3. Khâu nối vạn năng cho mọi biến
+                                    const vars = ['STT', 'ThoiGian', 'TenChiBo', 'TenDoanTruong', 'HoTen', 'NangLuc', 'KhuyetDiem'];
+                                    vars.forEach(v => {
+                                        let regexStr = '\\{\\s*(?:<[^>]+>|\\s)*\\{\\s*(?:<[^>]+>|\\s)*';
+                                        for(let i=0; i<v.length; i++) {
+                                            regexStr += v[i] + '(?:<[^>]+>|\\s)*';
+                                        }
+                                        regexStr += '\\}\\s*(?:<[^>]+>|\\s)*\\}';
+                                        let regex = new RegExp(regexStr, 'gi');
+                                        xml = xml.replace(regex, '{{' + v + '}}');
+                                    });
+
+                                    zip.file(fileName, xml);
+                                }
+                            }
+                            // =======================================================
+
                             const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
                             doc.render(stData);
 
@@ -188,12 +247,12 @@
                         const content = await outZip.generateAsync({type:"blob"});
                         saveAs(content, "Ho_So_Ban_Nhan_Xet_Hoan_Thanh.zip");
                         
-                        statusLabel.innerText = `Thành công! Đã tạo xong ${validStudents.length} file Word chuẩn định dạng gốc.`;
+                        statusLabel.innerText = `Thành công tuyệt đối! Đã vượt qua lỗi phân mảnh và tạo xong ${validStudents.length} file Word chuẩn định dạng gốc.`;
                         statusLabel.style.color = "green";
 
                     } catch (error) {
                         console.error(error);
-                        statusLabel.innerText = "Lỗi file Word: Vẫn còn biến bị gạch chân chính tả. Vui lòng làm theo hướng dẫn Notepad. Chi tiết: " + error.message;
+                        statusLabel.innerText = "Lỗi xử lý file. Chi tiết: " + error.message;
                         statusLabel.style.color = "red";
                     }
                 };
