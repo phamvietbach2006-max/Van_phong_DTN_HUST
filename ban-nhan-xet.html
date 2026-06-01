@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YUMStarterkit - Bản Nhận Xét</title>
+    <title>Tạo Bản Nhận Xét - HUST Portal</title>
     <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -13,60 +13,87 @@
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
 <body>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-
-    <div class="container">
-        <header class="hero">
-            <span class="floating-badge badge-tl">✨ Tự động hóa 100%</span>
-            <span class="floating-badge badge-tr">Prebuilt Templates</span>
-            <span class="floating-badge badge-bl">Đóng gói ZIP siêu tốc</span>
-            <span class="floating-badge badge-br">Chuẩn định dạng hành chính</span>
-
-            <div class="logo-wrapper">
-                <div class="logo-icon">📦</div>
-                <h1>YUM<span>Starterkit</span></h1>
+    <header class="top-header">
+        <div class="header-right-overlay">
+            <div class="search-box">
+                <input type="text" placeholder="Tìm kiếm...">
+                <button>🔍</button>
             </div>
-            <p class="subtitle">Production-Ready Document Automation SaaS for HUST.</p>
-        </header>
-
-        <div class="card">
-            <div class="upload-grid">
-                <div class="upload-box" onclick="document.getElementById('wordFile').click()">
-                    <div class="box-icon">📄</div>
-                    <div class="box-title">Upload Word Template</div>
-                    <div class="box-desc">Hỗ trợ biến [[STT]], [[HoTen]]...</div>
-                    <input type="file" id="wordFile" accept=".docx" style="display: none;">
-                    <div id="wordFileName" class="file-name">Chưa có tệp nào được chọn</div>
-                </div>
-
-                <div class="upload-box" onclick="document.getElementById('excelFile').click()">
-                    <div class="box-icon">📊</div>
-                    <div class="box-title">Upload Excel Data</div>
-                    <div class="box-desc">Hệ thống lọc rác thông minh</div>
-                    <input type="file" id="excelFile" accept=".xlsx" style="display: none;">
-                    <div id="excelFileName" class="file-name">Chưa có tệp nào được chọn</div>
-                </div>
+            <div class="action-buttons">
+                <a href="#" class="btn-red">ĐĂNG NHẬP</a>
+                <a href="#" class="btn-dark-red">YUMOFFICE v2.0</a>
             </div>
-
-            <button class="btn-submit" onclick="processData()">Khởi Tạo & Đóng Gói Hồ Sơ</button>
-            
-            <div id="statusBox" class="status-message"></div>
         </div>
-        
-        <footer>
-            <p>Hệ thống tự động hóa văn bản nghiệp vụ Đoàn - Hội.</p>
-            <p>© 2026 YUMOFFICE Core. Crafted for HUST.</p>
-        </footer>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html">TRANG CHỦ</a>
+            <a href="#">THÔNG BÁO</a>
+            <a href="#">QUY ĐỊNH</a>
+            <a href="ban-nhan-xet.html" class="active">BẢN NHẬN XÉT</a>
+            <a href="#">DỊCH VỤ</a>
+            <a href="#">TRA CỨU</a>
+            <a href="#">LIÊN HỆ</a>
+        </div>
+    </nav>
+
+    <div class="sub-nav">
+        <div class="sub-nav-container">
+            <a href="#" class="active">Tạo tự động</a>
+            <a href="#">Quản lý mẫu</a>
+            <a href="#">Hướng dẫn</a>
+        </div>
     </div>
+
+    <div class="content-wrapper">
+        <h2 class="section-title">HỆ THỐNG TẠO BẢN NHẬN XÉT ĐẢNG VIÊN</h2>
+        
+        <div class="tool-description">
+            Nhân bản và điền tự động dữ liệu Excel vào tệp Word mẫu cá nhân. Định dạng xuất ra kế thừa 100% lề lối văn bản gốc hành chính, nén gọn thành file ZIP hệ thống.
+        </div>
+
+        <div class="upload-grid">
+            <div class="upload-box" onclick="document.getElementById('wordFile').click()">
+                <div class="box-icon">📄</div>
+                <div class="box-title">TẢI LÊN MẪU WORD (.DOCX)</div>
+                <div class="box-desc">Sử dụng ký hiệu biến dạng vuông: [[HoTen]], [[STT]]...</div>
+                <input type="file" id="wordFile" accept=".docx" style="display: none;">
+                <div id="wordFileName" class="file-name">Chưa có tệp nào được chọn</div>
+            </div>
+
+            <div class="upload-box" onclick="document.getElementById('excelFile').click()">
+                <div class="box-icon">📊</div>
+                <div class="box-title">TẢI LÊN DỮ LIỆU EXCEL (.XLSX)</div>
+                <div class="box-desc">Hệ thống quét tự động nhận diện danh sách</div>
+                <input type="file" id="excelFile" accept=".xlsx" style="display: none;">
+                <div id="excelFileName" class="file-name">Chưa có tệp nào được chọn</div>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button class="btn-submit" onclick="processData()">XỬ LÝ & TẢI XUỐNG TỆP ZIP</button>
+        </div>
+
+        <div id="statusBox" class="status-message"></div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p><strong>Bản quyền thuộc về Đoàn Thanh niên Đại học Bách khoa Hà Nội</strong></p>
+            <p>Địa chỉ: Phòng C1-226, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
+            <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ YUMOFFICE 2026</p>
+        </div>
+    </footer>
 
     <script>
         document.getElementById('wordFile').addEventListener('change', function(e) {
             document.getElementById('wordFileName').innerText = e.target.files[0] ? e.target.files[0].name : "Chưa có tệp nào được chọn";
+            document.getElementById('wordFileName').style.color = "#b71a1a";
         });
         document.getElementById('excelFile').addEventListener('change', function(e) {
             document.getElementById('excelFileName').innerText = e.target.files[0] ? e.target.files[0].name : "Chưa có tệp nào được chọn";
+            document.getElementById('excelFileName').style.color = "#b71a1a";
         });
 
         function showStatus(message, type) {
@@ -122,11 +149,11 @@
             const excelInput = document.getElementById('excelFile');
 
             if (!wordInput.files.length || !excelInput.files.length) {
-                showStatus("⚠️ Vui lòng tải lên ĐẦY ĐỦ cả file Word và file Excel!", "error");
+                showStatus("⚠️ Vui lòng nạp đầy đủ cả file mẫu hồ sơ Word và dữ liệu Excel!", "error");
                 return;
             }
 
-            showStatus("⏳ Đang xử lý dữ liệu và đóng gói ZIP... Vui lòng đợi!", "info");
+            showStatus("⏳ Đang giải mã Word và đóng gói dữ liệu ZIP... Vui lòng đợi!", "info");
 
             try {
                 const wordBuffer = await wordInput.files[0].arrayBuffer();
@@ -167,7 +194,7 @@
                             }
                         }
 
-                        if (validStudents.length === 0) throw new Error("Không có dữ liệu hợp lệ trong Excel!");
+                        if (validStudents.length === 0) throw new Error("Không tìm thấy hàng dữ liệu sinh viên hợp lệ!");
 
                         const outZip = new JSZip();
 
@@ -200,6 +227,7 @@
                                 }
                             }
 
+                            // ĐỌC BIẾN [[ ]] ĐỂ CHỐNG LỖI PHÂN MẢNH
                             const doc = new window.docxtemplater(zip, { 
                                 paragraphLoop: true, linebreaks: true, delimiters: { start: '[[', end: ']]' } 
                             });
@@ -216,22 +244,22 @@
                         }
 
                         const content = await outZip.generateAsync({type:"blob"});
-                        saveAs(content, "Ho_So_Ban_Nhan_Xet_Hoan_Thanh.zip");
+                        saveAs(content, "Ho_So_Ban_Nhan_Xet.zip");
                         
-                        showStatus(`🎉 THÀNH CÔNG! Đã đóng gói xong ${validStudents.length} file Bản nhận xét.`, "success");
+                        showStatus(`🎉 THÀNH CÔNG! Đã khởi tạo hoàn tất toàn bộ gói hồ sơ ZIP cho ${validStudents.length} cán bộ, sinh viên.`, "success");
 
                     } catch (error) {
                         console.error(error);
                         let msg = error.message;
                         if (error.properties && error.properties.errors) {
-                            msg = `⚠️ Lỗi định dạng Word! Vui lòng kiểm tra lại các biến [[STT]], [[HoTen]] trong file mẫu của bạn.`;
+                            msg = `⚠️ Lỗi định dạng thẻ: Hãy chắc chắn file Word mẫu đang bọc đúng dấu vuông khối [[STT]], [[HoTen]]...`;
                         }
                         showStatus("❌ " + msg, "error");
                     }
                 };
                 excelReader.readAsArrayBuffer(excelInput.files[0]);
             } catch (err) {
-                showStatus("❌ Đã xảy ra lỗi hệ thống: " + err.message, "error");
+                showStatus("❌ Lỗi hệ thống: " + err.message, "error");
             }
         }
     </script>
