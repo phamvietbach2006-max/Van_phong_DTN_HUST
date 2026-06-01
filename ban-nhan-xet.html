@@ -27,8 +27,7 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét (Bản Dấu Ngoặc Vuông)</h2>
-            <p><em>Hệ thống đã nâng cấp lõi đọc biến [[ ]], triệt tiêu hoàn toàn lỗi đứt gãy thẻ Word.</em></p>
+            <h2>Tạo Bản Nhận Xét</h2>
 
             <div style="margin-bottom: 20px; padding: 15px; border: 2px dashed #ce1616; border-radius: 8px; background-color: #fff9f9;">
                 <label style="color: #ce1616;"><strong>Bước 1: Tải lên file WORD mẫu (.docx)</strong></label><br>
@@ -61,8 +60,8 @@
         <div class="footer-col">
             <h4>LIÊN HỆ</h4>
             <ul>
-                <li>📍 Nguyễn Khánh Toàn, Nghĩa Đô, Hà Nội</li>
-                <li>📧 phamvietbach2006@gmail.com</li>
+                <li>📍Đoàn Thanh niên Đại học Bách khoa Hà Nội (C1-226)</li>
+                <li>📧 DTN@hust.edu.vn</li>
             </ul>
         </div>
     </footer>
@@ -234,7 +233,7 @@
                         const content = await outZip.generateAsync({type:"blob"});
                         saveAs(content, "Ho_So_Ban_Nhan_Xet_Hoan_Thanh.zip");
                         
-                        showStatus(`🎉 THÀNH CÔNG RỰC RỠ! Đã tạo xong file ZIP chứa ${validStudents.length} Bản nhận xét.`, "success");
+                        showStatus(`🎉 Đã tạo xong file ZIP chứa ${validStudents.length} Bản nhận xét.`, "success");
 
                     } catch (error) {
                         console.error(error);
