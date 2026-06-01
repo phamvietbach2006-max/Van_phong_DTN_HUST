@@ -24,8 +24,8 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét Tự Động (Chuẩn Thể Thức)</h2>
-            <p><em>Hệ thống xuất văn bản gốc ép chuẩn 1 trang A4. Tự động quét 38 người.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét (Bản Sao Chép Hoàn Hảo)</h2>
+            <p><em>Hệ thống xuất văn bản tự động, định dạng 100% giống file Mau_Ban_Nhan_Xet.docx gốc.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
@@ -117,7 +117,7 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang tạo văn bản chuẩn xác... Vui lòng đợi!";
+            statusLabel.innerText = "Đang áp dụng khuôn mẫu văn bản... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             const excelReader = new FileReader();
@@ -166,14 +166,22 @@
                     <head>
                         <meta charset='utf-8'>
                         <style>
+                            /* Lề khổ giấy chuẩn xác: Trái 3cm, Phải 2cm, Trên/Dưới 2cm */
                             @page WordSection1 { size: 21.0cm 29.7cm; margin: 2.0cm 2.0cm 2.0cm 3.0cm; mso-header-margin: 35.4pt; mso-footer-margin: 35.4pt; mso-paper-source: 0; }
                             div.WordSection1 { page: WordSection1; }
-                            body { font-family: "Times New Roman", serif; font-size: 14pt; line-height: 1.15; }
-                            p { margin: 3pt 0; text-align: justify; }
-                            .center { text-align: center; }
+                            
+                            /* Cỡ chữ 14pt, giãn dòng 1.25 */
+                            body { font-family: "Times New Roman", serif; font-size: 14pt; line-height: 1.25; color: #000000; }
+                            
+                            /* Khoảng cách các đoạn 6pt, thò thụt dòng đầu đúng 1.27cm */
+                            p { margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; }
+                            
+                            /* Các thẻ đặc biệt */
+                            .no-indent { text-indent: 0 !important; }
+                            .center { text-align: center; text-indent: 0 !important; }
                             .bold { font-weight: bold; }
                             .italic { font-style: italic; }
-                            .indent { text-indent: 1.27cm; }
+                            .underline { text-decoration: underline; }
                         </style>
                     </head>
                     <body>
@@ -191,44 +199,23 @@
                         const TenChiBo = getColValue(row, ['chibo']) || "......................";
                         const TenDoanTruong = getColValue(row, ['doantruong', 'lienchi']) || "......................";
                         const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "......................";
-                        
-                        const tg_tu_den = getColValue(row, ['thoigian']);
-                        const ThoiGianKhaoSat = tg_tu_den ? ` từ ${tg_tu_den} ` : " ";
 
                         const NangLuc = `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`;
                         const KhuyetDiem = evaluateKhuyetDiem(gpa, drl);
 
                         wordContent += `
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12pt; border: none;">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 18pt; border: none;">
                             <tr>
                                 <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; font-size: 12pt;">THÀNH ĐOÀN HÀ NỘI</p>
+                                    <p class="center" style="margin: 0; font-size: 13pt;">THÀNH ĐOÀN HÀ NỘI</p>
+                                    <p class="center bold" style="margin: 0; font-size: 13pt;">BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</p>
+                                    <p class="center" style="margin: 0; font-size: 13pt;">***</p>
+                                    <p class="center" style="margin: 0; font-size: 13pt;">Số: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -BNX/ĐTN</p>
                                 </td>
                                 <td style="width: 55%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p class="bold" style="margin: 0; font-size: 14pt;"><u>ĐOÀN TNCS HỒ CHÍ MINH</u></p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p class="bold" style="margin: 0; font-size: 12pt;">BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</p>
-                                </td>
-                                <td style="width: 55%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; font-size: 14pt;">&nbsp;</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; font-size: 12pt;">***</p>
-                                </td>
-                                <td style="width: 55%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p class="italic" style="margin: 0; font-size: 14pt;">Hà Nội, ngày&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tháng&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;năm 2026</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; font-size: 14pt;">Số: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-BNX/ĐTN</p>
-                                </td>
-                                <td style="width: 55%; text-align: center; vertical-align: top; padding: 0;">
+                                    <p class="center bold underline" style="margin: 0; font-size: 14pt;">ĐOÀN TNCS HỒ CHÍ MINH</p>
+                                    <p class="center" style="margin: 0; font-size: 14pt;">&nbsp;</p>
+                                    <p class="center italic" style="margin: 0; font-size: 14pt;">Hà Nội, ngày &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tháng &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; năm 2026</p>
                                 </td>
                             </tr>
                         </table>
@@ -239,42 +226,42 @@
                         <table style="width: 100%; margin-bottom: 6pt; border: none;">
                             <tr>
                                 <td style="width: 2.5cm; padding-left: 1.27cm; vertical-align: top; padding: 0;">
-                                    <p class="italic" style="margin: 0;">Kính gửi:</p>
+                                    <p class="italic bold no-indent" style="margin: 0;">Kính gửi:</p>
                                 </td>
                                 <td style="vertical-align: top; padding: 0;">
-                                    <p style="margin: 0;">- Chi ủy Chi bộ Sinh viên ${TenChiBo};</p>
-                                    <p style="margin: 0;">- Đảng uỷ Đại học Bách khoa Hà Nội.</p>
+                                    <p class="no-indent" style="margin: 0;">- Chi ủy Chi bộ Sinh viên ${TenChiBo};</p>
+                                    <p class="no-indent" style="margin: 0;">- Đảng uỷ Đại học Bách khoa Hà Nội.</p>
                                 </td>
                             </tr>
                         </table>
 
-                        <p class="indent">Căn cứ Điểm 1, Điều 4, Chương I Điều lệ Đảng Cộng Sản Việt Nam về thủ tục, quyền hạn của BCH Đoàn cơ sở giới thiệu Đoàn viên ưu tú cho Đảng.</p>
-                        <p class="indent">Căn cứ Điểm 1, Điều 5, Chương I Điều lệ Đảng Cộng Sản Việt Nam quy định về thời kỳ dự bị đối với người được kết nạp Đảng.</p>
-                        <p class="indent">Căn cứ Bản Nhận xét số ${STT}-BNX/ĐTN ${ThoiGian} của ${TenDoanTruong};</p>
+                        <p>Căn cứ Điểm 1, Điều 4, Chương I Điều lệ Đảng Cộng Sản Việt Nam về thủ tục, quyền hạn của BCH Đoàn cơ sở giới thiệu Đoàn viên ưu tú cho Đảng.</p>
+                        <p>Căn cứ Điểm 1, Điều 5, Chương I Điều lệ Đảng Cộng Sản Việt Nam quy định về thời kỳ dự bị đối với người được kết nạp Đảng.</p>
+                        <p>Căn cứ Bản Nhận xét số ${STT} ${ThoiGian} của ${TenDoanTruong};</p>
 
-                        <p class="indent">Ban Thường vụ Đoàn TNCS Hồ Chí Minh Đại học Bách khoa Hà Nội xin báo cáo với Chi bộ và Đảng ủy Đại học những vấn đề chủ yếu về Đảng viên dự bị ${HoTen}${ThoiGianKhaoSat}như sau:</p>
+                        <p>Ban Thường vụ Đoàn TNCS Hồ Chí Minh Đại học Bách khoa Hà Nội xin báo cáo với Chi bộ và Đảng ủy Đại học những vấn đề chủ yếu về Đảng viên dự bị ${HoTen} như sau:</p>
                         
-                        <p class="indent">- Ưu điểm:</p>
-                        <p class="indent">+ Phẩm chất chính trị: Có phẩm chất chính trị vững vàng, chấp hành và thực hiện đúng chủ trương đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Nhà trường, của tổ chức Đoàn.</p>
-                        <p class="indent">+ Đạo đức lối sống: Có phẩm chất đạo đức tốt, có lối sống lành mạnh, trong sáng, thật thà, giản dị. Sống nghiêm túc và có trách nhiệm với bản thân, gia đình, xã hội. Có ý thức đoàn kết xây dựng tập thể.</p>
-                        <p class="indent">+ Năng lực công tác: ${NangLuc}, có tinh thần học để nâng cao trình độ chuyên môn. ${KhuyetDiem}</p>
-                        <p class="indent">+ Quan hệ quần chúng: Sống hòa nhã với mọi người, sẵn sàng giúp đỡ bạn bè, đồng chí. Tôn trọng và biết lắng nghe ý kiến của người khác, giữ gìn sự đoàn kết của tập thể.</p>
+                        <p><span class="bold">- Ưu điểm:</span></p>
+                        <p>+ Phẩm chất chính trị: Có phẩm chất chính trị vững vàng, chấp hành và thực hiện đúng chủ trương đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Nhà trường, của tổ chức Đoàn.</p>
+                        <p>+ Đạo đức lối sống: Có phẩm chất đạo đức tốt, có lối sống lành mạnh, trong sáng, thật thà, giản dị. Sống nghiêm túc và có trách nhiệm với bản thân, gia đình, xã hội. Có ý thức đoàn kết xây dựng tập thể.</p>
+                        <p>+ Năng lực công tác: ${NangLuc}, có tinh thần học để nâng cao trình độ chuyên môn. ${KhuyetDiem}</p>
+                        <p>+ Quan hệ quần chúng: Sống hòa nhã với mọi người, sẵn sàng giúp đỡ bạn bè, đồng chí. Tôn trọng và biết lắng nghe ý kiến của người khác, giữ gìn sự đoàn kết của tập thể.</p>
 
-                        <p class="indent">- Khuyết điểm và những vấn đề cần lưu ý : Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình.</p>
+                        <p><span class="bold">- Khuyết điểm và những vấn đề cần lưu ý :</span> Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình.</p>
                         
-                        <p class="indent">Đối chiếu với các tiêu chuẩn Đảng viên và kết quả phấn đấu rèn luyện của đồng chí, chúng tôi đề nghị Chi bộ xét chuyển Đảng chính thức cho đồng chí ${HoTen} với sự tán thành của 09/09 đ/c Thường vụ dự họp.</p>
+                        <p>Đối chiếu với các tiêu chuẩn Đảng viên và kết quả phấn đấu rèn luyện của đồng chí, chúng tôi đề nghị Chi bộ xét chuyển Đảng chính thức cho đồng chí ${HoTen} với sự tán thành của 09/09 đ/c Thường vụ dự họp.</p>
 
-                        <p class="indent" style="margin-top: 6pt; margin-bottom: 6pt;">Chúng tôi xin chịu trách nhiệm trước Đảng về lời nhận xét của mình.</p>
+                        <p style="margin-bottom: 12pt;">Chúng tôi xin chịu trách nhiệm trước Đảng về lời nhận xét của mình.</p>
 
                         <table style="width: 100%; border: none;">
                             <tr>
                                 <td style="width: 50%; padding-left: 1.27cm; vertical-align: top; padding: 0;">
-                                    <p class="bold italic" style="margin: 0; text-decoration: underline;">Nơi nhận:</p>
-                                    <p style="margin: 0;">- Như kính gửi;</p>
-                                    <p style="margin: 0;">- Lưu VP.</p>
+                                    <p class="bold italic underline no-indent" style="margin: 0;">Nơi nhận:</p>
+                                    <p class="no-indent" style="margin: 0;">- Như kính gửi;</p>
+                                    <p class="no-indent" style="margin: 0;">- Lưu VP.</p>
                                 </td>
                                 <td style="width: 50%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p class="bold" style="margin: 0;">TM. BAN THƯỜNG VỤ ĐOÀN ĐẠI HỌC</p>
+                                    <p class="bold center no-indent" style="margin: 0;">TM. BAN THƯỜNG VỤ ĐOÀN ĐẠI HỌC</p>
                                 </td>
                             </tr>
                         </table>
@@ -290,7 +277,7 @@
                     const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
                     saveAs(blob, "Ban_Nhan_Xet_Hoan_Thanh.doc");
                     
-                    statusLabel.innerText = `Thành công! Đã xuất bản nhận xét chuẩn thể thức, ép vừa 1 trang A4.`;
+                    statusLabel.innerText = `Thành công! Đã xuất ${validStudents.length} bản nhận xét chuẩn lề, cỡ chữ, thò thụt y hệt văn bản gốc.`;
                     statusLabel.style.color = "green";
 
                 } catch (error) {
