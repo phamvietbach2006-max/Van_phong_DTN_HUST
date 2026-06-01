@@ -10,7 +10,7 @@ body {
     color: #333;
 }
 
-/* TOP HEADER - CÓ LOGO */
+/* TOP HEADER - LOGO & TIÊU ĐỀ SÁT LỀ TRÁI */
 .top-header {
     background-image: url('header-banner.jpg');
     background-repeat: no-repeat;
@@ -24,13 +24,41 @@ body {
 }
 
 .header-container {
-    max-width: 1200px;
-    margin: 0 auto;
     width: 100%;
-    padding: 0 20px;
+    padding: 0 4%; /* Đẩy logo sát ra lề trái */
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Nhóm Logo và Tên trang web */
+.logo-group {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Khoảng cách giữa logo và chữ */
+}
+
+.site-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.site-title .main-title {
+    font-size: 26px; /* To rõ ràng */
+    font-weight: bold; /* In đậm */
+    color: #b71a1a; /* Đỏ Bách khoa */
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.site-title .sub-title {
+    font-size: 17px; /* Nhỏ hơn */
+    font-weight: normal; /* Không in đậm */
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .action-buttons a {
@@ -48,17 +76,26 @@ body {
     background-color: #b71a1a;
 }
 
-/* MAIN NAVBAR (Menu đen) */
+/* MAIN NAVBAR (Menu đen - Cố định 1 dòng) */
 .main-nav {
     background-color: #2b2b2b;
     border-bottom: 3px solid #b71a1a;
 }
 
 .nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    padding: 0 4%; /* Thẳng hàng với Logo */
     display: flex;
-    flex-wrap: wrap; /* Hỗ trợ tự động xuống dòng nếu menu quá dài */
+    flex-wrap: nowrap; /* BẮT BUỘC NẰM TRÊN 1 DÒNG */
+    overflow-x: auto; /* Cho phép cuộn ngang nếu màn hình quá nhỏ */
+    white-space: nowrap;
+}
+
+.nav-container::-webkit-scrollbar {
+    height: 4px; /* Thanh cuộn mỏng */
+}
+.nav-container::-webkit-scrollbar-thumb {
+    background: #b71a1a; 
 }
 
 .nav-container a {
@@ -69,6 +106,7 @@ body {
     text-transform: uppercase;
     font-weight: bold;
     transition: 0.2s;
+    flex-shrink: 0; /* Chống co bóp chữ */
 }
 .nav-container a:hover { color: #ccc; }
 .nav-container a.active {
@@ -80,7 +118,7 @@ body {
 
 /* MAIN CONTENT AREA */
 .content-wrapper {
-    max-width: 1200px;
+    max-width: 1300px; /* Nới rộng khung nội dung một chút */
     margin: 30px auto;
     background-color: #fff;
     padding: 40px;
@@ -113,9 +151,7 @@ body {
     font-size: 14px;
     color: #555;
     margin-bottom: 30px;
-    background-color: #f8fafc;
-    padding: 15px;
-    border-left: 4px solid #b71a1a;
+    line-height: 1.6;
 }
 
 /* KHU VỰC TẢI FILE */
