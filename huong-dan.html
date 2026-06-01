@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn sử dụng - YUMOFFICE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top-header">
+        <div class="header-container">
+            <div class="logo-group">
+                <img src="logo.png" alt="Logo YUMOFFICE" class="header-logo" onerror="this.style.display='none'">
+                <div class="site-title">
+                    <div class="main-title">VĂN PHÒNG ĐOÀN THANH NIÊN</div>
+                    <div class="sub-title">Đại học Bách khoa Hà Nội</div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <a href="#">YUMOFFICE v2.0</a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html">TRANG CHỦ</a>
+            <a href="ban-nhan-xet.html">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
+            <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="#">KHO TÀI LIỆU</a>
+            <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
+            <a href="huong-dan.html" class="active">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
+        </div>
+    </nav>
+
+    <div class="sub-nav">
+        <div class="sub-nav-container">
+            <a href="#" class="active">Quy trình chung</a>
+            <a href="#">Cấu trúc biến Word</a>
+            <a href="#">Hỏi đáp (FAQ)</a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <h2 class="section-title">HƯỚNG DẪN SỬ DỤNG HỆ THỐNG YUMOFFICE</h2>
+        
+        <div class="tool-description">
+            Chào mừng đồng chí đến với tài liệu hướng dẫn sử dụng hệ thống quản lý văn bản tự động YUMOFFICE v2.0. Vui lòng đọc kỹ các quy tắc về định dạng file để hệ thống hoạt động chính xác 100%.
+        </div>
+
+        <div style="line-height: 1.8; color: #333; font-size: 15px;">
+            
+            <h3 style="color: #b71a1a; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">1. Quy trình tạo Bản nhận xét Đảng viên</h3>
+            <p><strong>Bước 1: Chuẩn bị file mẫu Word (.docx)</strong></p>
+            <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li>Mở file Word mẫu hành chính của Đoàn trường.</li>
+                <li>Tại những vị trí cần điền thông tin tự động, hãy sử dụng dấu ngoặc vuông kép: <code>[[Tên_Biến]]</code>.</li>
+                <li><em>Ví dụ:</em> Kính gửi đồng chí <strong>[[HoTen]]</strong>, sinh viên lớp <strong>[[Lop]]</strong>...</li>
+                <li><span style="color: #cc0000; font-weight: bold;">⚠️ Lưu ý cực kỳ quan trọng:</span> Đôi khi Microsoft Word tự động kiểm tra lỗi chính tả (dấu gạch chân đỏ) và làm đứt gãy biến <code>[[ ]]</code> ngầm bên trong. Hãy đảm bảo gõ liền mạch hoặc Copy/Paste nguyên cụm biến vào Word để tránh lỗi phân mảnh XML.</li>
+            </ul>
+
+            <p><strong>Bước 2: Chuẩn bị file dữ liệu Excel (.xlsx)</strong></p>
+            <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li>File Excel cần có dòng tiêu đề cột rõ ràng.</li>
+                <li>Tên các tiêu đề cột trong Excel <strong>PHẢI</strong> chứa các từ khóa tương ứng với biến trong Word (Ví dụ: cột "Họ và Tên", cột "STT", cột "Điểm rèn luyện", "GPA").</li>
+                <li>Hệ thống được lập trình thuật toán làm sạch dữ liệu: tự động bỏ qua các dòng trống hoặc các dòng có đánh dấu "Đồng ý" lạc lõng. Dòng tiêu đề sẽ được hệ thống tự động dò tìm thông qua cột có chữ "Họ tên".</li>
+            </ul>
+
+            <p><strong>Bước 3: Xử lý và tải xuống</strong></p>
+            <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li>Truy cập mục <strong>Bản nhận xét chuyển Đảng chính thức</strong>.</li>
+                <li>Tải lên file Word và Excel đã chuẩn bị. Bấm <strong>XỬ LÝ & TẢI XUỐNG</strong>.</li>
+                <li>Hệ thống sẽ chạy ngầm, trộn dữ liệu và trả về cho đồng chí một tệp nén <code>.ZIP</code>. Trong đó chứa hàng loạt các file Word đã được điền tên từng người, xuất thành các file riêng lẻ vô cùng gọn gàng.</li>
+            </ul>
+
+            <h3 style="color: #b71a1a; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">2. Tính năng Lịch sử tạo văn bản & Bảo mật dữ liệu</h3>
+            <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li><strong>Không cần mạng Internet liên tục:</strong> Quá trình xử lý và trộn file Word diễn ra 100% bằng sức mạnh xử lý trên máy tính (trình duyệt) của đồng chí. Dữ liệu KHÔNG bị tải lên bất kỳ máy chủ nào.</li>
+                <li><strong>Lưu trữ Ổ đĩa ảo (IndexedDB):</strong> Sau khi tạo file ZIP, hệ thống tự động lưu một bản sao an toàn vào ổ đĩa ảo của trình duyệt.</li>
+                <li>Đồng chí có thể sang tab <strong>LỊCH SỬ TẠO VĂN BẢN</strong> để tải lại file ZIP bất cứ lúc nào. Tuy nhiên, nếu đồng chí chủ động <strong>Xóa lịch sử duyệt web (Clear Cache)</strong> của trình duyệt, các file lưu trữ này sẽ bị mất đi.</li>
+            </ul>
+
+            <h3 style="color: #b71a1a; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">3. Hỗ trợ Kỹ thuật</h3>
+            <p>Nếu hệ thống báo lỗi <em>"Không tìm thấy dòng tiêu đề"</em> hoặc <em>"Lỗi định dạng thẻ Word"</em>, vui lòng:</p>
+            <ol style="margin-left: 20px; margin-bottom: 15px;">
+                <li>Mở file Word ra, xóa đi gõ lại cụm <code>[[HoTen]]</code>.</li>
+                <li>Đảm bảo file Excel không bị gộp ô (Merge Cells) ở dòng tiêu đề cột.</li>
+                <li>Liên hệ Ban Tổ chức - Kiểm tra Đoàn trường Đại học Bách khoa Hà Nội nếu cần hỗ trợ cấu trúc lại file mẫu.</li>
+            </ol>
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p><strong>Bản quyền thuộc về Đoàn Thanh niên Đại học Bách khoa Hà Nội</strong></p>
+            <p>Địa chỉ: Phòng C1-226, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
+            <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ YUMOFFICE 2026</p>
+        </div>
+    </footer>
+</body>
+</html>
