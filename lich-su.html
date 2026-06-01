@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử tạo văn bản - YUMOFFICE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top-header">
+        <div class="header-container">
+            <div class="logo-group">
+                <img src="logo.png" alt="Logo YUMOFFICE" class="header-logo" onerror="this.style.display='none'">
+                <div class="site-title">
+                    <div class="main-title">VĂN PHÒNG ĐOÀN THANH NIÊN</div>
+                    <div class="sub-title">Đại học Bách khoa Hà Nội</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="#">YUMOFFICE v2.0</a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html">TRANG CHỦ</a>
+            <a href="ban-nhan-xet.html">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
+            <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="#">KHO TÀI LIỆU</a>
+            <a href="lich-su.html" class="active">LỊCH SỬ TẠO VĂN BẢN</a>
+        </div>
+    </nav>
+
+    <div class="sub-nav">
+        <div class="sub-nav-container">
+            <a href="#" class="active">Tất cả lịch sử</a>
+            <a href="#">Tháng này</a>
+            <a href="#">Đã đánh dấu</a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <h2 class="section-title">LỊCH SỬ TẠO VĂN BẢN & HỒ SƠ</h2>
+        
+        <div class="tool-description">
+            Khu vực lưu trữ thông tin các đợt xuất hồ sơ tự động. Bạn có thể tra cứu lại ngày giờ, số lượng văn bản đã tạo và tải lại các tệp ZIP mà không cần nạp lại dữ liệu Excel.
+        </div>
+
+        <div class="history-controls">
+            <input type="text" placeholder="🔍 Tìm kiếm tên lô hồ sơ...">
+            <div style="font-size: 14px; color: #555;">Hiển thị: <strong>10</strong> kết quả gần nhất</div>
+        </div>
+
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%; text-align: center;">STT</th>
+                    <th style="width: 15%;">Thời gian tạo</th>
+                    <th style="width: 30%;">Tên lô hồ sơ (Tệp ZIP)</th>
+                    <th style="width: 20%;">Loại nghiệp vụ</th>
+                    <th style="width: 10%; text-align: center;">Số lượng</th>
+                    <th style="width: 10%; text-align: center;">Trạng thái</th>
+                    <th style="width: 10%; text-align: center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">1</td>
+                    <td>01/06/2026 - 10:30</td>
+                    <td style="font-weight: bold; color: #b71a1a;">Ho_So_Ban_Nhan_Xet_Dot1.zip</td>
+                    <td>Bản nhận xét Đảng viên</td>
+                    <td style="text-align: center;">38 file</td>
+                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
+                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">2</td>
+                    <td>28/05/2026 - 15:45</td>
+                    <td style="font-weight: bold; color: #b71a1a;">Ho_So_Ban_Nhan_Xet_K69.zip</td>
+                    <td>Bản nhận xét Đảng viên</td>
+                    <td style="text-align: center;">12 file</td>
+                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
+                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">3</td>
+                    <td>15/05/2026 - 09:15</td>
+                    <td style="font-weight: bold; color: #b71a1a;">Ho_So_Ban_Nhan_Xet_K68.zip</td>
+                    <td>Bản nhận xét Đảng viên</td>
+                    <td style="text-align: center;">45 file</td>
+                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
+                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">4</td>
+                    <td>10/05/2026 - 14:00</td>
+                    <td style="font-weight: bold; color: #555;">Nghi_Quyet_Gioi_Thieu_Dot1.zip</td>
+                    <td>Nghị quyết giới thiệu</td>
+                    <td style="text-align: center;">20 file</td>
+                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
+                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p><strong>Bản quyền thuộc về Đoàn Thanh niên Đại học Bách khoa Hà Nội</strong></p>
+            <p>Địa chỉ: Phòng C1-226, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
+            <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ YUMOFFICE 2026</p>
+        </div>
+    </footer>
+</body>
+</html>
