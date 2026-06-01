@@ -27,18 +27,18 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét (Bản Word Gốc)</h2>
-            <p><em>Hệ thống đã trang bị lõi Khâu XML, chống mọi lỗi vỡ khung của MS Word.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét (Bản Word Gốc - Sinh ZIP)</h2>
+            <p><em>Hệ thống điền dữ liệu trực tiếp vào file Word mẫu của bạn, đảm bảo giữ nguyên 100% định dạng và căn lề.</em></p>
 
             <div style="margin-bottom: 20px; padding: 15px; border: 2px dashed #ce1616; border-radius: 8px; background-color: #fff9f9;">
                 <label style="color: #ce1616;"><strong>Bước 1: Tải lên file WORD mẫu (.docx)</strong></label><br>
-                <em style="font-size: 13px; color: #555;">(File có chứa các biến {{HoTen}}, {{STT}}...)</em><br><br>
+                <em style="font-size: 13px; color: #555;">(File mẫu chứa các biến {{HoTen}}, {{STT}} đã được gõ liền mạch)</em><br><br>
                 <input type="file" id="wordFile" accept=".docx">
             </div>
 
             <div style="margin-bottom: 25px; padding: 15px; border: 2px dashed #0056b3; border-radius: 8px; background-color: #f0f8ff;">
                 <label style="color: #0056b3;"><strong>Bước 2: Tải lên file EXCEL dữ liệu (.xlsx)</strong></label><br>
-                <em style="font-size: 13px; color: #555;">(Hệ thống tự động loại bỏ dòng rác và xuất ra ZIP)</em><br><br>
+                <em style="font-size: 13px; color: #555;">(Hệ thống tự động loại bỏ dòng rác và tạo tệp ZIP)</em><br><br>
                 <input type="file" id="excelFile" accept=".xlsx">
             </div>
 
@@ -132,7 +132,7 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang khôi phục mã Word và tạo hồ sơ ZIP... Vui lòng đợi!";
+            statusLabel.innerText = "Đang trích xuất dữ liệu và tạo hồ sơ ZIP... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             try {
@@ -203,33 +203,6 @@
 
                             const zip = new PizZip(wordBuffer);
 
-                            // =========================================================
-                            // CỖ MÁY KHÂU XML TỐI THƯỢNG - DIỆT MỌI LỖI MS WORD
-                            // =========================================================
-                            for (let fileName in zip.files) {
-                                if (fileName.endsWith('.xml')) {
-                                    let xml = zip.files[fileName].asText();
-                                    
-                                    // BƯỚC 1: Xóa trắng toàn bộ lịch sử chỉnh sửa và gạch đỏ chính tả
-                                    xml = xml.replace(/<w:del\b[^>]*>[\s\S]*?<\/w:del>/g, '');
-                                    xml = xml.replace(/<w:ins\b[^>]*>([\s\S]*?)<\/w:ins>/g, '$1');
-                                    
-                                    // BƯỚC 2: Khâu các thẻ mở bị nát ({ <rác XML> {  ==>  {{ )
-                                    xml = xml.replace(/\{((?:<[^>]+>)+)\{/g, '{{');
-                                    
-                                    // BƯỚC 3: Khâu các thẻ đóng bị nát (} <rác XML> }  ==>  }} )
-                                    xml = xml.replace(/\}((?:<[^>]+>)+)\}/g, '}}');
-                                    
-                                    // BƯỚC 4: Hút sạch mọi rác XML vô tình chui vào giữa các biến {{ ... }}
-                                    xml = xml.replace(/\{\{([\s\S]*?)\}\}/g, function(match, inner) {
-                                        return '{{' + inner.replace(/<[^>]+>/g, '') + '}}';
-                                    });
-
-                                    zip.file(fileName, xml);
-                                }
-                            }
-                            // =========================================================
-
                             const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
                             doc.render(stData);
 
@@ -247,12 +220,12 @@
                         const content = await outZip.generateAsync({type:"blob"});
                         saveAs(content, "Ho_So_Ban_Nhan_Xet_Hoan_Thanh.zip");
                         
-                        statusLabel.innerText = `Thành công tuyệt đối! Đã tạo xong ${validStudents.length} file Word chuẩn định dạng gốc.`;
+                        statusLabel.innerText = `Thành công rực rỡ! Đã tạo xong file ZIP chứa ${validStudents.length} Bản nhận xét.`;
                         statusLabel.style.color = "green";
 
                     } catch (error) {
                         console.error(error);
-                        statusLabel.innerText = "Lỗi xử lý. Chi tiết (nhấn F12): " + error.message;
+                        statusLabel.innerText = "LỖI FILE WORD: Biến trong file Word bị gạch đỏ hoặc ngắt quãng. Hãy mở file Word, xóa biến lỗi đi gõ lại một mạch, sau đó tải lên lại nhé!";
                         statusLabel.style.color = "red";
                     }
                 };
