@@ -10,15 +10,17 @@ body {
     color: #333;
 }
 
-/* TOP HEADER - LOGO & TIÊU ĐỀ SÁT LỀ TRÁI */
+/* =========================================
+   TOP HEADER - SỬ DỤNG HEADER.PNG
+========================================= */
 .top-header {
-    background-image: url('header-banner.jpg');
-    background-repeat: no-repeat;
-    background-position: left top;
-    background-size: auto 100%;
-    background-color: #eef0f2;
+    background-image: url('header.png'); /* Đã cập nhật background mới */
+    background-repeat: repeat-x; /* Lặp ngang để phủ kín mọi màn hình rộng */
+    background-position: center;
+    background-size: auto 100%; /* Chiều cao vừa khít 100% header */
+    background-color: #fbc05b; /* Màu dự phòng */
     height: 140px;
-    border-bottom: 1px solid #dbdbdb;
+    border-bottom: 2px solid #b71a1a;
     display: flex;
     align-items: center;
 }
@@ -35,7 +37,7 @@ body {
 .logo-group {
     display: flex;
     align-items: center;
-    gap: 20px; /* Khoảng cách giữa logo và chữ */
+    gap: 20px;
 }
 
 .site-title {
@@ -45,17 +47,17 @@ body {
 }
 
 .site-title .main-title {
-    font-size: 26px; /* To rõ ràng */
-    font-weight: bold; /* In đậm */
-    color: #b71a1a; /* Đỏ Bách khoa */
+    font-size: 26px;
+    font-weight: bold;
+    color: #b71a1a;
     text-transform: uppercase;
     margin-bottom: 5px;
     text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
 }
 
 .site-title .sub-title {
-    font-size: 17px; /* Nhỏ hơn */
-    font-weight: normal; /* Không in đậm */
+    font-size: 17px;
+    font-weight: normal;
     color: #333;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -76,7 +78,9 @@ body {
     background-color: #b71a1a;
 }
 
-/* MAIN NAVBAR (Menu đen - Cố định 1 dòng) */
+/* =========================================
+   MAIN NAVBAR (Menu đen - Cố định 1 dòng)
+========================================= */
 .main-nav {
     background-color: #2b2b2b;
     border-bottom: 3px solid #b71a1a;
@@ -84,15 +88,15 @@ body {
 
 .nav-container {
     width: 100%;
-    padding: 0 4%; /* Thẳng hàng với Logo */
+    padding: 0 4%;
     display: flex;
-    flex-wrap: nowrap; /* BẮT BUỘC NẰM TRÊN 1 DÒNG */
-    overflow-x: auto; /* Cho phép cuộn ngang nếu màn hình quá nhỏ */
+    flex-wrap: nowrap;
+    overflow-x: auto;
     white-space: nowrap;
 }
 
 .nav-container::-webkit-scrollbar {
-    height: 4px; /* Thanh cuộn mỏng */
+    height: 4px;
 }
 .nav-container::-webkit-scrollbar-thumb {
     background: #b71a1a; 
@@ -106,7 +110,7 @@ body {
     text-transform: uppercase;
     font-weight: bold;
     transition: 0.2s;
-    flex-shrink: 0; /* Chống co bóp chữ */
+    flex-shrink: 0;
 }
 .nav-container a:hover { color: #ccc; }
 .nav-container a.active {
@@ -116,9 +120,11 @@ body {
     margin-bottom: -3px;
 }
 
-/* MAIN CONTENT AREA */
+/* =========================================
+   MAIN CONTENT AREA
+========================================= */
 .content-wrapper {
-    max-width: 1300px; /* Nới rộng khung nội dung một chút */
+    max-width: 1300px;
     margin: 30px auto;
     background-color: #fff;
     padding: 40px;
@@ -212,13 +218,23 @@ body {
 .status-message.success { background-color: #e6ffe6; color: #008000; border: 1px solid #b3e6b3; }
 .status-message.error { background-color: #ffe6e6; color: #cc0000; border: 1px solid #ffb3b3; }
 
-/* FOOTER */
+/* =========================================
+   FOOTER - SỬ DỤNG FOOTER.PNG
+========================================= */
 footer {
+    background-image: url('footer.png'); /* Cập nhật nền footer */
+    background-size: cover;
+    background-position: center bottom;
+    background-repeat: no-repeat;
     background-color: #a41b1b;
     color: #fff;
     text-align: center;
-    padding: 25px 20px;
+    padding: 40px 20px 80px; /* Tăng padding dưới để không bị che bởi hình cổng trường */
     border-top: 5px solid #821010;
     margin-top: 50px;
 }
-.footer-content p { margin-bottom: 6px; font-size: 13px; }
+.footer-content p {
+    margin-bottom: 6px;
+    font-size: 13px;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.9); /* Thêm viền đen mờ để chữ luôn rõ trên nền nhị phân sáng */
+}
