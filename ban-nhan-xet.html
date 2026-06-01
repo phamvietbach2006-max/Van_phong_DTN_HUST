@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo Bản Nhận Xét - YUMOFFICE</title>
+    <title>Tạo Bản Nhận Xét - HUST Portal</title>
     <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -11,6 +11,7 @@
     <script src="https://unpkg.com/docxtemplater@3.37.11/build/docxtemplater.js"></script>
     <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 </head>
 <body>
     <header class="top-header">
@@ -22,7 +23,6 @@
                     <div class="sub-title">Đại học Bách khoa Hà Nội</div>
                 </div>
             </div>
-            
             <div class="action-buttons">
                 <a href="#">YUMOFFICE v2.0</a>
             </div>
@@ -36,6 +36,7 @@
             <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="#">KHO TÀI LIỆU</a>
             <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
+            <a href="#">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
         </div>
     </nav>
 
@@ -120,23 +121,19 @@
             if (gpa < 2.5) return "trung bình"; if (gpa <= 3.2) return "khá";
             if (gpa <= 3.6) return "tốt"; return "xuất sắc";
         }
-
         function evaluateRenLuyen(drl) {
             if (drl < 65) return "trung bình"; if (drl <= 80) return "khá";
             if (drl <= 90) return "tốt"; return "xuất sắc";
         }
-
         function evaluateKhuyetDiem(gpa, drl) {
             if (gpa <= 3.2 && drl <= 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
             if (gpa > 3.2 && drl <= 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
             if (gpa <= 3.2 && drl > 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
             return "Hoàn thành tốt nhiệm vụ được giao.";
         }
-
         function removeAccents(str) {
             return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
         }
-
         function getColValue(rowObj, possibleKeys) {
             for (let key in rowObj) {
                 let normalizedKey = removeAccents(key).toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -243,10 +240,34 @@
                             outZip.file(docName, docOutput);
                         }
 
+                        // TẠO TÊN FILE CÓ NGÀY THÁNG NĂM
+                        const now = new Date();
+                        const dateStr = `${String(now.getDate()).padStart(2, '0')}_${String(now.getMonth() + 1).padStart(2, '0')}_${now.getFullYear()}`;
+                        const zipName = `Ho_So_Ban_Nhan_Xet_${dateStr}.zip`;
+
                         const content = await outZip.generateAsync({type:"blob"});
-                        saveAs(content, "Ho_So_Ban_Nhan_Xet.zip");
+                        saveAs(content, zipName); // Tải xuống máy tính
                         
-                        showStatus(`🎉 THÀNH CÔNG! Đã khởi tạo hoàn tất toàn bộ gói hồ sơ ZIP cho ${validStudents.length} cán bộ, sinh viên.`, "success");
+                        // LƯU TRỮ VÀO Ổ ĐĨA ẢO ĐỂ TẢI LẠI SAU
+                        const fileId = 'zip_' + Date.now();
+                        await localforage.setItem(fileId, content); // Lưu file Blob thật vào bộ nhớ trình duyệt
+
+                        // Ghi lại thông tin vào Lịch sử
+                        const timeString = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                        const historyRecord = {
+                            id: fileId,
+                            time: timeString,
+                            fileName: zipName,
+                            type: "Bản nhận xét Đảng viên",
+                            count: validStudents.length + " file",
+                            status: "Thành công"
+                        };
+
+                        let historyData = JSON.parse(localStorage.getItem('yumHistory')) || [];
+                        historyData.unshift(historyRecord);
+                        localStorage.setItem('yumHistory', JSON.stringify(historyData));
+
+                        showStatus(`🎉 THÀNH CÔNG! Đã đóng gói xong ${validStudents.length} file. Bạn có thể tải lại trong mục Lịch sử.`, "success");
 
                     } catch (error) {
                         console.error(error);
