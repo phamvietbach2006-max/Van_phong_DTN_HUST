@@ -8,7 +8,244 @@
 
 body {
     background-color: #e9eaec; /* Màu xám nhạt nền ngoài */
+    color: #333;/* FONT CHUẨN CỔNG THÔNG TIN */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: #e9eaec;
     color: #333;
+}
+
+/* =========================================
+   TOP HEADER - ĐỒNG BỘ BANNER ĐOÀN BÁCH KHOA
+========================================= */
+.top-header {
+    background-image: url('header-banner.jpg'); /* Sử dụng bức ảnh bạn vừa gửi */
+    background-size: cover;
+    background-position: left center;
+    background-repeat: no-repeat;
+    height: 160px; /* Chiều cao tối ưu hiển thị trọn vẹn logo và dải màu */
+    position: relative;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Các nút chức năng ẩn trên góc phải banner */
+.header-right-overlay {
+    position: absolute;
+    top: 15px;
+    right: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.search-box {
+    display: flex;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.search-box input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 2px 0 0 2px;
+    outline: none;
+    width: 200px;
+    font-size: 13px;
+}
+.search-box button {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-left: none;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 0 2px 2px 0;
+}
+
+.action-buttons a {
+    display: inline-block;
+    padding: 5px 12px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+.btn-red { background-color: #b71a1a; }
+.btn-dark-red { background-color: #2b2b2b; }
+
+/* =========================================
+   MAIN NAVBAR (Menu đen)
+========================================= */
+.main-nav {
+    background-color: #2b2b2b;
+    border-bottom: 3px solid #b71a1a;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+}
+
+.nav-container a {
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 25px;
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: bold;
+    transition: 0.2s;
+}
+.nav-container a:hover { color: #ccc; }
+.nav-container a.active {
+    color: #b71a1a;
+    border-bottom: 4px solid #b71a1a;
+    background-color: #fff;
+    margin-bottom: -3px;
+}
+
+/* =========================================
+   SUB NAVBAR (Menu đỏ gạch)
+========================================= */
+.sub-nav {
+    background-color: #b71a1a;
+}
+
+.sub-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+}
+
+.sub-nav-container a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 25px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.sub-nav-container a:hover { background-color: #921313; }
+.sub-nav-container a.active {
+    background-color: #fff;
+    color: #b71a1a;
+}
+
+/* =========================================
+   MAIN CONTENT AREA
+========================================= */
+.content-wrapper {
+    max-width: 1200px;
+    margin: 25px auto;
+    background-color: #fff;
+    padding: 40px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    min-height: 500px;
+    border-radius: 4px;
+}
+
+.section-title {
+    color: #b71a1a;
+    font-size: 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+    position: relative;
+}
+.section-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 120px;
+    height: 2px;
+    background-color: #b71a1a;
+}
+
+.tool-description {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 30px;
+    background-color: #f8fafc;
+    padding: 15px;
+    border-left: 4px solid #b71a1a;
+}
+
+/* KHU VỰC TẢI FILE */
+.upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 35px;
+}
+
+.upload-box {
+    border: 2px dashed #cbd5e1;
+    background-color: #f8fafc;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+.upload-box:hover {
+    border-color: #b71a1a;
+    background-color: #fff5f5;
+}
+
+.box-icon { font-size: 40px; margin-bottom: 12px; }
+.box-title { font-weight: bold; color: #1e293b; margin-bottom: 8px; font-size: 15px; }
+.box-desc { font-size: 12px; color: #64748b; margin-bottom: 15px; }
+.file-name { font-weight: bold; color: #64748b; font-size: 13px; word-break: break-all;}
+
+/* BUTTONS */
+.action-area { text-align: center; margin-bottom: 10px; }
+.btn-submit {
+    background-color: #b71a1a;
+    color: #fff;
+    border: none;
+    padding: 14px 40px;
+    font-size: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+.btn-submit:hover { background-color: #921313; }
+
+/* TRẠNG THÁI */
+.status-message {
+    padding: 15px;
+    margin-top: 25px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    display: none;
+}
+.status-message.info { background-color: #e9f5ff; color: #0056b3; border: 1px solid #b8daff; }
+.status-message.success { background-color: #e6ffe6; color: #008000; border: 1px solid #b3e6b3; }
+.status-message.error { background-color: #ffe6e6; color: #cc0000; border: 1px solid #ffb3b3; }
+
+/* FOOTER CHÂN TRANG */
+footer {
+    background-color: #a41b1b;
+    color: #fff;
+    text-align: center;
+    padding: 25px 20px;
+    border-top: 5px solid #821010;
+    margin-top: 50px;
+}
+.footer-content p { margin-bottom: 6px; font-size: 13px; }
 }
 
 /* =========================================
