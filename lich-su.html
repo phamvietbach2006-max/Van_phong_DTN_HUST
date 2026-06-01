@@ -32,23 +32,16 @@
             <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="#">KHO TÀI LIỆU</a>
             <a href="lich-su.html" class="active">LỊCH SỬ TẠO VĂN BẢN</a>
-            <a href="huong-dan.html" class="active">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
+            <a href="huong-dan.html">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
         </div>
     </nav>
-
-    <div class="sub-nav">
-        <div class="sub-nav-container">
-            <a href="#" class="active">Tất cả lịch sử</a>
-            <a href="#" onclick="clearHistory()" style="background-color: #ffe6e6; color: #cc0000; border-radius: 4px; margin-left: 10px; border: 1px solid #ffb3b3;">⚠️ Xóa toàn bộ dữ liệu</a>
-        </div>
-    </div>
 
     <div class="content-wrapper">
         <h2 class="section-title">LỊCH SỬ TẠO VĂN BẢN & HỒ SƠ</h2>
         
         <div style="background-color: #fff1f0; border: 1px solid #ffa39e; padding: 15px; border-radius: 4px; margin-bottom: 25px;">
             <p style="color: #cf1322; font-size: 14px; margin-bottom: 5px;"><strong>⚠️ CẢNH BÁO QUAN TRỌNG:</strong></p>
-            <p style="color: #cf1322; font-size: 13px; line-height: 1.5;">Toàn bộ dữ liệu hồ sơ đang được lưu trữ trực tiếp trên thiết bị này (không lưu trên máy chủ Cloud). Nếu đồng chí chọn <strong>"Xóa toàn bộ dữ liệu"</strong> hoặc dọn dẹp lịch sử duyệt web sâu (Clear Cache), các file ZIP lưu tại đây sẽ bị mất vĩnh viễn. Vui lòng cân nhắc kỹ trước khi xóa!</p>
+            <p style="color: #cf1322; font-size: 13px; line-height: 1.5;">Toàn bộ dữ liệu hồ sơ đang được lưu trữ trực tiếp trên thiết bị này (không lưu trên máy chủ Cloud). Nếu đồng chí chọn <strong>"Xóa dữ liệu"</strong> hoặc dọn dẹp lịch sử duyệt web sâu (Clear Cache), các file ZIP lưu tại đây sẽ bị mất vĩnh viễn. Vui lòng cân nhắc kỹ trước khi xóa!</p>
         </div>
 
         <div class="history-controls">
@@ -60,7 +53,10 @@
                     <option value="Nghị quyết giới thiệu">Nghị quyết giới thiệu</option>
                 </select>
             </div>
-            <div style="font-size: 14px; color: #555;">Dữ liệu lưu nội bộ 100% bảo mật.</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-size: 14px; color: #555;">Dữ liệu lưu nội bộ 100% bảo mật.</span>
+                <button onclick="clearHistory()" style="background-color: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s;">⚠️ Xóa dữ liệu</button>
+            </div>
         </div>
 
         <table class="history-table">
@@ -92,9 +88,7 @@
         <div class="modal-box">
             <div id="modalTitle" class="modal-title">Thông báo</div>
             <div id="modalMessage" class="modal-message">Nội dung thông báo</div>
-            
             <input type="text" id="modalInput" class="modal-input" placeholder="Gõ xác nhận vào đây..." autocomplete="off">
-            
             <div class="modal-buttons">
                 <button id="modalCancelBtn" class="btn-modal btn-modal-cancel">Hủy</button>
                 <button id="modalConfirmBtn" class="btn-modal btn-modal-confirm">Xác nhận</button>
@@ -103,7 +97,6 @@
     </div>
 
     <script>
-        // --- HỆ THỐNG ĐIỀU KHIỂN CỬA SỔ NỔI (Thay thế alert & prompt) ---
         function showCustomModal(options) {
             return new Promise((resolve) => {
                 const overlay = document.getElementById('customModalOverlay');
@@ -113,30 +106,25 @@
                 const confirmBtn = document.getElementById('modalConfirmBtn');
                 const cancelBtn = document.getElementById('modalCancelBtn');
 
-                // Cài đặt nội dung
                 titleEl.innerHTML = options.title || 'Thông báo';
                 msgEl.innerHTML = options.message || '';
                 confirmBtn.innerHTML = options.confirmText || 'Đồng ý';
                 
-                // Cài đặt loại Modal (Nhập liệu hay Chỉ thông báo)
                 if (options.type === 'prompt') {
                     inputEl.style.display = 'block';
                     inputEl.value = '';
                     cancelBtn.style.display = 'inline-block';
                 } else {
                     inputEl.style.display = 'none';
-                    cancelBtn.style.display = 'none'; // Alert chỉ cần 1 nút đóng
+                    cancelBtn.style.display = 'none';
                 }
 
-                // Hiển thị modal
                 overlay.style.display = 'flex';
                 
-                // Tự động focus vào ô nhập nếu là prompt
                 if (options.type === 'prompt') {
                     setTimeout(() => inputEl.focus(), 100);
                 }
 
-                // Bắt sự kiện bấm nút
                 confirmBtn.onclick = function() {
                     overlay.style.display = 'none';
                     resolve(options.type === 'prompt' ? inputEl.value : true);
@@ -149,7 +137,6 @@
             });
         }
 
-        // --- CÁC HÀM XỬ LÝ LỊCH SỬ ---
         function loadHistory() {
             const historyBody = document.getElementById('historyBody');
             const filterValue = document.getElementById('filterType').value;
@@ -206,7 +193,6 @@
         }
 
         async function clearHistory() {
-            // Thay thế hàm prompt() bằng Cửa sổ nổi
             const userInput = await showCustomModal({
                 title: '⚠️ CẢNH BÁO NGUY HIỂM',
                 message: 'Hành động này sẽ xóa vĩnh viễn toàn bộ lịch sử và file ZIP đã lưu trên máy tính này!<br><br>Để xác nhận chắc chắn muốn xóa, vui lòng gõ chữ: <b>XOA</b>',
@@ -214,14 +200,12 @@
                 confirmText: 'Xác nhận xóa'
             });
             
-            // Xử lý kết quả trả về từ cửa sổ nổi
             if (userInput !== null) {
                 if (userInput.trim().toUpperCase() === "XOA") {
                     localStorage.removeItem('yumHistory');
                     await localforage.clear(); 
                     loadHistory();
                     
-                    // Thay thế alert() báo thành công
                     await showCustomModal({
                         title: '✅ ĐÃ XÓA THÀNH CÔNG',
                         message: 'Toàn bộ dữ liệu lịch sử và bộ nhớ lưu trữ đã được dọn sạch!',
@@ -229,7 +213,6 @@
                         confirmText: 'Đã hiểu'
                     });
                 } else {
-                    // Thay thế alert() báo lỗi gõ sai
                     await showCustomModal({
                         title: '❌ HỦY THAO TÁC',
                         message: 'Lệnh xóa đã bị hủy do đồng chí nhập không đúng chữ <b>XOA</b>.',
