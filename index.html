@@ -3,48 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - YUMOFFICE</title>
+    <title>Hệ thống Nghiệp vụ Văn phòng Đoàn - HUST Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <img src="logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
-        <h1>VĂN PHÒNG ĐOÀN THANH NIÊN ĐẠI HỌC BÁCH KHOA HÀ NỘI</h1>
-        <div style="width: 60px;"></div> 
+    <header class="top-header">
+        <div class="header-right-overlay">
+            <div class="search-box">
+                <input type="text" placeholder="Tìm kiếm...">
+                <button>🔍</button>
+            </div>
+            <div class="action-buttons">
+                <a href="#" class="btn-red">ĐĂNG NHẬP</a>
+                <a href="#" class="btn-dark-red">YUMOFFICE v2.0</a>
+            </div>
+        </div>
     </header>
 
-    <nav>
-        <a href="index.html">Trang chủ</a>
-        <a href="ban-nhan-xet.html">Bản Nhận Xét</a>
-        <a href="#">Nghị quyết</a>
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="active">TRANG CHỦ</a>
+            <a href="#">THÔNG BÁO</a>
+            <a href="#">QUY ĐỊNH</a>
+            <a href="ban-nhan-xet.html">BẢN NHẬN XÉT</a>
+            <a href="#">DỊCH VỤ</a>
+            <a href="#">TRA CỨU</a>
+            <a href="#">LIÊN HỆ</a>
+        </div>
     </nav>
 
-    <div class="container">
-        <div class="card">
-            <h2>Chào mừng đến với hệ thống YUMOFFICE</h2>
-            <p>Hệ thống số hóa nghiệp vụ công tác Đoàn và phong trào thanh niên.</p>
-            <p>Vui lòng chọn tính năng trên thanh công cụ để bắt đầu.</p>
+    <div class="sub-nav">
+        <div class="sub-nav-container">
+            <a href="#" class="active">Tổng quan hệ thống</a>
+            <a href="#">Tài liệu mẫu nghiệp vụ</a>
+            <a href="#">Văn bản hướng dẫn</a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <h2 class="section-title">HỆ THỐNG QUẢN LÝ NGHIỆP VỤ VĂN PHÒNG ĐOÀN - YUMOFFICE</h2>
+        
+        <div class="tool-description">
+            Chào mừng đồng chí đến với <strong>YUMOFFICE v2.0</strong> - Hệ thống hỗ trợ chuyển đổi số toàn diện công tác quản lý văn bản, hồ sơ Đoàn viên ưu tú và Đảng viên dự bị tại Đại học Bách khoa Hà Nội. Hệ thống giúp tối ưu hóa thời gian xử lý hồ sơ hành chính, đảm bảo tính chính xác và tuân thủ tuyệt đối thể thức văn bản.
+        </div>
+
+        <div class="upload-grid">
+            <div class="upload-box" onclick="location.href='ban-nhan-xet.html'" style="text-align: left; padding: 30px 25px;">
+                <div class="box-icon" style="text-align: left; margin-bottom: 10px;">📋</div>
+                <div class="box-title" style="font-size: 16px; color: #b71a1a;">BẢN NHẬN XÉT ĐẢNG VIÊN</div>
+                <div class="box-desc" style="margin-bottom: 0; font-size: 13px; color: #555; line-height: 1.5;">
+                    Hỗ trợ sinh tự động và đóng gói hàng loạt Bản nhận xét kết quả phấn đấu của Đảng viên dự bị từ dữ liệu Excel. Hồ sơ xuất ra dưới dạng tệp nén ZIP chứa các file Word riêng lẻ chuẩn lề lối hành chính.
+                </div>
+                <div style="margin-top: 15px; font-size: 12px; color: #b71a1a; font-weight: bold; text-align: right;">Truy cập phân hệ &rarr;</div>
+            </div>
+
+            <div class="upload-box" style="text-align: left; padding: 30px 25px; cursor: not-allowed; background-color: #f1f5f9; border-color: #e2e8f0;">
+                <div class="box-icon" style="text-align: left; margin-bottom: 10px; opacity: 0.6;">📜</div>
+                <div class="box-title" style="font-size: 16px; color: #64748b;">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</div>
+                <div class="box-desc" style="margin-bottom: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                    Tự động hóa quy trình tổng hợp số liệu biểu quyết và trích xuất hệ thống Nghị quyết giới thiệu Đoàn viên ưu tú vào Đảng của Ban Chấp hành Đoàn trường hoặc Liên chi Đoàn.
+                </div>
+                <div style="margin-top: 15px; font-size: 12px; color: #94a3b8; font-weight: bold; text-align: right;">Phân hệ đang phát triển...</div>
+            </div>
+        </div>
+
+        <div class="tool-description" style="margin-top: 20px; border-left: 4px solid #fbc05b; background-color: #fffbeb;">
+            <strong>📌 Quy trình xử lý hồ sơ chuẩn:</strong> Đảm bảo file Word mẫu tải lên sử dụng cấu trúc dấu ngoặc vuông <code>[[ ]]</code> (ví dụ: <code>[[HoTen]]</code>, <code>[[STT]]</code>) để triệt tiêu hoàn toàn hiện tượng phân mảnh XML ngầm do tính năng soát lỗi chính tả của Microsoft Word gây ra.
         </div>
     </div>
 
     <footer>
-        <div class="footer-col">
-            <img src="logo.png" alt="Logo" style="height: 50px;" onerror="this.style.display='none'">
-            <p>Hệ thống hỗ trợ nghiệp vụ YUMOFFICE.</p>
-        </div>
-        <div class="footer-col">
-            <h4>GIỚI THIỆU</h4>
-            <ul>
-                <li>Về Đoàn Bách khoa</li>
-                <li>Đội ngũ phát triển</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>LIÊN HỆ</h4>
-            <ul>
-                <li>📍 Nguyễn Khánh Toàn, Nghĩa Đô, Hà Nội</li>
-                <li>📧 phamvietbach2006@gmail.com</li>
-            </ul>
+        <div class="footer-content">
+            <p><strong>Bản quyền thuộc về Đoàn Thanh niên Đại học Bách khoa Hà Nội</strong></p>
+            <p>Địa chỉ: Phòng C1-226, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
+            <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ YUMOFFICE 2026</p>
         </div>
     </footer>
 </body>
