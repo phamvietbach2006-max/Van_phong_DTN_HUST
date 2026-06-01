@@ -16,7 +16,6 @@
                     <div class="sub-title">Đại học Bách khoa Hà Nội</div>
                 </div>
             </div>
-            
             <div class="action-buttons">
                 <a href="#">YUMOFFICE v2.0</a>
             </div>
@@ -36,8 +35,7 @@
     <div class="sub-nav">
         <div class="sub-nav-container">
             <a href="#" class="active">Tất cả lịch sử</a>
-            <a href="#">Tháng này</a>
-            <a href="#">Đã đánh dấu</a>
+            <a href="#" onclick="clearHistory()" style="background-color: #ffe6e6; color: #cc0000; border-radius: 4px; margin-left: 10px;">🗑️ Xóa toàn bộ lịch sử</a>
         </div>
     </div>
 
@@ -45,14 +43,15 @@
         <h2 class="section-title">LỊCH SỬ TẠO VĂN BẢN & HỒ SƠ</h2>
         
         <div class="tool-description">
-            Khu vực lưu trữ thông tin các đợt xuất hồ sơ tự động. Bạn có thể tra cứu lại ngày giờ, số lượng văn bản đã tạo và tải lại các tệp ZIP mà không cần nạp lại dữ liệu Excel.
+            Khu vực lưu trữ thông tin các đợt xuất hồ sơ tự động. Bạn có thể tra cứu lại ngày giờ, số lượng văn bản đã tạo.
         </div>
 
         <div class="history-controls">
             <input type="text" placeholder="🔍 Tìm kiếm tên lô hồ sơ...">
-            <div style="font-size: 14px; color: #555;">Hiển thị: <strong>10</strong> kết quả gần nhất</div>
+            <div style="font-size: 14px; color: #555;">Dữ liệu được lưu trữ an toàn trên trình duyệt của bạn.</div>
         </div>
 
+        <!-- BẢNG LỊCH SỬ -->
         <table class="history-table">
             <thead>
                 <tr>
@@ -61,50 +60,13 @@
                     <th style="width: 30%;">Tên lô hồ sơ (Tệp ZIP)</th>
                     <th style="width: 20%;">Loại nghiệp vụ</th>
                     <th style="width: 10%; text-align: center;">Số lượng</th>
-                    <th style="width: 10%; text-align: center;">Trạng thái</th>
-                    <th style="width: 10%; text-align: center;">Thao tác</th>
+                    <th style="width: 20%; text-align: center;">Trạng thái</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center; font-weight: bold;">1</td>
-                    <td>01/06/2026 - 10:30</td>
-                    <td style="font-weight: bold; color: #b71a1a;">Ho_So_Ban_Nhan_Xet_Dot1.zip</td>
-                    <td>Bản nhận xét Đảng viên</td>
-                    <td style="text-align: center;">38 file</td>
-                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
-                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
-                </tr>
-                <tr>
-                    <td style="text-align: center; font-weight: bold;">2</td>
-                    <td>28/05/2026 - 15:45</td>
-                    <td style="font-weight: bold; color: #b71a1a;">Ho_So_Ban_Nhan_Xet_K69.zip</td>
-                    <td>Bản nhận xét Đảng viên</td>
-                    <td style="text-align: center;">12 file</td>
-                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
-                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
-                </tr>
-                <tr>
-                    <td style="text-align: center; font-weight: bold;">3</td>
-                    <td>15/05/2026 - 09:15</td>
-                    <td style="font-weight: bold; color: #b71a1a;">Ho_So_Ban_Nhan_Xet_K68.zip</td>
-                    <td>Bản nhận xét Đảng viên</td>
-                    <td style="text-align: center;">45 file</td>
-                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
-                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
-                </tr>
-                <tr>
-                    <td style="text-align: center; font-weight: bold;">4</td>
-                    <td>10/05/2026 - 14:00</td>
-                    <td style="font-weight: bold; color: #555;">Nghi_Quyet_Gioi_Thieu_Dot1.zip</td>
-                    <td>Nghị quyết giới thiệu</td>
-                    <td style="text-align: center;">20 file</td>
-                    <td style="text-align: center;"><span class="badge-status">Thành công</span></td>
-                    <td style="text-align: center;"><button class="btn-download-sm">Tải lại</button></td>
-                </tr>
+            <tbody id="historyBody">
+                <!-- Dữ liệu sẽ được Javascript nhồi vào đây tự động -->
             </tbody>
         </table>
-
     </div>
 
     <footer>
@@ -114,5 +76,46 @@
             <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ YUMOFFICE 2026</p>
         </div>
     </footer>
+
+    <!-- SCRIPT XỬ LÝ LOCAL STORAGE -->
+    <script>
+        // Hàm load dữ liệu khi mở trang
+        function loadHistory() {
+            const historyBody = document.getElementById('historyBody');
+            const historyData = JSON.parse(localStorage.getItem('yumHistory')) || [];
+
+            // Nếu chưa có lịch sử nào
+            if (historyData.length === 0) {
+                historyBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 30px;">Chưa có lịch sử tạo văn bản nào được ghi nhận trên thiết bị này.</td></tr>`;
+                return;
+            }
+
+            // Nếu có dữ liệu, nhồi từng dòng vào bảng
+            historyBody.innerHTML = '';
+            historyData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; font-weight: bold;">${index + 1}</td>
+                    <td>${item.time}</td>
+                    <td style="font-weight: bold; color: #b71a1a;">${item.fileName}</td>
+                    <td>${item.type}</td>
+                    <td style="text-align: center;">${item.count}</td>
+                    <td style="text-align: center;"><span class="badge-status">${item.status}</span></td>
+                `;
+                historyBody.appendChild(tr);
+            });
+        }
+
+        // Hàm xóa lịch sử
+        function clearHistory() {
+            if(confirm("Đồng chí có chắc chắn muốn xóa toàn bộ lịch sử trên thiết bị này không?")) {
+                localStorage.removeItem('yumHistory');
+                loadHistory(); // Load lại bảng cho trống
+            }
+        }
+
+        // Tự động chạy hàm loadHistory khi trang web vừa tải xong
+        window.onload = loadHistory;
+    </script>
 </body>
 </html>
