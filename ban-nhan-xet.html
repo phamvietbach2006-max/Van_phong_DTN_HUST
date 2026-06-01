@@ -27,12 +27,12 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét (Bản Nạp Kép Tối Ưu)</h2>
-            <p><em>Hệ thống điền dữ liệu trực tiếp vào file Word. Đã tích hợp Trợ lý AI báo lỗi gõ sai biến.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét (Bản Dấu Ngoặc Vuông)</h2>
+            <p><em>Hệ thống đã nâng cấp lõi đọc biến [[ ]], triệt tiêu hoàn toàn lỗi đứt gãy thẻ Word.</em></p>
 
             <div style="margin-bottom: 20px; padding: 15px; border: 2px dashed #ce1616; border-radius: 8px; background-color: #fff9f9;">
                 <label style="color: #ce1616;"><strong>Bước 1: Tải lên file WORD mẫu (.docx)</strong></label><br>
-                <em style="font-size: 13px; color: #555;">(File chứa các biến {{HoTen}}, {{STT}} được gõ cẩn thận, không dư dấu ngoặc)</em><br><br>
+                <em style="font-size: 13px; color: #555;">(File chứa biến ngoặc vuông: [[HoTen]], [[STT]]...)</em><br><br>
                 <input type="file" id="wordFile" accept=".docx">
             </div>
 
@@ -42,8 +42,7 @@
             </div>
 
             <button onclick="processData()" style="width: 100%; padding: 15px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 18px;">Xử lý & Tải xuống tệp ZIP</button>
-            
-            <div id="statusBox" style="margin-top: 20px; font-weight: bold; text-align: center; font-size: 16px; padding: 10px; border-radius: 5px; display: none;"></div>
+            <p id="status" style="margin-top: 20px; font-weight: bold; text-align: center; font-size: 16px; padding: 10px; border-radius: 5px; display: none;"></p>
         </div>
     </div>
 
@@ -69,6 +68,25 @@
     </footer>
 
     <script>
+        function showStatus(message, type) {
+            const statusBox = document.getElementById('status');
+            statusBox.style.display = 'block';
+            statusBox.innerHTML = message;
+            if (type === 'error') {
+                statusBox.style.backgroundColor = '#ffe6e6';
+                statusBox.style.color = '#cc0000';
+                statusBox.style.border = '1px solid #cc0000';
+            } else if (type === 'success') {
+                statusBox.style.backgroundColor = '#e6ffe6';
+                statusBox.style.color = '#008000';
+                statusBox.style.border = '1px solid #008000';
+            } else {
+                statusBox.style.backgroundColor = '#e6f2ff';
+                statusBox.style.color = '#0056b3';
+                statusBox.style.border = '1px solid #0056b3';
+            }
+        }
+
         function parseDate(raw) {
             if (!raw) return "";
             let str = String(raw).split(',')[0].split(' ')[0].trim();
@@ -118,25 +136,6 @@
             return "";
         }
 
-        function showStatus(message, type) {
-            const statusBox = document.getElementById('statusBox');
-            statusBox.style.display = 'block';
-            statusBox.innerHTML = message;
-            if (type === 'error') {
-                statusBox.style.backgroundColor = '#ffe6e6';
-                statusBox.style.color = '#cc0000';
-                statusBox.style.border = '1px solid #cc0000';
-            } else if (type === 'success') {
-                statusBox.style.backgroundColor = '#e6ffe6';
-                statusBox.style.color = '#008000';
-                statusBox.style.border = '1px solid #008000';
-            } else {
-                statusBox.style.backgroundColor = '#e6f2ff';
-                statusBox.style.color = '#0056b3';
-                statusBox.style.border = '1px solid #0056b3';
-            }
-        }
-
         async function processData() {
             const wordInput = document.getElementById('wordFile');
             const excelInput = document.getElementById('excelFile');
@@ -146,7 +145,7 @@
                 return;
             }
 
-            showStatus("Đang xử lý dữ liệu... Vui lòng đợi!", "info");
+            showStatus("Đang xử lý dữ liệu và đóng gói ZIP... Vui lòng đợi!", "info");
 
             try {
                 const wordBuffer = await wordInput.files[0].arrayBuffer();
@@ -188,7 +187,7 @@
                             }
                         }
 
-                        if (validStudents.length === 0) throw new Error("Không có dữ liệu hợp lệ trong file Excel!");
+                        if (validStudents.length === 0) throw new Error("Không có dữ liệu hợp lệ trong Excel!");
 
                         const outZip = new JSZip();
 
@@ -213,16 +212,13 @@
 
                             const zip = new PizZip(wordBuffer);
                             
-                            // Dọn dẹp thẻ kiểm tra chính tả của Word
-                            for (let fileName in zip.files) {
-                                if (fileName.endsWith('.xml')) {
-                                    let xml = zip.files[fileName].asText();
-                                    xml = xml.replace(/<w:proofErr[^>]*>/g, '');
-                                    zip.file(fileName, xml);
-                                }
-                            }
-
-                            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+                            // LÕI MỚI: Chỉ định thư viện đọc dấu [[ ]] thay vì {{ }}
+                            const doc = new window.docxtemplater(zip, { 
+                                paragraphLoop: true, 
+                                linebreaks: true,
+                                delimiters: { start: '[[', end: ']]' } // TÙY CHỈNH KỲ DIỆU Ở ĐÂY
+                            });
+                            
                             doc.render(stData);
 
                             const docOutput = doc.getZip().generate({
@@ -238,23 +234,11 @@
                         const content = await outZip.generateAsync({type:"blob"});
                         saveAs(content, "Ho_So_Ban_Nhan_Xet_Hoan_Thanh.zip");
                         
-                        showStatus(`Thành công tuyệt đối! Đã tạo xong file ZIP chứa ${validStudents.length} Bản nhận xét.`, "success");
+                        showStatus(`🎉 THÀNH CÔNG RỰC RỠ! Đã tạo xong file ZIP chứa ${validStudents.length} Bản nhận xét.`, "success");
 
                     } catch (error) {
                         console.error(error);
-                        let msg = error.message;
-                        
-                        // TRỢ LÝ DÒ LỖI THÔNG MINH
-                        if (error.properties && error.properties.errors) {
-                            let badTags = error.properties.errors.map(e => `<strong>${e.properties.xtag}</strong>`).join(' và ');
-                            msg = `⚠️ BẠN ĐANG GÕ DƯ DẤU NGOẶC TRONG FILE WORD!<br><br>
-                                   Hệ thống phát hiện lỗi ở các cụm: ${badTags}.<br><br>
-                                   👉 <strong>Cách sửa:</strong> Mở file Word mẫu trên máy tính của bạn, XÓA HẲN các chữ bị lỗi đó đi và gõ lại thật chậm, chính xác (Ví dụ: {{STT}}, {{HoTen}}). Sau đó Lưu lại (Ctrl+S) và tải lên đây lần nữa.`;
-                        } else if (error.properties && error.properties.id === 'duplicate_open_tag') {
-                            msg = `⚠️ GÕ SAI DẤU NGOẶC: Hệ thống phát hiện bạn gõ dư dấu ở cụm <strong>${error.properties.xtag}</strong>. Mở Word xóa cụm đó đi và gõ lại nhé!`;
-                        }
-
-                        showStatus(msg, "error");
+                        showStatus("Lỗi khi xử lý: " + error.message, "error");
                     }
                 };
                 excelReader.readAsArrayBuffer(excelInput.files[0]);
