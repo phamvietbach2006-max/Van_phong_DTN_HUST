@@ -10,61 +10,43 @@ body {
     color: #333;
 }
 
-/* TOP HEADER - ĐỒNG BỘ BANNER ĐOÀN BÁCH KHOA */
+/* TOP HEADER - CÓ LOGO */
 .top-header {
     background-image: url('header-banner.jpg');
     background-repeat: no-repeat;
     background-position: left top;
     background-size: auto 100%;
     background-color: #eef0f2;
-    height: 150px;
-    position: relative;
+    height: 140px;
     border-bottom: 1px solid #dbdbdb;
+    display: flex;
+    align-items: center;
 }
 
-.header-right-overlay {
-    position: absolute;
-    bottom: 15px;
-    right: 3%;
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 20px;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-}
-
-.search-box {
-    display: flex;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.search-box input {
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 2px 0 0 2px;
-    outline: none;
-    width: 200px;
-    font-size: 13px;
-}
-.search-box button {
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-left: none;
-    background: #fff;
-    cursor: pointer;
-    border-radius: 0 2px 2px 0;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .action-buttons a {
     display: inline-block;
-    padding: 5px 12px;
+    padding: 8px 15px;
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     text-decoration: none;
     border-radius: 3px;
-    margin-left: 5px;
+    background-color: #2b2b2b;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.btn-red { background-color: #b71a1a; }
-.btn-dark-red { background-color: #2b2b2b; }
+.action-buttons a:hover {
+    background-color: #b71a1a;
+}
 
 /* MAIN NAVBAR (Menu đen) */
 .main-nav {
@@ -76,12 +58,13 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
+    flex-wrap: wrap; /* Hỗ trợ tự động xuống dòng nếu menu quá dài */
 }
 
 .nav-container a {
     color: #fff;
     text-decoration: none;
-    padding: 14px 25px;
+    padding: 14px 20px;
     font-size: 13px;
     text-transform: uppercase;
     font-weight: bold;
@@ -95,26 +78,10 @@ body {
     margin-bottom: -3px;
 }
 
-/* SUB NAVBAR (Menu đỏ gạch) */
-.sub-nav { background-color: #b71a1a; }
-.sub-nav-container { max-width: 1200px; margin: 0 auto; display: flex; }
-.sub-nav-container a {
-    color: #fff;
-    text-decoration: none;
-    padding: 10px 25px;
-    font-size: 13px;
-    font-weight: bold;
-}
-.sub-nav-container a:hover { background-color: #921313; }
-.sub-nav-container a.active {
-    background-color: #fff;
-    color: #b71a1a;
-}
-
 /* MAIN CONTENT AREA */
 .content-wrapper {
     max-width: 1200px;
-    margin: 25px auto;
+    margin: 30px auto;
     background-color: #fff;
     padding: 40px;
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
