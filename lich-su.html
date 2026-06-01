@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch sử tạo văn bản - YUMOFFICE</title>
     <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
 <body>
     <header class="top-header">
@@ -29,6 +32,7 @@
             <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="#">KHO TÀI LIỆU</a>
             <a href="lich-su.html" class="active">LỊCH SỬ TẠO VĂN BẢN</a>
+            <a href="#">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
         </div>
     </nav>
 
@@ -43,29 +47,35 @@
         <h2 class="section-title">LỊCH SỬ TẠO VĂN BẢN & HỒ SƠ</h2>
         
         <div class="tool-description">
-            Khu vực lưu trữ thông tin các đợt xuất hồ sơ tự động. Bạn có thể tra cứu lại ngày giờ, số lượng văn bản đã tạo.
+            Khu vực lưu trữ các đợt xuất hồ sơ. Dữ liệu được bảo mật tuyệt đối trong phân vùng lưu trữ nội bộ của trình duyệt. Bạn có thể tải lại file bất cứ lúc nào.
         </div>
 
         <div class="history-controls">
-            <input type="text" placeholder="🔍 Tìm kiếm tên lô hồ sơ...">
-            <div style="font-size: 14px; color: #555;">Dữ liệu được lưu trữ an toàn trên trình duyệt của bạn.</div>
+            <div>
+                <strong style="font-size: 14px; margin-right: 10px;">Lọc nghiệp vụ:</strong>
+                <select id="filterType" onchange="loadHistory()" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+                    <option value="all">Tất cả các loại</option>
+                    <option value="Bản nhận xét Đảng viên">Bản nhận xét Đảng viên</option>
+                    <option value="Nghị quyết giới thiệu">Nghị quyết giới thiệu</option>
+                </select>
+            </div>
+            <div style="font-size: 14px; color: #555;">Dữ liệu lưu nội bộ 100% không cần tải lên Cloud.</div>
         </div>
 
-        <!-- BẢNG LỊCH SỬ -->
         <table class="history-table">
             <thead>
                 <tr>
                     <th style="width: 5%; text-align: center;">STT</th>
                     <th style="width: 15%;">Thời gian tạo</th>
-                    <th style="width: 30%;">Tên lô hồ sơ (Tệp ZIP)</th>
+                    <th style="width: 25%;">Tên lô hồ sơ (Tệp ZIP)</th>
                     <th style="width: 20%;">Loại nghiệp vụ</th>
                     <th style="width: 10%; text-align: center;">Số lượng</th>
-                    <th style="width: 20%; text-align: center;">Trạng thái</th>
+                    <th style="width: 10%; text-align: center;">Trạng thái</th>
+                    <th style="width: 15%; text-align: center;">Thao tác</th>
                 </tr>
             </thead>
             <tbody id="historyBody">
-                <!-- Dữ liệu sẽ được Javascript nhồi vào đây tự động -->
-            </tbody>
+                </tbody>
         </table>
     </div>
 
@@ -77,20 +87,22 @@
         </div>
     </footer>
 
-    <!-- SCRIPT XỬ LÝ LOCAL STORAGE -->
     <script>
-        // Hàm load dữ liệu khi mở trang
         function loadHistory() {
             const historyBody = document.getElementById('historyBody');
-            const historyData = JSON.parse(localStorage.getItem('yumHistory')) || [];
+            const filterValue = document.getElementById('filterType').value;
+            let historyData = JSON.parse(localStorage.getItem('yumHistory')) || [];
 
-            // Nếu chưa có lịch sử nào
+            // Lọc dữ liệu theo Dropdown
+            if (filterValue !== 'all') {
+                historyData = historyData.filter(item => item.type === filterValue);
+            }
+
             if (historyData.length === 0) {
-                historyBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 30px;">Chưa có lịch sử tạo văn bản nào được ghi nhận trên thiết bị này.</td></tr>`;
+                historyBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">Không tìm thấy lịch sử tạo văn bản nào phù hợp.</td></tr>`;
                 return;
             }
 
-            // Nếu có dữ liệu, nhồi từng dòng vào bảng
             historyBody.innerHTML = '';
             historyData.forEach((item, index) => {
                 const tr = document.createElement('tr');
@@ -101,20 +113,38 @@
                     <td>${item.type}</td>
                     <td style="text-align: center;">${item.count}</td>
                     <td style="text-align: center;"><span class="badge-status">${item.status}</span></td>
+                    <td style="text-align: center;">
+                        <button class="btn-download-sm" onclick="downloadOldFile('${item.id}', '${item.fileName}')">⬇️ Tải lại</button>
+                    </td>
                 `;
                 historyBody.appendChild(tr);
             });
         }
 
-        // Hàm xóa lịch sử
-        function clearHistory() {
-            if(confirm("Đồng chí có chắc chắn muốn xóa toàn bộ lịch sử trên thiết bị này không?")) {
-                localStorage.removeItem('yumHistory');
-                loadHistory(); // Load lại bảng cho trống
+        // HÀM TẢI LẠI FILE TỪ Ổ ĐĨA ẢO INDEXED_DB
+        async function downloadOldFile(fileId, fileName) {
+            try {
+                const blob = await localforage.getItem(fileId);
+                if (blob) {
+                    saveAs(blob, fileName); // Bung file ra tải về máy
+                } else {
+                    alert('Xin lỗi, tệp tin này đã bị xóa hoặc không còn tồn tại trong bộ nhớ cache của trình duyệt!');
+                }
+            } catch (err) {
+                alert('Có lỗi xảy ra khi truy xuất file!');
+                console.error(err);
             }
         }
 
-        // Tự động chạy hàm loadHistory khi trang web vừa tải xong
+        // HÀM XÓA SẠCH LỊCH SỬ VÀ GIẢI PHÓNG BỘ NHỚ FILE
+        async function clearHistory() {
+            if(confirm("Đồng chí có chắc chắn muốn xóa toàn bộ lịch sử và giải phóng bộ nhớ không? Hành động này không thể hoàn tác!")) {
+                localStorage.removeItem('yumHistory');
+                await localforage.clear(); // Xóa sạch các file ZIP đã lưu
+                loadHistory();
+            }
+        }
+
         window.onload = loadHistory;
     </script>
 </body>
