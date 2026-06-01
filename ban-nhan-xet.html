@@ -3,251 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống YUMOFFICE - Bản Nhận Xét</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Tạo Bản Nhận Xét - HUST Portal</title>
+    <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://unpkg.com/docxtemplater@3.37.11/build/docxtemplater.js"></script>
     <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-
-    <style>
-        /* RESET & CƠ BẢN */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: #f4f7f6; color: #333; line-height: 1.6; }
-        a { text-decoration: none; }
-
-        /* HEADER TONE ĐỎ BÁCH KHOA */
-        header {
-            background: linear-gradient(135deg, #ce1616 0%, #a10f0f 100%);
-            color: white;
-            padding: 15px 5%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        header h1 { font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-
-        /* THANH ĐIỀU HƯỚNG */
-        nav {
-            background-color: #ffffff;
-            display: flex;
-            justify-content: center;
-            padding: 12px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 40px;
-        }
-        nav a {
-            color: #555;
-            font-weight: 600;
-            margin: 0 20px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-        nav a:hover { color: #ce1616; background-color: #fff0f0; }
-
-        /* CONTAINER & CARD */
-        .container { max-width: 850px; margin: 0 auto; padding: 0 20px; }
-        .card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            margin-bottom: 50px;
-        }
-        .card h2 {
-            color: #ce1616;
-            font-size: 28px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .card p.subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 35px;
-            font-size: 15px;
-        }
-
-        /* KHU VỰC TẢI FILE (UPLOAD BOX) */
-        .upload-wrapper { display: flex; gap: 20px; margin-bottom: 30px; }
-        @media (max-width: 768px) { .upload-wrapper { flex-direction: column; } }
-        
-        .upload-box {
-            flex: 1;
-            border: 2px dashed #cbd5e1;
-            border-radius: 10px;
-            padding: 30px 20px;
-            text-align: center;
-            position: relative;
-            background-color: #f8fafc;
-            transition: all 0.3s ease;
-        }
-        .upload-box:hover { border-color: #ce1616; background-color: #fff5f5; }
-        
-        /* Box Word có viền đỏ nhẹ, Box Excel có viền xanh nhẹ */
-        .upload-box.word-box:hover { border-color: #ce1616; background-color: #fff5f5; }
-        .upload-box.excel-box:hover { border-color: #0056b3; background-color: #f0f8ff; }
-
-        .upload-box input[type="file"] {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; cursor: pointer;
-        }
-        .upload-icon { font-size: 40px; margin-bottom: 10px; }
-        .upload-title { font-weight: 700; color: #333; margin-bottom: 5px; font-size: 16px; }
-        .upload-desc { font-size: 13px; color: #777; }
-        .file-name-display {
-            margin-top: 15px; font-size: 14px; font-weight: 600; color: #ce1616;
-            word-break: break-all;
-        }
-
-        /* NÚT BẤM XỬ LÝ */
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #ce1616, #e72222);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(206, 22, 22, 0.3);
-        }
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(206, 22, 22, 0.5);
-        }
-        .btn-submit:active { transform: translateY(1px); }
-
-        /* HỘP TRẠNG THÁI */
-        #status {
-            margin-top: 25px;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 15px;
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* FOOTER */
-        footer {
-            background-color: #1e293b;
-            color: #e2e8f0;
-            padding: 40px 5%;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 20px;
-        }
-        .footer-col { flex: 1; min-width: 250px; }
-        .footer-col h4 { color: #fff; margin-bottom: 15px; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;}
-        .footer-col ul { list-style: none; }
-        .footer-col ul li { margin-bottom: 10px; font-size: 14px; color: #cbd5e1; }
-    </style>
 </head>
 <body>
-
-    <header>
-        <h1>Đoàn Thanh Niên Đại Học Bách Khoa Hà Nội</h1>
-    </header>
-    
-    <nav>
-        <a href="index.html">Trang chủ</a>
-        <a href="ban-nhan-xet.html" style="color: #ce1616; background-color: #fff0f0;">Tạo Bản Nhận Xét</a>
-        <a href="#">Nghị quyết</a>
-    </nav>
-
-    <div class="container">
-        <div class="card">
-            <h2>Hệ Thống Sinh Bản Nhận Xét Tự Động</h2>
-            <p class="subtitle">Đóng gói hàng loạt hồ sơ sang định dạng ZIP với độ chính xác 100%.</p>
-
-            <div class="upload-wrapper">
-                <div class="upload-box word-box">
-                    <input type="file" id="wordFile" accept=".docx">
-                    <div class="upload-icon">📄</div>
-                    <div class="upload-title">Tải lên Mẫu Word (.docx)</div>
-                    <div class="upload-desc">Sử dụng biến ngoặc vuông: [[HoTen]]</div>
-                    <div id="wordFileName" class="file-name-display">Chưa chọn tệp nào</div>
-                </div>
-
-                <div class="upload-box excel-box">
-                    <input type="file" id="excelFile" accept=".xlsx">
-                    <div class="upload-icon">📊</div>
-                    <div class="upload-title">Tải lên Dữ liệu Excel (.xlsx)</div>
-                    <div class="upload-desc">Danh sách sinh viên tự động lọc rác</div>
-                    <div id="excelFileName" class="file-name-display" style="color: #0056b3;">Chưa chọn tệp nào</div>
+    <!-- TOP HEADER -->
+    <header class="top-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <!-- Sử dụng logo Bách khoa gốc nếu có, ở đây dùng text mô phỏng -->
+                <div class="logo-text">
+                    <h1>ĐẠI HỌC BÁCH KHOA HÀ NỘI</h1>
+                    <p>HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY</p>
                 </div>
             </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button>🔍</button>
+                </div>
+                <div class="action-buttons">
+                    <a href="#" class="btn-red">ĐĂNG NHẬP</a>
+                    <a href="#" class="btn-dark-red">HỆ THỐNG YUMOFFICE</a>
+                </div>
+            </div>
+        </div>
+    </header>
 
-            <button class="btn-submit" onclick="processData()">Khởi Tạo & Tải Xuống Hồ Sơ</button>
-            
-            <div id="status"></div>
+    <!-- MAIN NAVBAR -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html">TRANG CHỦ</a>
+            <a href="#">THÔNG BÁO</a>
+            <a href="#">QUY ĐỊNH</a>
+            <a href="ban-nhan-xet.html" class="active">BẢN NHẬN XÉT</a>
+            <a href="#">DỊCH VỤ</a>
+            <a href="#">TRA CỨU</a>
+            <a href="#">LIÊN HỆ</a>
+        </div>
+    </nav>
+
+    <!-- SUB NAVBAR TONE ĐỎ -->
+    <div class="sub-nav">
+        <div class="sub-nav-container">
+            <a href="#" class="active">Tạo tự động</a>
+            <a href="#">Lịch sử xuất</a>
+            <a href="#">Quản lý mẫu</a>
+            <a href="#">Hướng dẫn sử dụng</a>
         </div>
     </div>
 
+    <!-- MAIN CONTENT AREA -->
+    <div class="content-wrapper">
+        <h2 class="section-title">HỆ THỐNG TẠO BẢN NHẬN XÉT ĐẢNG VIÊN</h2>
+        
+        <div class="tool-description">
+            <p>Hệ thống tự động điền dữ liệu từ file Excel vào file Word mẫu, đóng gói thành tệp ZIP chuẩn định dạng. Đảm bảo chính xác 100%.</p>
+        </div>
+
+        <div class="upload-grid">
+            <!-- Box Word -->
+            <div class="upload-box" onclick="document.getElementById('wordFile').click()">
+                <div class="box-icon">📄</div>
+                <div class="box-title">TẢI LÊN MẪU WORD (.DOCX)</div>
+                <div class="box-desc">File mẫu sử dụng biến [[STT]], [[HoTen]]...</div>
+                <input type="file" id="wordFile" accept=".docx" style="display: none;">
+                <div id="wordFileName" class="file-name">Chưa có tệp nào được chọn</div>
+            </div>
+
+            <!-- Box Excel -->
+            <div class="upload-box" onclick="document.getElementById('excelFile').click()">
+                <div class="box-icon">📊</div>
+                <div class="box-title">TẢI LÊN DỮ LIỆU EXCEL (.XLSX)</div>
+                <div class="box-desc">Hệ thống tự động bỏ qua dòng trống/lỗi</div>
+                <input type="file" id="excelFile" accept=".xlsx" style="display: none;">
+                <div id="excelFileName" class="file-name">Chưa có tệp nào được chọn</div>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button class="btn-submit" onclick="processData()">XỬ LÝ & TẢI XUỐNG TỆP ZIP</button>
+        </div>
+
+        <!-- Trạng thái -->
+        <div id="statusBox" class="status-message"></div>
+    </div>
+
+    <!-- FOOTER -->
     <footer>
-        <div class="footer-col">
-            <h4 style="color: #ce1616; font-weight: 800;">YUMOFFICE</h4>
-            <p style="font-size: 14px; color: #94a3b8;">Hệ thống hỗ trợ nghiệp vụ tự động hóa dành riêng cho cán bộ Đoàn - Hội.</p>
-        </div>
-        <div class="footer-col">
-            <h4>Giới thiệu</h4>
-            <ul>
-                <li>Về Đoàn Thanh niên Bách khoa</li>
-                <li>Đội ngũ phát triển hệ thống</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Liên hệ</h4>
-            <ul>
-                <li>📍 C1-226, Đại học Bách khoa Hà Nội</li>
-                <li>📧 DTN@hust.edu.vn</li>
-            </ul>
+        <div class="footer-content">
+            <p><strong>Bản quyền thuộc về Đại học Bách Khoa Hà Nội</strong></p>
+            <p>Địa chỉ: Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
+            <p>Phát triển bởi: Hệ thống YUMOFFICE - Văn phòng Đoàn Thanh niên</p>
         </div>
     </footer>
 
+    <!-- SCRIPT XỬ LÝ (Giữ nguyên lõi ngoặc vuông [[ ]] và Trợ lý dò lỗi) -->
     <script>
-        // Hiển thị tên file khi người dùng tải lên
+        // Hiển thị tên file
         document.getElementById('wordFile').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : "Chưa chọn tệp nào";
-            document.getElementById('wordFileName').innerText = fileName;
+            document.getElementById('wordFileName').innerText = e.target.files[0] ? e.target.files[0].name : "Chưa có tệp nào được chọn";
+            document.getElementById('wordFileName').style.color = "#a81c1c";
         });
-
         document.getElementById('excelFile').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : "Chưa chọn tệp nào";
-            document.getElementById('excelFileName').innerText = fileName;
+            document.getElementById('excelFileName').innerText = e.target.files[0] ? e.target.files[0].name : "Chưa có tệp nào được chọn";
+            document.getElementById('excelFileName').style.color = "#a81c1c";
         });
 
-        // Hàm hiển thị trạng thái xử lý
         function showStatus(message, type) {
-            const statusBox = document.getElementById('status');
+            const statusBox = document.getElementById('statusBox');
             statusBox.style.display = 'block';
             statusBox.innerHTML = message;
-            if (type === 'error') {
-                statusBox.style.backgroundColor = '#ffe6e6';
-                statusBox.style.color = '#cc0000';
-                statusBox.style.border = '1px solid #cc0000';
-            } else if (type === 'success') {
-                statusBox.style.backgroundColor = '#e6ffe6';
-                statusBox.style.color = '#008000';
-                statusBox.style.border = '1px solid #008000';
-            } else {
-                statusBox.style.backgroundColor = '#e6f2ff';
-                statusBox.style.color = '#0056b3';
-                statusBox.style.border = '1px solid #0056b3';
-            }
+            statusBox.className = 'status-message ' + type;
         }
 
         function parseDate(raw) {
@@ -255,9 +128,7 @@
             let str = String(raw).split(',')[0].split(' ')[0].trim();
             let parts = str.split(/[.\/-]/); 
             if (parts.length >= 3) {
-                let d = parts[0].padStart(2, '0');
-                let m = parts[1].padStart(2, '0');
-                let y = parts[2];
+                let d = parts[0].padStart(2, '0'); let m = parts[1].padStart(2, '0'); let y = parts[2];
                 if (y.length === 2) y = "20" + y;
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
@@ -265,17 +136,13 @@
         }
 
         function evaluateHocTap(gpa) {
-            if (gpa < 2.5) return "trung bình";
-            if (gpa <= 3.2) return "khá";
-            if (gpa <= 3.6) return "tốt";
-            return "xuất sắc";
+            if (gpa < 2.5) return "trung bình"; if (gpa <= 3.2) return "khá";
+            if (gpa <= 3.6) return "tốt"; return "xuất sắc";
         }
 
         function evaluateRenLuyen(drl) {
-            if (drl < 65) return "trung bình";
-            if (drl <= 80) return "khá";
-            if (drl <= 90) return "tốt";
-            return "xuất sắc";
+            if (drl < 65) return "trung bình"; if (drl <= 80) return "khá";
+            if (drl <= 90) return "tốt"; return "xuất sắc";
         }
 
         function evaluateKhuyetDiem(gpa, drl) {
@@ -292,9 +159,7 @@
         function getColValue(rowObj, possibleKeys) {
             for (let key in rowObj) {
                 let normalizedKey = removeAccents(key).toLowerCase().replace(/[^a-z0-9]/g, '');
-                for (let pKey of possibleKeys) {
-                    if (normalizedKey.includes(pKey)) return rowObj[key];
-                }
+                for (let pKey of possibleKeys) { if (normalizedKey.includes(pKey)) return rowObj[key]; }
             }
             return "";
         }
@@ -304,11 +169,11 @@
             const excelInput = document.getElementById('excelFile');
 
             if (!wordInput.files.length || !excelInput.files.length) {
-                showStatus("⚠️ Vui lòng tải lên ĐẦY ĐỦ cả file Word mẫu và file Excel!", "error");
+                showStatus("⚠️ Vui lòng tải lên ĐẦY ĐỦ cả file Word và file Excel!", "error");
                 return;
             }
 
-            showStatus("⏳ Đang xử lý dữ liệu và đóng gói ZIP... Vui lòng đợi!", "info");
+            showStatus("Đang xử lý dữ liệu và đóng gói ZIP... Vui lòng đợi!", "info");
 
             try {
                 const wordBuffer = await wordInput.files[0].arrayBuffer();
@@ -326,8 +191,7 @@
                             if (!rows[i]) continue;
                             const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
                             if (rowText.includes('hoten') || rowText.includes('hovaten')) {
-                                headerRowIndex = i;
-                                break;
+                                headerRowIndex = i; break;
                             }
                         }
 
@@ -375,18 +239,22 @@
 
                             const zip = new PizZip(wordBuffer);
                             
-                            // Chỉ định thư viện đọc dấu [[ ]]
+                            for (let fileName in zip.files) {
+                                if (fileName.endsWith('.xml')) {
+                                    let xml = zip.files[fileName].asText();
+                                    xml = xml.replace(/<w:proofErr[^>]*>/g, '');
+                                    zip.file(fileName, xml);
+                                }
+                            }
+
                             const doc = new window.docxtemplater(zip, { 
-                                paragraphLoop: true, 
-                                linebreaks: true,
-                                delimiters: { start: '[[', end: ']]' }
+                                paragraphLoop: true, linebreaks: true, delimiters: { start: '[[', end: ']]' } 
                             });
                             
                             doc.render(stData);
 
                             const docOutput = doc.getZip().generate({
-                                type: "blob",
-                                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             });
                             
                             const safeFileName = removeAccents(HoTen).replace(/[^a-zA-Z0-9]/g, '_');
@@ -395,18 +263,22 @@
                         }
 
                         const content = await outZip.generateAsync({type:"blob"});
-                        saveAs(content, "Ho_So_Ban_Nhan_Xet_Hoan_Thanh.zip");
+                        saveAs(content, "Ho_So_Ban_Nhan_Xet.zip");
                         
-                        showStatus(`🎉 THÀNH CÔNG! Đã đóng gói xong ${validStudents.length} file Bản nhận xét. File ZIP đang được tải xuống.`, "success");
+                        showStatus(`🎉 THÀNH CÔNG! Đã đóng gói xong ${validStudents.length} file Bản nhận xét.`, "success");
 
                     } catch (error) {
                         console.error(error);
-                        showStatus("❌ Lỗi khi xử lý file: " + error.message, "error");
+                        let msg = error.message;
+                        if (error.properties && error.properties.errors) {
+                            msg = `⚠️ BẠN ĐANG GÕ SAI HOẶC DƯ DẤU [[ ]] TRONG FILE WORD!<br>Vui lòng kiểm tra lại các biến và tải lên lại.`;
+                        }
+                        showStatus(msg, "error");
                     }
                 };
                 excelReader.readAsArrayBuffer(excelInput.files[0]);
             } catch (err) {
-                showStatus("❌ Đã xảy ra lỗi hệ thống: " + err.message, "error");
+                showStatus("Đã xảy ra lỗi hệ thống: " + err.message, "error");
             }
         }
     </script>
