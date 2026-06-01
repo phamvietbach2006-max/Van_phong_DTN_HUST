@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://unpkg.com/docxtemplater@3.37.11/build/docxtemplater.js"></script>
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
 <body>
@@ -24,15 +27,15 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét Tự Động</h2>
-            <p><em>Hệ thống xuất văn bản gốc - Chuẩn từng mm lề, thò thụt và in đậm theo file Word gốc.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét (Phiên Bản ZIP Hồ Sơ)</h2>
+            <p><em>Hệ thống tự động tạo từng file Word riêng cho mỗi cá nhân và nén thành 1 file ZIP. Không cần thẻ vòng lặp.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
                 <input type="file" id="excelFile" accept=".xlsx">
             </div>
 
-            <button onclick="processData()" style="padding: 12px 24px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 16px;">Xử lý & Tải xuống Bản Nhận Xét</button>
+            <button onclick="processData()" style="padding: 12px 24px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 16px;">Xử lý & Tải xuống tệp ZIP</button>
             <p id="status" style="margin-top: 20px; font-weight: bold;"></p>
         </div>
     </div>
@@ -108,7 +111,7 @@
             return "";
         }
 
-        function processData() {
+        async function processData() {
             const excelInput = document.getElementById('excelFile');
             const statusLabel = document.getElementById('status');
 
@@ -117,174 +120,128 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang tạo văn bản chuẩn xác... Vui lòng đợi!";
+            statusLabel.innerText = "Đang tạo hồ sơ ZIP... Vui lòng đợi trong giây lát!";
             statusLabel.style.color = "blue";
 
-            const excelReader = new FileReader();
-            excelReader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
-                    
-                    let headerRowIndex = -1;
-                    for (let i = 0; i < rows.length; i++) {
-                        if (!rows[i]) continue;
-                        const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
-                        if (rowText.includes('hoten') || rowText.includes('hovaten') || rowText.includes('masosinhvien')) {
-                            headerRowIndex = i;
-                            break;
-                        }
-                    }
+            try {
+                // Tải file Word gốc
+                const templateResponse = await fetch('Mau_Ban_Nhan_Xet.docx?v=' + new Date().getTime());
+                if (!templateResponse.ok) throw new Error("Không tải được file Mau_Ban_Nhan_Xet.docx trên máy chủ.");
+                const templateArrayBuffer = await templateResponse.arrayBuffer();
 
-                    if (headerRowIndex === -1) throw new Error("Không tìm thấy dòng tiêu đề 'Họ tên' trong Excel!");
-
-                    const headers = rows[headerRowIndex];
-                    const validStudents = [];
-
-                    for (let i = headerRowIndex + 1; i < rows.length; i++) {
-                        const rowData = rows[i];
-                        if (!rowData || rowData.length === 0) continue;
+                const excelReader = new FileReader();
+                excelReader.onload = async function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
                         
-                        let rowObj = {};
-                        headers.forEach((h, index) => {
-                            if (h) rowObj[h] = rowData[index];
-                        });
-
-                        let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
-                        let normalizedName = name ? removeAccents(String(name)).toLowerCase() : "";
-                        
-                        if (name && normalizedName.trim() !== "" && !normalizedName.includes('dong y')) {
-                            validStudents.push(rowObj);
-                        }
-                    }
-
-                    if (validStudents.length === 0) throw new Error("Không có dữ liệu sinh viên hợp lệ!");
-
-                    let wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                    <head>
-                        <meta charset='utf-8'>
-                        <style>
-                            @page WordSection1 { 
-                                size: 21.0cm 29.7cm; 
-                                margin: 2.0cm 2.0cm 2.0cm 3.0cm; 
-                                mso-header-margin: 35.4pt; 
-                                mso-footer-margin: 35.4pt; 
-                                mso-paper-source: 0; 
+                        let headerRowIndex = -1;
+                        for (let i = 0; i < rows.length; i++) {
+                            if (!rows[i]) continue;
+                            const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
+                            if (rowText.includes('hoten') || rowText.includes('hovaten') || rowText.includes('masosinhvien')) {
+                                headerRowIndex = i;
+                                break;
                             }
-                            div.WordSection1 { page: WordSection1; }
-                            body { font-family: "Times New Roman", serif; font-size: 14pt; color: #000000; }
-                        </style>
-                    </head>
-                    <body>
-                    <div class="WordSection1">`;
-
-                    validStudents.forEach((row, index) => {
-                        const gpa = parseFloat(getColValue(row, ['tb2ky', 'gpa', 'trungbinh'])) || 0;
-                        let drlStr = String(getColValue(row, ['diemrenluyen', 'renluyen', 'drl']));
-                        let drlMatch = drlStr.match(/\d+/);
-                        const drl = drlMatch ? parseFloat(drlMatch[0]) : 0;
-                        
-                        const STT = getColValue(row, ['sobnx', 'bnx', 'stt']) || "";
-                        const ThoiGianRaw = getColValue(row, ['ngayhopdoan', 'lcd', 'uv', 'ngayhop']);
-                        const ThoiGian = parseDate(ThoiGianRaw) || "ngày ...... tháng ...... năm 2026";
-                        const TenChiBo = getColValue(row, ['chibo']) || "......................";
-                        const TenDoanTruong = getColValue(row, ['doantruong', 'lienchi']) || "......................";
-                        const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "......................";
-                        
-                        const tg_tu_den = getColValue(row, ['thoigian']);
-                        const ThoiGianKhaoSat = tg_tu_den ? ` từ ${tg_tu_den} ` : " ";
-
-                        const NangLuc = `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`;
-                        const KhuyetDiem = evaluateKhuyetDiem(gpa, drl);
-                        const STT_display = STT ? STT : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-
-                        // SỬ DỤNG ÉP KIỂU INLINE CSS DÀNH RIÊNG CHO WORD MSO
-                        wordContent += `
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12pt; border: none; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-                            <tr>
-                                <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; text-align: center; font-size: 13pt;">THÀNH ĐOÀN HÀ NỘI</p>
-                                    <p style="margin: 0; text-align: center; font-size: 13pt; font-weight: bold;">BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</p>
-                                    <p style="margin: 0; text-align: center; font-size: 13pt;">***</p>
-                                    <p style="margin: 0; text-align: center; font-size: 13pt;">Số: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${STT_display}-BNX/ĐTN</p>
-                                </td>
-                                <td style="width: 55%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; text-align: center; font-size: 13pt; font-weight: bold;"><u>ĐOÀN TNCS HỒ CHÍ MINH</u></p>
-                                    <p style="margin: 0; text-align: center; font-size: 13pt;">&nbsp;</p>
-                                    <p style="margin: 0; text-align: center; font-size: 13pt; font-style: italic;">Hà Nội, ngày&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tháng&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;năm 2026</p>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <p style="margin: 12pt 0 0 0; text-align: center; font-weight: bold; font-size: 14pt;">BẢN NHẬN XÉT</p>
-                        <p style="margin: 0 0 12pt 0; text-align: center; font-weight: bold; font-size: 14pt;">KẾT QUẢ PHẤN ĐẤU CỦA ĐẢNG VIÊN DỰ BỊ</p>
-
-                        <table style="width: 100%; margin-bottom: 6pt; border: none; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-                            <tr>
-                                <td style="width: 2.8cm; padding-left: 1.27cm; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; font-style: italic; font-size: 14pt;">Kính gửi:</p>
-                                </td>
-                                <td style="vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; font-size: 14pt;">- Chi ủy Chi bộ Sinh viên ${TenChiBo};</p>
-                                    <p style="margin: 0; font-size: 14pt;">- Đảng uỷ Đại học Bách khoa Hà Nội.</p>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">Căn cứ Điểm 1, Điều 4, Chương I Điều lệ Đảng Cộng Sản Việt Nam về thủ tục, quyền hạn của BCH Đoàn cơ sở giới thiệu Đoàn viên ưu tú cho Đảng.</p>
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">Căn cứ Điểm 1, Điều 5, Chương I Điều lệ Đảng Cộng Sản Việt Nam quy định về thời kỳ dự bị đối với người được kết nạp Đảng.</p>
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">Căn cứ Bản Nhận xét số ${STT}-BNX/ĐTN ${ThoiGian} của ${TenDoanTruong};</p>
-
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">Ban Thường vụ Đoàn TNCS Hồ Chí Minh Đại học Bách khoa Hà Nội xin báo cáo với Chi bộ và Đảng ủy Đại học những vấn đề chủ yếu về Đảng viên dự bị ${HoTen}${ThoiGianKhaoSat}như sau:</p>
-                        
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">- <span style="font-weight: bold;">Ưu điểm:</span></p>
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">+ Phẩm chất chính trị: Có phẩm chất chính trị vững vàng, chấp hành và thực hiện đúng chủ trương đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Nhà trường, của tổ chức Đoàn.</p>
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">+ Đạo đức lối sống: Có phẩm chất đạo đức tốt, có lối sống lành mạnh, trong sáng, thật thà, giản dị. Sống nghiêm túc và có trách nhiệm với bản thân, gia đình, xã hội. Có ý thức đoàn kết xây dựng tập thể.</p>
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">+ Năng lực công tác: ${NangLuc}, có tinh thần học để nâng cao trình độ chuyên môn. ${KhuyetDiem}</p>
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">+ Quan hệ quần chúng: Sống hòa nhã với mọi người, sẵn sàng giúp đỡ bạn bè, đồng chí. Tôn trọng và biết lắng nghe ý kiến của người khác, giữ gìn sự đoàn kết của tập thể.</p>
-
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;"><span style="font-weight: bold;">- Khuyết điểm và những vấn đề cần lưu ý :</span> Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình.</p>
-                        
-                        <p style="margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">Đối chiếu với các tiêu chuẩn Đảng viên và kết quả phấn đấu rèn luyện của đồng chí, chúng tôi đề nghị Chi bộ xét chuyển Đảng chính thức cho đồng chí ${HoTen} với sự tán thành của 09/09 đ/c Thường vụ dự họp.</p>
-
-                        <p style="margin: 6pt 0 12pt 0; text-align: justify; text-indent: 1.27cm; line-height: 1.15; font-size: 14pt;">Chúng tôi xin chịu trách nhiệm trước Đảng về lời nhận xét của mình.</p>
-
-                        <table style="width: 100%; border: none; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-                            <tr>
-                                <td style="width: 50%; vertical-align: top; padding: 0; padding-left: 1.27cm;">
-                                    <p style="margin: 0; font-size: 12pt; font-weight: bold; font-style: italic; text-decoration: underline;">Nơi nhận:</p>
-                                    <p style="margin: 0; font-size: 12pt;">- Như kính gửi;</p>
-                                    <p style="margin: 0; font-size: 12pt;">- Lưu VP.</p>
-                                </td>
-                                <td style="width: 50%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p style="margin: 0; font-weight: bold; text-align: center; font-size: 14pt;">TM. BAN THƯỜNG VỤ ĐOÀN ĐẠI HỌC</p>
-                                </td>
-                            </tr>
-                        </table>
-                        `;
-
-                        if (index < validStudents.length - 1) {
-                            wordContent += `<br clear="all" style="mso-special-character:line-break;page-break-before:always" />`;
                         }
-                    });
 
-                    wordContent += `</div></body></html>`;
+                        if (headerRowIndex === -1) throw new Error("Không tìm thấy dòng tiêu đề 'Họ tên' trong file Excel!");
 
-                    const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
-                    saveAs(blob, "Ban_Nhan_Xet_TCKT_Chuan_Word.doc");
-                    
-                    statusLabel.innerText = `Hoàn hảo! Đã xuất thành công ${validStudents.length} bản. Lề và font đã được khóa cứng theo chuẩn Microsoft Word.`;
-                    statusLabel.style.color = "green";
+                        const headers = rows[headerRowIndex];
+                        const validStudents = [];
 
-                } catch (error) {
-                    console.error(error);
-                    statusLabel.innerText = "Lỗi xử lý: " + error.message;
-                    statusLabel.style.color = "red";
-                }
-            };
-            excelReader.readAsArrayBuffer(excelInput.files[0]);
+                        for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                            const rowData = rows[i];
+                            if (!rowData || rowData.length === 0) continue;
+                            
+                            let rowObj = {};
+                            headers.forEach((h, index) => {
+                                if (h) rowObj[h] = rowData[index];
+                            });
+
+                            let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
+                            let normalizedName = name ? removeAccents(String(name)).toLowerCase() : "";
+                            
+                            // Lọc bỏ dòng trống và dòng "đồng ý"
+                            if (name && normalizedName.trim() !== "" && !normalizedName.includes('dong y')) {
+                                validStudents.push(rowObj);
+                            }
+                        }
+
+                        if (validStudents.length === 0) throw new Error("Không có dữ liệu sinh viên hợp lệ!");
+
+                        // Khởi tạo file ZIP đóng gói
+                        const outZip = new JSZip();
+
+                        // Lặp qua từng sinh viên, tạo ra 1 file Word riêng
+                        for (let index = 0; index < validStudents.length; index++) {
+                            const row = validStudents[index];
+                            const gpa = parseFloat(getColValue(row, ['tb2ky', 'gpa', 'trungbinh'])) || 0;
+                            let drlStr = String(getColValue(row, ['diemrenluyen', 'renluyen', 'drl']));
+                            let drlMatch = drlStr.match(/\d+/);
+                            const drl = drlMatch ? parseFloat(drlMatch[0]) : 0;
+                            
+                            const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "Sinh_Vien";
+
+                            // Dữ liệu độc lập cho MỘT sinh viên (Không dùng mảng nữa)
+                            const stData = {
+                                STT: getColValue(row, ['sobnx', 'bnx', 'stt']) || "....",
+                                ThoiGian: parseDate(getColValue(row, ['ngayhopdoan', 'lcd', 'uv', 'ngayhop'])) || "ngày......tháng......năm 2026",
+                                TenChiBo: getColValue(row, ['chibo']) || "......................",
+                                TenDoanTruong: getColValue(row, ['doantruong', 'lienchi']) || "......................",
+                                HoTen: HoTen,
+                                NangLuc: `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`,
+                                KhuyetDiem: evaluateKhuyetDiem(gpa, drl)
+                            };
+
+                            const zip = new PizZip(templateArrayBuffer);
+
+                            // THUỐC GIẢI XML
+                            for (let fileName in zip.files) {
+                                if (fileName.endsWith('.xml')) {
+                                    let xml = zip.files[fileName].asText();
+                                    xml = xml.replace(/<w:proofErr[^>]*>/g, '');
+                                    xml = xml.replace(/<\/w:proofErr>/g, '');
+                                    zip.file(fileName, xml);
+                                }
+                            }
+
+                            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+                            doc.render(stData); // Nạp thẳng Object thay vì Array
+
+                            const docOutput = doc.getZip().generate({
+                                type: "blob",
+                                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            });
+                            
+                            // Tạo tên file an toàn (Không dấu, thay khoảng trắng bằng dấu gạch dưới)
+                            const safeFileName = removeAccents(HoTen).replace(/[^a-zA-Z0-9]/g, '_');
+                            const docName = `BNX_${String(index + 1).padStart(2, '0')}_${safeFileName}.docx`;
+                            
+                            // Đưa file Word vào trong file ZIP
+                            outZip.file(docName, docOutput);
+                        }
+
+                        // Xuất và tải file ZIP về máy
+                        const content = await outZip.generateAsync({type:"blob"});
+                        saveAs(content, "Danh_Sach_Ban_Nhan_Xet.zip");
+                        
+                        statusLabel.innerText = `Thành công! Đã đóng gói ${validStudents.length} bản nhận xét vào file ZIP.`;
+                        statusLabel.style.color = "green";
+
+                    } catch (error) {
+                        console.error(error);
+                        statusLabel.innerText = "Lỗi xử lý: " + error.message;
+                        statusLabel.style.color = "red";
+                    }
+                };
+                excelReader.readAsArrayBuffer(excelInput.files[0]);
+            } catch (err) {
+                statusLabel.innerText = "Đã xảy ra lỗi: " + err.message;
+                statusLabel.style.color = "red";
+            }
         }
     </script>
 </body>
