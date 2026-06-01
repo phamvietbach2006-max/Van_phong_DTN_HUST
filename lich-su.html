@@ -88,7 +88,68 @@
         </div>
     </footer>
 
+    <div id="customModalOverlay" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modalTitle" class="modal-title">Thông báo</div>
+            <div id="modalMessage" class="modal-message">Nội dung thông báo</div>
+            
+            <input type="text" id="modalInput" class="modal-input" placeholder="Gõ xác nhận vào đây..." autocomplete="off">
+            
+            <div class="modal-buttons">
+                <button id="modalCancelBtn" class="btn-modal btn-modal-cancel">Hủy</button>
+                <button id="modalConfirmBtn" class="btn-modal btn-modal-confirm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- HỆ THỐNG ĐIỀU KHIỂN CỬA SỔ NỔI (Thay thế alert & prompt) ---
+        function showCustomModal(options) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('customModalOverlay');
+                const titleEl = document.getElementById('modalTitle');
+                const msgEl = document.getElementById('modalMessage');
+                const inputEl = document.getElementById('modalInput');
+                const confirmBtn = document.getElementById('modalConfirmBtn');
+                const cancelBtn = document.getElementById('modalCancelBtn');
+
+                // Cài đặt nội dung
+                titleEl.innerHTML = options.title || 'Thông báo';
+                msgEl.innerHTML = options.message || '';
+                confirmBtn.innerHTML = options.confirmText || 'Đồng ý';
+                
+                // Cài đặt loại Modal (Nhập liệu hay Chỉ thông báo)
+                if (options.type === 'prompt') {
+                    inputEl.style.display = 'block';
+                    inputEl.value = '';
+                    cancelBtn.style.display = 'inline-block';
+                } else {
+                    inputEl.style.display = 'none';
+                    cancelBtn.style.display = 'none'; // Alert chỉ cần 1 nút đóng
+                }
+
+                // Hiển thị modal
+                overlay.style.display = 'flex';
+                
+                // Tự động focus vào ô nhập nếu là prompt
+                if (options.type === 'prompt') {
+                    setTimeout(() => inputEl.focus(), 100);
+                }
+
+                // Bắt sự kiện bấm nút
+                confirmBtn.onclick = function() {
+                    overlay.style.display = 'none';
+                    resolve(options.type === 'prompt' ? inputEl.value : true);
+                };
+
+                cancelBtn.onclick = function() {
+                    overlay.style.display = 'none';
+                    resolve(null);
+                };
+            });
+        }
+
+        // --- CÁC HÀM XỬ LÝ LỊCH SỬ ---
         function loadHistory() {
             const historyBody = document.getElementById('historyBody');
             const filterValue = document.getElementById('filterType').value;
@@ -127,30 +188,54 @@
                 if (blob) {
                     saveAs(blob, fileName);
                 } else {
-                    alert('Xin lỗi, tệp tin này đã bị xóa hoặc không còn tồn tại trong bộ nhớ cache của trình duyệt!');
+                    await showCustomModal({
+                        title: '⚠️ FILE KHÔNG TỒN TẠI',
+                        message: 'Xin lỗi đồng chí, tệp tin này đã bị xóa hoặc không còn tồn tại trong bộ nhớ cache của trình duyệt!',
+                        type: 'alert',
+                        confirmText: 'Đóng lại'
+                    });
                 }
             } catch (err) {
-                alert('Có lỗi xảy ra khi truy xuất file!');
-                console.error(err);
+                await showCustomModal({
+                    title: '❌ LỖI HỆ THỐNG',
+                    message: 'Có lỗi xảy ra khi truy xuất file từ ổ đĩa ảo!',
+                    type: 'alert',
+                    confirmText: 'Đóng lại'
+                });
             }
         }
 
-        // CƠ CHẾ XÓA BẢO MẬT 2 LỚP
         async function clearHistory() {
-            // Bước 1: Yêu cầu gõ chữ XOA
-            const userInput = prompt("CẢNH BÁO NGUY HIỂM: \nHành động này sẽ xóa vĩnh viễn toàn bộ lịch sử và file ZIP đã lưu trên máy tính này!\n\nĐể xác nhận chắc chắn muốn xóa, vui lòng gõ chữ: XOA");
+            // Thay thế hàm prompt() bằng Cửa sổ nổi
+            const userInput = await showCustomModal({
+                title: '⚠️ CẢNH BÁO NGUY HIỂM',
+                message: 'Hành động này sẽ xóa vĩnh viễn toàn bộ lịch sử và file ZIP đã lưu trên máy tính này!<br><br>Để xác nhận chắc chắn muốn xóa, vui lòng gõ chữ: <b>XOA</b>',
+                type: 'prompt',
+                confirmText: 'Xác nhận xóa'
+            });
             
-            // Bước 2: Kiểm tra nội dung gõ
+            // Xử lý kết quả trả về từ cửa sổ nổi
             if (userInput !== null) {
                 if (userInput.trim().toUpperCase() === "XOA") {
-                    // Nếu nhập đúng chữ XOA -> Tiến hành xóa
                     localStorage.removeItem('yumHistory');
                     await localforage.clear(); 
                     loadHistory();
-                    alert("✅ Đã xóa toàn bộ dữ liệu lịch sử thành công!");
+                    
+                    // Thay thế alert() báo thành công
+                    await showCustomModal({
+                        title: '✅ ĐÃ XÓA THÀNH CÔNG',
+                        message: 'Toàn bộ dữ liệu lịch sử và bộ nhớ lưu trữ đã được dọn sạch!',
+                        type: 'alert',
+                        confirmText: 'Đã hiểu'
+                    });
                 } else {
-                    // Nếu nhập sai
-                    alert("❌ Hủy thao tác xóa! (Bạn nhập không đúng chữ XOA)");
+                    // Thay thế alert() báo lỗi gõ sai
+                    await showCustomModal({
+                        title: '❌ HỦY THAO TÁC',
+                        message: 'Lệnh xóa đã bị hủy do đồng chí nhập không đúng chữ <b>XOA</b>.',
+                        type: 'alert',
+                        confirmText: 'Đóng lại'
+                    });
                 }
             }
         }
