@@ -24,8 +24,8 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét (Chuẩn Thể thức)</h2>
-            <p><em>Hệ thống xuất văn bản tự động, định dạng 100% giống file BNX.docx gốc.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét Tự Động</h2>
+            <p><em>Hệ thống xuất văn bản gốc - Chuẩn từng mm lề, thò thụt và in đậm theo file Word gốc.</em></p>
 
             <div style="margin-bottom: 25px; margin-top: 20px;">
                 <label><strong>Tải lên file Excel dữ liệu (.xlsx):</strong></label><br><br>
@@ -117,7 +117,7 @@
                 return;
             }
 
-            statusLabel.innerText = "Đang áp dụng khuôn mẫu văn bản... Vui lòng đợi!";
+            statusLabel.innerText = "Đang tạo văn bản chuẩn xác... Vui lòng đợi!";
             statusLabel.style.color = "blue";
 
             const excelReader = new FileReader();
@@ -166,17 +166,15 @@
                     <head>
                         <meta charset='utf-8'>
                         <style>
-                            @page WordSection1 { size: 21.0cm 29.7cm; margin: 2.0cm 2.0cm 2.0cm 3.0cm; mso-header-margin: 35.4pt; mso-footer-margin: 35.4pt; mso-paper-source: 0; }
+                            @page WordSection1 { 
+                                size: 21.0cm 29.7cm; 
+                                margin: 2.0cm 2.0cm 2.0cm 3.0cm; 
+                                mso-header-margin: 35.4pt; 
+                                mso-footer-margin: 35.4pt; 
+                                mso-paper-source: 0; 
+                            }
                             div.WordSection1 { page: WordSection1; }
-                            
-                            body { font-family: "Times New Roman", serif; font-size: 14pt; line-height: 1.25; color: #000000; }
-                            p { margin: 6pt 0 0 0; text-align: justify; text-indent: 1.27cm; }
-                            
-                            .no-indent { text-indent: 0 !important; }
-                            .center { text-align: center; text-indent: 0 !important; }
-                            .bold { font-weight: bold; }
-                            .italic { font-style: italic; }
-                            .underline { text-decoration: underline; }
+                            body { font-family: "Times New Roman", serif; font-size: 14pt; color: #000000; }
                         </style>
                     </head>
                     <body>
@@ -194,96 +192,25 @@
                         const TenChiBo = getColValue(row, ['chibo']) || "......................";
                         const TenDoanTruong = getColValue(row, ['doantruong', 'lienchi']) || "......................";
                         const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "......................";
+                        
+                        const tg_tu_den = getColValue(row, ['thoigian']);
+                        const ThoiGianKhaoSat = tg_tu_den ? ` từ ${tg_tu_den} ` : " ";
 
                         const NangLuc = `Có kết quả học tập ${evaluateHocTap(gpa)} và rèn luyện ${evaluateRenLuyen(drl)}`;
                         const KhuyetDiem = evaluateKhuyetDiem(gpa, drl);
-                        
-                        const STT_display = STT ? STT + " " : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                        const STT_display = STT ? STT : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
+                        // SỬ DỤNG ÉP KIỂU INLINE CSS DÀNH RIÊNG CHO WORD MSO
                         wordContent += `
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 18pt; border: none;">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12pt; border: none; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
                             <tr>
                                 <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p class="center no-indent" style="margin: 0; font-size: 13pt;">THÀNH ĐOÀN HÀ NỘI</p>
-                                    <p class="center bold no-indent" style="margin: 0; font-size: 13pt;">BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</p>
-                                    <p class="center no-indent" style="margin: 0; font-size: 13pt;">***</p>
-                                    <p class="center no-indent" style="margin: 0; font-size: 13pt;">Số: ${STT_display}-BNX/ĐTN</p>
+                                    <p style="margin: 0; text-align: center; font-size: 13pt;">THÀNH ĐOÀN HÀ NỘI</p>
+                                    <p style="margin: 0; text-align: center; font-size: 13pt; font-weight: bold;">BCH ĐOÀN ĐẠI HỌC BÁCH KHOA HÀ NỘI</p>
+                                    <p style="margin: 0; text-align: center; font-size: 13pt;">***</p>
+                                    <p style="margin: 0; text-align: center; font-size: 13pt;">Số: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${STT_display}-BNX/ĐTN</p>
                                 </td>
                                 <td style="width: 55%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p class="center bold no-indent" style="margin: 0; font-size: 13pt;"><span style="border-bottom: 1px solid black;">ĐOÀN TNCS HỒ CHÍ MINH</span></p>
-                                    <p class="center italic no-indent" style="margin: 0; font-size: 13pt; margin-top: 6pt;">Hà Nội, ngày &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tháng &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; năm 2026</p>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <p class="center bold no-indent" style="margin-top: 0; margin-bottom: 0;">BẢN NHẬN XÉT</p>
-                        <p class="center bold no-indent" style="margin-top: 0; margin-bottom: 12pt;">KẾT QUẢ PHẤN ĐẤU CỦA ĐẢNG VIÊN DỰ BỊ</p>
-
-                        <table style="width: 100%; margin-bottom: 6pt; border: none;">
-                            <tr>
-                                <td style="width: 2.5cm; padding-left: 1.27cm; vertical-align: top; padding: 0;">
-                                    <p class="italic bold no-indent" style="margin: 0;">Kính gửi:</p>
-                                </td>
-                                <td style="vertical-align: top; padding: 0;">
-                                    <p class="no-indent" style="margin: 0;">- Chi ủy Chi bộ Sinh viên ${TenChiBo};</p>
-                                    <p class="no-indent" style="margin: 0;">- Đảng uỷ Đại học Bách khoa Hà Nội.</p>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <p>Căn cứ Điểm 1, Điều 4, Chương I Điều lệ Đảng Cộng Sản Việt Nam về thủ tục, quyền hạn của BCH Đoàn cơ sở giới thiệu Đoàn viên ưu tú cho Đảng.</p>
-                        <p>Căn cứ Điểm 1, Điều 5, Chương I Điều lệ Đảng Cộng Sản Việt Nam quy định về thời kỳ dự bị đối với người được kết nạp Đảng.</p>
-                        <p>Căn cứ Bản Nhận xét số ${STT} ${ThoiGian} của ${TenDoanTruong};</p>
-
-                        <p>Ban Thường vụ Đoàn TNCS Hồ Chí Minh Đại học Bách khoa Hà Nội xin báo cáo với Chi bộ và Đảng ủy Đại học những vấn đề chủ yếu về Đảng viên dự bị ${HoTen} như sau:</p>
-                        
-                        <p><span class="bold">- Ưu điểm:</span></p>
-                        <p>+ Phẩm chất chính trị: Có phẩm chất chính trị vững vàng, chấp hành và thực hiện đúng chủ trương đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Nhà trường, của tổ chức Đoàn.</p>
-                        <p>+ Đạo đức lối sống: Có phẩm chất đạo đức tốt, có lối sống lành mạnh, trong sáng, thật thà, giản dị. Sống nghiêm túc và có trách nhiệm với bản thân, gia đình, xã hội. Có ý thức đoàn kết xây dựng tập thể.</p>
-                        <p>+ Năng lực công tác: ${NangLuc}, có tinh thần học để nâng cao trình độ chuyên môn. ${KhuyetDiem}</p>
-                        <p>+ Quan hệ quần chúng: Sống hòa nhã với mọi người, sẵn sàng giúp đỡ bạn bè, đồng chí. Tôn trọng và biết lắng nghe ý kiến của người khác, giữ gìn sự đoàn kết của tập thể.</p>
-
-                        <p><span class="bold">- Khuyết điểm và những vấn đề cần lưu ý:</span> Cần mạnh dạn hơn nữa trong công tác phê bình và tự phê bình.</p>
-                        
-                        <p>Đối chiếu với các tiêu chuẩn Đảng viên và kết quả phấn đấu rèn luyện của đồng chí, chúng tôi đề nghị Chi bộ xét chuyển Đảng chính thức cho đồng chí ${HoTen} với sự tán thành của 09/09 đ/c Thường vụ dự họp.</p>
-
-                        <p style="margin-bottom: 12pt;">Chúng tôi xin chịu trách nhiệm trước Đảng về lời nhận xét của mình.</p>
-
-                        <table style="width: 100%; border: none;">
-                            <tr>
-                                <td style="width: 50%; vertical-align: top; padding: 0;">
-                                    <p class="bold italic no-indent" style="margin: 0; font-size: 12pt;"><u>Nơi nhận:</u></p>
-                                    <p class="no-indent" style="margin: 0; font-size: 12pt;">- Như kính gửi;</p>
-                                    <p class="no-indent" style="margin: 0; font-size: 12pt;">- Lưu VP.</p>
-                                </td>
-                                <td style="width: 50%; text-align: center; vertical-align: top; padding: 0;">
-                                    <p class="bold center no-indent" style="margin: 0; font-size: 14pt;">TM. BAN THƯỜNG VỤ ĐOÀN ĐẠI HỌC</p>
-                                </td>
-                            </tr>
-                        </table>
-                        `;
-
-                        if (index < validStudents.length - 1) {
-                            wordContent += `<br clear="all" style="mso-special-character:line-break;page-break-before:always" />`;
-                        }
-                    });
-
-                    wordContent += `</div></body></html>`;
-
-                    const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
-                    saveAs(blob, "Ban_Nhan_Xet_Hoan_Thanh.doc");
-                    
-                    statusLabel.innerText = `Thành công! Đã xuất ${validStudents.length} bản nhận xét chuẩn lề, cỡ chữ, khánh tiết y hệt văn bản gốc.`;
-                    statusLabel.style.color = "green";
-
-                } catch (error) {
-                    console.error(error);
-                    statusLabel.innerText = "Lỗi xử lý: " + error.message;
-                    statusLabel.style.color = "red";
-                }
-            };
-            excelReader.readAsArrayBuffer(excelInput.files[0]);
-        }
-    </script>
-</body>
-</html>
+                                    <p style="margin: 0; text-align: center; font-size: 13pt; font-weight: bold;"><u>ĐOÀN TNCS HỒ CHÍ MINH</u></p>
+                                    <p style="margin: 0; text-align: center; font-size: 13pt;">&nbsp;</p>
+                                    <p
