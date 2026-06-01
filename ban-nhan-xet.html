@@ -27,46 +27,23 @@
 
     <div class="container">
         <div class="card">
-            <h2>Hệ thống Tạo Bản Nhận Xét (Bản Word Gốc - Sinh ZIP)</h2>
-            <p><em>Hệ thống điền dữ liệu trực tiếp vào file Word mẫu của bạn, đảm bảo giữ nguyên 100% định dạng và căn lề.</em></p>
+            <h2>Hệ thống Tạo Bản Nhận Xét (Bản ZIP Nạp Kép)</h2>
+            <p><em>Hệ thống điền dữ liệu trực tiếp vào file Word mẫu. Đảm bảo giữ nguyên 100% định dạng, căn lề.</em></p>
 
             <div style="margin-bottom: 20px; padding: 15px; border: 2px dashed #ce1616; border-radius: 8px; background-color: #fff9f9;">
-                <label style="color: #ce1616;"><strong>Bước 1: Tải lên file WORD mẫu (.docx)</strong></label><br>
-                <em style="font-size: 13px; color: #555;">(File mẫu chứa các biến {{HoTen}}, {{STT}} đã được gõ liền mạch)</em><br><br>
+                <label style="color: #ce1616;"><strong>Bước 1: Tải lên file WORD mẫu (.docx) đã làm sạch</strong></label><br><br>
                 <input type="file" id="wordFile" accept=".docx">
             </div>
 
             <div style="margin-bottom: 25px; padding: 15px; border: 2px dashed #0056b3; border-radius: 8px; background-color: #f0f8ff;">
-                <label style="color: #0056b3;"><strong>Bước 2: Tải lên file EXCEL dữ liệu (.xlsx)</strong></label><br>
-                <em style="font-size: 13px; color: #555;">(Hệ thống tự động loại bỏ dòng rác và tạo tệp ZIP)</em><br><br>
+                <label style="color: #0056b3;"><strong>Bước 2: Tải lên file EXCEL dữ liệu (.xlsx)</strong></label><br><br>
                 <input type="file" id="excelFile" accept=".xlsx">
             </div>
 
-            <button onclick="processData()" style="width: 100%; padding: 15px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 18px; text-transform: uppercase;">Xử lý & Tải xuống tệp ZIP</button>
+            <button onclick="processData()" style="width: 100%; padding: 15px; background-color: #ce1616; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 18px;">Xử lý & Tải xuống tệp ZIP</button>
             <p id="status" style="margin-top: 20px; font-weight: bold; text-align: center; font-size: 16px;"></p>
         </div>
     </div>
-
-    <footer>
-        <div class="footer-col">
-            <img src="logo.png" alt="Logo" style="height: 50px;" onerror="this.style.display='none'">
-            <p>Hệ thống hỗ trợ nghiệp vụ YUMOFFICE.</p>
-        </div>
-        <div class="footer-col">
-            <h4>GIỚI THIỆU</h4>
-            <ul>
-                <li>Về Đoàn Bách khoa</li>
-                <li>Đội ngũ phát triển</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>LIÊN HỆ</h4>
-            <ul>
-                <li>📍 Nguyễn Khánh Toàn, Nghĩa Đô, Hà Nội</li>
-                <li>📧 phamvietbach2006@gmail.com</li>
-            </ul>
-        </div>
-    </footer>
 
     <script>
         function parseDate(raw) {
@@ -123,12 +100,8 @@
             const excelInput = document.getElementById('excelFile');
             const statusLabel = document.getElementById('status');
 
-            if (!wordInput.files.length) {
-                alert("Bạn chưa tải lên file Word mẫu!");
-                return;
-            }
-            if (!excelInput.files.length) {
-                alert("Bạn chưa tải lên file Excel dữ liệu!");
+            if (!wordInput.files.length || !excelInput.files.length) {
+                alert("Vui lòng tải lên ĐẦY ĐỦ cả file Word và file Excel!");
                 return;
             }
 
@@ -150,13 +123,13 @@
                         for (let i = 0; i < rows.length; i++) {
                             if (!rows[i]) continue;
                             const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
-                            if (rowText.includes('hoten') || rowText.includes('hovaten') || rowText.includes('masosinhvien')) {
+                            if (rowText.includes('hoten') || rowText.includes('hovaten')) {
                                 headerRowIndex = i;
                                 break;
                             }
                         }
 
-                        if (headerRowIndex === -1) throw new Error("Không tìm thấy cột 'Họ tên' trong file Excel!");
+                        if (headerRowIndex === -1) throw new Error("Không tìm thấy dòng tiêu đề 'Họ tên' trong file Excel!");
 
                         const headers = rows[headerRowIndex];
                         const validStudents = [];
@@ -164,11 +137,8 @@
                         for (let i = headerRowIndex + 1; i < rows.length; i++) {
                             const rowData = rows[i];
                             if (!rowData || rowData.length === 0) continue;
-                            
                             let rowObj = {};
-                            headers.forEach((h, index) => {
-                                if (h) rowObj[h] = rowData[index];
-                            });
+                            headers.forEach((h, index) => { if (h) rowObj[h] = rowData[index]; });
 
                             let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
                             let normalizedName = name ? removeAccents(String(name)).toLowerCase() : "";
@@ -178,7 +148,7 @@
                             }
                         }
 
-                        if (validStudents.length === 0) throw new Error("Không có dữ liệu sinh viên hợp lệ!");
+                        if (validStudents.length === 0) throw new Error("Không có dữ liệu hợp lệ!");
 
                         const outZip = new JSZip();
 
@@ -202,7 +172,6 @@
                             };
 
                             const zip = new PizZip(wordBuffer);
-
                             const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
                             doc.render(stData);
 
@@ -213,25 +182,24 @@
                             
                             const safeFileName = removeAccents(HoTen).replace(/[^a-zA-Z0-9]/g, '_');
                             const docName = `BNX_${String(index + 1).padStart(2, '0')}_${safeFileName}.docx`;
-                            
                             outZip.file(docName, docOutput);
                         }
 
                         const content = await outZip.generateAsync({type:"blob"});
                         saveAs(content, "Ho_So_Ban_Nhan_Xet_Hoan_Thanh.zip");
                         
-                        statusLabel.innerText = `Thành công rực rỡ! Đã tạo xong file ZIP chứa ${validStudents.length} Bản nhận xét.`;
+                        statusLabel.innerText = `Thành công! Đã tạo xong ${validStudents.length} file Word chuẩn định dạng gốc.`;
                         statusLabel.style.color = "green";
 
                     } catch (error) {
                         console.error(error);
-                        statusLabel.innerText = "LỖI FILE WORD: Biến trong file Word bị gạch đỏ hoặc ngắt quãng. Hãy mở file Word, xóa biến lỗi đi gõ lại một mạch, sau đó tải lên lại nhé!";
+                        statusLabel.innerText = "Lỗi file Word: Vẫn còn biến bị gạch chân chính tả. Vui lòng làm theo hướng dẫn Notepad. Chi tiết: " + error.message;
                         statusLabel.style.color = "red";
                     }
                 };
                 excelReader.readAsArrayBuffer(excelInput.files[0]);
             } catch (err) {
-                statusLabel.innerText = "Đã xảy ra lỗi hệ thống: " + err.message;
+                statusLabel.innerText = "Đã xảy ra lỗi: " + err.message;
                 statusLabel.style.color = "red";
             }
         }
