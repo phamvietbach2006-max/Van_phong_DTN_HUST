@@ -26,16 +26,16 @@
             </div>
             
             <div class="action-buttons">
-                <a href="#">YUMOFFICE v2.0</a>
+                <span class="version-badge" style="display: inline-block; padding: 8px 15px; color: #fff; font-size: 12px; font-weight: bold; border-radius: 3px; background-color: #2b2b2b;">YUMOFFICE v2.0</span>
             </div>
         </div>
     </header>
 
-    <nav class="main-nav">
+    <nav class="main-nav" aria-label="Điều hướng chính">
         <div class="nav-container">
             <a href="index.html">TRANG CHỦ</a>
-            <a href="ban-nhan-xet.html" class="active">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
-            <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="ban-nhan-xet.html" class="active" aria-current="page">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
+            <a href="#" class="disabled-link" aria-disabled="true" tabindex="-1">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="kho-tai-lieu.html">KHO TÀI LIỆU</a>
             <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
             <a href="huong-dan.html">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
@@ -131,35 +131,39 @@
             statusBox.className = 'status-message ' + type;
         }
 
-        // ĐÃ NÂNG CẤP: Nhận diện định dạng ngày tháng thông minh
+        // =====================================
+        // ĐÃ SỬA LỖI: Lệch ngày do Timezone
+        // =====================================
         function parseDate(raw) {
             if (!raw || String(raw).trim() === "") return "";
             
-            // 1. Trường hợp Excel tự động định dạng thành đối tượng Date của Javascript
+            // 1. Nếu là đối tượng Date
             if (raw instanceof Date) {
-                const d = String(raw.getDate()).padStart(2, '0');
-                const m = String(raw.getMonth() + 1).padStart(2, '0');
-                const y = raw.getFullYear();
+                // Ép cộng thêm 12 tiếng để chống sai số 23:59:59 của ngày hôm trước
+                const safeDate = new Date(raw.getTime() + (12 * 60 * 60 * 1000));
+                const d = String(safeDate.getDate()).padStart(2, '0');
+                const m = String(safeDate.getMonth() + 1).padStart(2, '0');
+                const y = safeDate.getFullYear();
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
 
-            // 2. Trường hợp là Serial Number gốc của Excel
+            // 2. Nếu là số Serial của Excel (25569 là khoảng cách từ 01/01/1900 đến 01/01/1970)
             if (typeof raw === 'number') {
-                const date = new Date((raw - (25567 + 2)) * 86400 * 1000);
-                const d = String(date.getDate()).padStart(2, '0');
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const y = date.getFullYear();
+                const safeDate = new Date((raw - 25569) * 86400 * 1000 + (12 * 60 * 60 * 1000));
+                const d = String(safeDate.getDate()).padStart(2, '0');
+                const m = String(safeDate.getMonth() + 1).padStart(2, '0');
+                const y = safeDate.getFullYear();
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
 
-            // 3. Trường hợp nhập dưới dạng chuỗi (Text)
+            // 3. Nếu nhập dưới dạng chuỗi chữ bình thường
             let str = String(raw).trim();
             let parts = str.match(/\d+/g); 
             if (parts && parts.length >= 3) {
                 let d = parts[0].padStart(2, '0'); 
                 let m = parts[1].padStart(2, '0'); 
                 let y = parts[2];
-                // Chỉ nhận các số hợp lệ của ngày tháng (tránh nhầm giờ phút)
+                // Chỉ nhận số ngày/tháng hợp lệ (nhỏ hơn 31 và 12)
                 if (parseInt(d) <= 31 && parseInt(m) <= 12) {
                     if (y.length === 2) {
                         y = parseInt(y) > 50 ? "19" + y : "20" + y;
@@ -264,7 +268,6 @@
                 excelReader.onload = async function(e) {
                     try {
                         const data = new Uint8Array(e.target.result);
-                        // Cấu hình cellDates: true sẽ giúp SheetJS tự sinh ra Date của JS
                         const workbook = XLSX.read(data, {type: 'array', cellDates: true});
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
@@ -318,11 +321,9 @@
                             let ngayHop = parseDate(getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan']));
                             if(ngayHop === "") missingFields.push("Ngày họp Đoàn trường/LCĐ");
 
-                            // ĐÃ SỬA: Loại bỏ từ khóa "so" (tránh quét nhầm Mã số sinh viên)
-                            let soBNX = getColValue(row, ['sobnx', 'sobannhanxet', 'stt', 'tt']);
+                            let soBNX = getColValue(row, ['sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv']);
                             if(!soBNX) missingFields.push("Số Bản nhận xét");
 
-                            // ĐÃ SỬA: Loại bỏ các cột ngày tháng khi quét Tên đoàn trường
                             let tenDoanTruong = getColValue(row, ['doantruong', 'lienchi', 'lcd'], ['ngay', 'thoigian', 'hop']);
 
                             if (missingFields.length > 0) {
