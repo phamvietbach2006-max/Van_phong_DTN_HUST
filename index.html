@@ -19,17 +19,17 @@
             </div>
             
             <div class="action-buttons">
-                <a href="#">YUMOFFICE v2.0</a>
+                <span class="version-badge">YUMOFFICE v2.0</span>
             </div>
         </div>
     </header>
 
     <!-- ĐÃ SỬA LỖI: Thêm lại thẻ nav và đưa link Kho tài liệu vào đúng vị trí -->
-    <nav class="main-nav">
+    <nav class="main-nav" aria-label="Điều hướng chính">
         <div class="nav-container">
-            <a href="index.html" class="active">TRANG CHỦ</a>
+            <a href="index.html" class="active" aria-current="page">TRANG CHỦ</a>
             <a href="ban-nhan-xet.html">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
-            <a href="#">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="#" class="disabled-link" aria-disabled="true" tabindex="-1">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="kho-tai-lieu.html">KHO TÀI LIỆU</a>
             <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
             <a href="huong-dan.html">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
@@ -44,16 +44,16 @@
         </div>
 
         <div class="upload-grid">
-            <div class="upload-box" onclick="location.href='ban-nhan-xet.html'" style="text-align: left; padding: 30px 25px;">
+            <a class="upload-box feature-card" href="ban-nhan-xet.html" style="text-align: left; padding: 30px 25px;">
                 <div class="box-icon" style="text-align: left; margin-bottom: 10px;">📋</div>
                 <div class="box-title" style="font-size: 16px; color: #b71a1a;">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</div>
                 <div class="box-desc">
                     Hỗ trợ tạo tự động và đóng gói hàng loạt Bản nhận xét kết quả phấn đấu của Đảng viên dự bị từ dữ liệu Excel. Hồ sơ xuất ra dưới dạng tệp nén ZIP chứa các file Word riêng lẻ chuẩn lề lối hành chính.
                 </div>
                 <div style="margin-top: 15px; font-size: 12px; color: #b71a1a; font-weight: bold; text-align: right;">Truy cập phân hệ &rarr;</div>
-            </div>
+            </a>
 
-            <div class="upload-box" style="text-align: left; padding: 30px 25px; cursor: not-allowed; background-color: #f1f5f9; border-color: #e2e8f0;">
+            <div class="upload-box feature-card is-disabled" aria-disabled="true" style="text-align: left; padding: 30px 25px; cursor: not-allowed; background-color: #f1f5f9; border-color: #e2e8f0;">
                 <div class="box-icon" style="text-align: left; margin-bottom: 10px; opacity: 0.6;">📜</div>
                 <div class="box-title" style="font-size: 16px; color: #64748b;">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</div>
                 <div class="box-desc" style="color: #94a3b8;">
