@@ -131,9 +131,19 @@
             statusBox.className = 'status-message ' + type;
         }
 
+        // ĐÃ NÂNG CẤP: Nhận diện định dạng ngày tháng thông minh
         function parseDate(raw) {
             if (!raw || String(raw).trim() === "") return "";
             
+            // 1. Trường hợp Excel tự động định dạng thành đối tượng Date của Javascript
+            if (raw instanceof Date) {
+                const d = String(raw.getDate()).padStart(2, '0');
+                const m = String(raw.getMonth() + 1).padStart(2, '0');
+                const y = raw.getFullYear();
+                return `ngày ${d} tháng ${m} năm ${y}`;
+            }
+
+            // 2. Trường hợp là Serial Number gốc của Excel
             if (typeof raw === 'number') {
                 const date = new Date((raw - (25567 + 2)) * 86400 * 1000);
                 const d = String(date.getDate()).padStart(2, '0');
@@ -142,18 +152,22 @@
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
 
+            // 3. Trường hợp nhập dưới dạng chuỗi (Text)
             let str = String(raw).trim();
             let parts = str.match(/\d+/g); 
             if (parts && parts.length >= 3) {
                 let d = parts[0].padStart(2, '0'); 
                 let m = parts[1].padStart(2, '0'); 
                 let y = parts[2];
-                if (y.length === 2) {
-                    y = parseInt(y) > 50 ? "19" + y : "20" + y;
+                // Chỉ nhận các số hợp lệ của ngày tháng (tránh nhầm giờ phút)
+                if (parseInt(d) <= 31 && parseInt(m) <= 12) {
+                    if (y.length === 2) {
+                        y = parseInt(y) > 50 ? "19" + y : "20" + y;
+                    }
+                    return `ngày ${d} tháng ${m} năm ${y}`;
                 }
-                return `ngày ${d} tháng ${m} năm ${y}`;
             }
-            return ""; 
+            return String(raw); 
         }
 
         function parseGPA(raw) {
@@ -250,6 +264,7 @@
                 excelReader.onload = async function(e) {
                     try {
                         const data = new Uint8Array(e.target.result);
+                        // Cấu hình cellDates: true sẽ giúp SheetJS tự sinh ra Date của JS
                         const workbook = XLSX.read(data, {type: 'array', cellDates: true});
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
@@ -286,8 +301,6 @@
 
                         const outZip = new JSZip();
                         let missingDataWarnings = [];
-                        
-                        // Lấy năm hiện tại của hệ thống để làm mốc thời gian tự động
                         const currentYear = new Date().getFullYear();
 
                         for (let index = 0; index < validStudents.length; index++) {
@@ -303,21 +316,24 @@
                             if(drlObj.missing) missingFields.push("Điểm rèn luyện");
 
                             let ngayHop = parseDate(getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan']));
-                            if(ngayHop === "") missingFields.push("Ngày họp (thời gian)");
+                            if(ngayHop === "") missingFields.push("Ngày họp Đoàn trường/LCĐ");
 
-                            let soBNX = getColValue(row, ['stt', 'sobnx', 'so']);
+                            // ĐÃ SỬA: Loại bỏ từ khóa "so" (tránh quét nhầm Mã số sinh viên)
+                            let soBNX = getColValue(row, ['sobnx', 'sobannhanxet', 'stt', 'tt']);
                             if(!soBNX) missingFields.push("Số Bản nhận xét");
+
+                            // ĐÃ SỬA: Loại bỏ các cột ngày tháng khi quét Tên đoàn trường
+                            let tenDoanTruong = getColValue(row, ['doantruong', 'lienchi', 'lcd'], ['ngay', 'thoigian', 'hop']);
 
                             if (missingFields.length > 0) {
                                 missingDataWarnings.push(`<b style="color: #b71a1a;">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
                             }
 
-                            // ĐÃ CẬP NHẬT: Tự động điền năm hiện tại thay vì gắn cứng 2026
                             const stData = {
                                 STT: soBNX || "......",
                                 ThoiGian: ngayHop || `ngày......tháng......năm ${currentYear}`,
                                 TenChiBo: getColValue(row, ['chibo', 'tencb']) || "......................",
-                                TenDoanTruong: getColValue(row, ['doantruong', 'lienchi', 'lcd']) || "......................",
+                                TenDoanTruong: tenDoanTruong || "......................",
                                 HoTen: HoTen,
                                 NangLuc: `Có kết quả học tập ${evaluateHocTap(gpaObj.val)} và rèn luyện ${evaluateRenLuyen(drlObj.val)}`,
                                 KhuyetDiem: evaluateKhuyetDiem(gpaObj.val, drlObj.val)
