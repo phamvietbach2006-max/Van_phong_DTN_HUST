@@ -10,7 +10,6 @@
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://unpkg.com/docxtemplater@3.37.11/build/docxtemplater.js"></script>
-    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 </head>
@@ -46,14 +45,14 @@
         <h2 class="section-title">HỆ THỐNG TẠO BẢN NHẬN XÉT ĐẢNG VIÊN</h2>
         
         <div class="tool-description">
-            Nhân bản và điền tự động dữ liệu Excel vào tệp Word mẫu cá nhân. Định dạng xuất ra kế thừa 100% lề lối văn bản gốc hành chính, nén gọn thành file ZIP hệ thống.
+            Hệ thống tự động trộn dữ liệu Excel vào tệp Word mẫu cá nhân. Dữ liệu đầu ra sẽ được xuất thành <strong>một tệp Word duy nhất</strong> chứa toàn bộ hồ sơ (tự động ngắt trang) để tối ưu hóa quá trình in ấn hàng loạt.
         </div>
 
         <div class="upload-grid">
             <div class="upload-box" onclick="document.getElementById('wordFile').click()">
                 <div class="box-icon">📄</div>
                 <div class="box-title">TẢI LÊN MẪU WORD (.DOCX)</div>
-                <div class="box-desc">Sử dụng ký hiệu biến dạng vuông: [[HoTen]], [[STT]]...</div>
+                <div class="box-desc">Chỉ cần tải phôi Word gốc chứa các biến [[HoTen]], [[STT]]... Hệ thống sẽ tự cấy mã lặp.</div>
                 <input type="file" id="wordFile" accept=".docx" style="display: none;">
                 <div id="wordFileName" class="file-name">Chưa có tệp nào được chọn</div>
             </div>
@@ -68,7 +67,7 @@
         </div>
 
         <div class="action-area">
-            <button class="btn-submit" onclick="processData()">XỬ LÝ & TẢI XUỐNG TỆP ZIP</button>
+            <button class="btn-submit" onclick="processData()">XỬ LÝ & TẢI XUỐNG TỆP WORD</button>
         </div>
 
         <div id="statusBox" class="status-message"></div>
@@ -206,15 +205,12 @@
             if (drl < 90) return "tốt"; 
             return "xuất sắc";
         }
-        
-        // ĐÃ SỬA LỖI: Loại bỏ hoàn toàn dấu chấm ở cuối các câu nhận xét
         function evaluateKhuyetDiem(gpa, drl) {
             if (gpa < 3.2 && drl < 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt";
             if (gpa >= 3.2 && drl < 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt";
             if (gpa < 3.2 && drl >= 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt";
             return "Hoàn thành tốt nhiệm vụ được giao";
         }
-        
         function removeAccents(str) {
             if (!str) return "";
             return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
@@ -254,7 +250,7 @@
                 return;
             }
 
-            showStatus("⏳ Đang giải mã Word và đóng gói dữ liệu ZIP... Vui lòng đợi!", "info");
+            showStatus("⏳ Đang giải mã Word và cấu trúc lại mã nguồn XML... Vui lòng đợi!", "info");
 
             try {
                 const wordBuffer = await wordInput.files[0].arrayBuffer();
@@ -297,9 +293,9 @@
 
                         if (validStudents.length === 0) throw new Error("Không tìm thấy hàng dữ liệu sinh viên hợp lệ!");
 
-                        const outZip = new JSZip();
                         let missingDataWarnings = [];
                         const currentYear = new Date().getFullYear();
+                        const danhSachHoSo = [];
 
                         for (let index = 0; index < validStudents.length; index++) {
                             const row = validStudents[index];
@@ -325,58 +321,80 @@
                                 missingDataWarnings.push(`<b style="color: #b71a1a;">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
                             }
 
-                            const stData = {
+                            danhSachHoSo.push({
                                 STT: soBNX || "......",
                                 ThoiGian: ngayHop || `ngày......tháng......năm ${currentYear}`,
                                 TenChiBo: getColValue(row, ['chibo', 'tencb']) || "......................",
                                 TenDoanTruong: tenDoanTruong || "......................",
                                 HoTen: HoTen,
                                 NangLuc: `Có kết quả học tập ${evaluateHocTap(gpaObj.val)} và rèn luyện ${evaluateRenLuyen(drlObj.val)}`,
-                                KhuyetDiem: evaluateKhuyetDiem(gpaObj.val, drlObj.val)
-                            };
-
-                            const zip = new PizZip(wordBuffer);
-                            
-                            for (let fileName in zip.files) {
-                                if (fileName.endsWith('.xml')) {
-                                    let xml = zip.files[fileName].asText();
-                                    xml = xml.replace(/<w:proofErr[^>]*>/g, '');
-                                    zip.file(fileName, xml);
-                                }
-                            }
-
-                            const doc = new window.docxtemplater(zip, { 
-                                paragraphLoop: true, linebreaks: true, delimiters: { start: '[[', end: ']]' } 
+                                KhuyetDiem: evaluateKhuyetDiem(gpaObj.val, drlObj.val),
+                                // Biến cờ hiệu kích hoạt lệnh ngắt trang (Trừ hồ sơ cuối cùng)
+                                PageBreak: index < validStudents.length - 1
                             });
-                            
-                            doc.render(stData);
-
-                            const docOutput = doc.getZip().generate({
-                                type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                            });
-                            
-                            const safeFileName = removeAccents(HoTen).replace(/[^a-zA-Z0-9]/g, '_');
-                            const docName = `BNX_${String(index + 1).padStart(2, '0')}_${safeFileName}.docx`;
-                            outZip.file(docName, docOutput);
                         }
+
+                        // THUẬT TOÁN CẤY GHÉP XML (XML INJECTION)
+                        const zip = new PizZip(wordBuffer);
+                        
+                        // Xóa rác đánh dấu chính tả
+                        for (let fileName in zip.files) {
+                            if (fileName.endsWith('.xml')) {
+                                let xml = zip.files[fileName].asText();
+                                xml = xml.replace(/<w:proofErr[^>]*>/g, '');
+                                zip.file(fileName, xml);
+                            }
+                        }
+
+                        // Mở file lõi document.xml để cấy lệnh lặp DanhSach và ngắt trang
+                        let docXml = zip.files["word/document.xml"].asText();
+                        
+                        // 1. Cấy lệnh mở vòng lặp [[#DanhSach]] ngay sau thẻ <w:body>
+                        docXml = docXml.replace(/<w:body>/, '<w:body><w:p><w:r><w:t>[[#DanhSach]]</w:t></w:r></w:p>');
+                        
+                        // Mã XML của lệnh ngắt trang được điều khiển bằng biến boolean [[#PageBreak]]
+                        const pageBreakXml = '<w:p><w:r><w:t>[[#PageBreak]]</w:t></w:r></w:p><w:p><w:r><w:br w:type="page"/></w:r></w:p><w:p><w:r><w:t>[[/PageBreak]]</w:t></w:r></w:p>';
+                        
+                        // 2. Cấy lệnh kết thúc [[/DanhSach]] và ngắt trang vào cuối khối văn bản
+                        let sectPrIndex = docXml.lastIndexOf('<w:sectPr');
+                        if (sectPrIndex !== -1) {
+                            let before = docXml.substring(0, sectPrIndex);
+                            let after = docXml.substring(sectPrIndex);
+                            docXml = before + pageBreakXml + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p>' + after;
+                        } else {
+                            docXml = docXml.replace(/<\/w:body>/, pageBreakXml + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p></w:body>');
+                        }
+                        
+                        zip.file("word/document.xml", docXml);
+
+                        const doc = new window.docxtemplater(zip, { 
+                            paragraphLoop: true, linebreaks: true, delimiters: { start: '[[', end: ']]' } 
+                        });
+                        
+                        doc.render({
+                            DanhSach: danhSachHoSo
+                        });
+
+                        const docOutput = doc.getZip().generate({
+                            type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        });
 
                         const now = new Date();
                         const dateStr = `${String(now.getDate()).padStart(2, '0')}_${String(now.getMonth() + 1).padStart(2, '0')}_${now.getFullYear()}`;
-                        const zipName = `Ho_So_Ban_Nhan_Xet_${dateStr}.zip`;
+                        const finalFileName = `Tong_Hop_Ban_Nhan_Xet_${dateStr}.docx`;
 
-                        const content = await outZip.generateAsync({type:"blob"});
-                        saveAs(content, zipName);
+                        saveAs(docOutput, finalFileName);
                         
-                        const fileId = 'zip_' + Date.now();
-                        await localforage.setItem(fileId, content);
+                        const fileId = 'docx_' + Date.now();
+                        await localforage.setItem(fileId, docOutput);
 
                         const timeString = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
                         const historyRecord = {
                             id: fileId,
                             time: timeString,
-                            fileName: zipName,
+                            fileName: finalFileName,
                             type: "Bản nhận xét Đảng viên",
-                            count: validStudents.length + " file",
+                            count: validStudents.length + " người",
                             status: "Thành công"
                         };
 
@@ -384,10 +402,10 @@
                         historyData.unshift(historyRecord);
                         localStorage.setItem('yumHistory', JSON.stringify(historyData));
 
-                        showStatus(`🎉 THÀNH CÔNG! Đã đóng gói xong ${validStudents.length} file. Bạn có thể tải lại trong mục Lịch sử.`, "success");
+                        showStatus(`🎉 THÀNH CÔNG! Đã gộp tự động ${validStudents.length} hồ sơ thành 1 file Word.`, "success");
 
                         if (missingDataWarnings.length > 0) {
-                            let alertMsg = `Hệ thống đã xuất file <b>thành công</b>, nhưng quá trình quét phát hiện một số sinh viên bị bỏ trống dữ liệu quan trọng trong Excel. Vui lòng kiểm tra lại file Word vừa tải về để điền bổ sung:<br><br>`;
+                            let alertMsg = `Hệ thống đã xuất file Word tổng <b>thành công</b>, nhưng quá trình quét phát hiện một số sinh viên bị bỏ trống dữ liệu quan trọng trong Excel. Vui lòng kiểm tra lại file Word vừa tải về để điền bổ sung:<br><br>`;
                             alertMsg += `<div style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 4px; border: 1px solid #e2e8f0; max-height: 250px; overflow-y: auto; font-size: 13.5px; line-height: 1.8;">`;
                             alertMsg += missingDataWarnings.map(msg => `• ${msg}`).join("<br>");
                             alertMsg += `</div>`;
@@ -403,7 +421,7 @@
                         console.error(error);
                         let msg = error.message;
                         if (error.properties && error.properties.errors) {
-                            msg = `⚠️ Lỗi định dạng thẻ: Hãy chắc chắn file Word mẫu đang bọc đúng dấu vuông khối [[STT]], [[HoTen]]...`;
+                            msg = `⚠️ Lỗi định dạng Word. Xin vui lòng kiểm tra lại các khung biến [[ ]].`;
                         }
                         showStatus("❌ " + msg, "error");
                     }
