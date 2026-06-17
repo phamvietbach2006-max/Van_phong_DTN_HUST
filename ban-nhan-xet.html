@@ -131,15 +131,10 @@
             statusBox.className = 'status-message ' + type;
         }
 
-        // =====================================
-        // ĐÃ SỬA LỖI: Lệch ngày do Timezone
-        // =====================================
         function parseDate(raw) {
             if (!raw || String(raw).trim() === "") return "";
             
-            // 1. Nếu là đối tượng Date
             if (raw instanceof Date) {
-                // Ép cộng thêm 12 tiếng để chống sai số 23:59:59 của ngày hôm trước
                 const safeDate = new Date(raw.getTime() + (12 * 60 * 60 * 1000));
                 const d = String(safeDate.getDate()).padStart(2, '0');
                 const m = String(safeDate.getMonth() + 1).padStart(2, '0');
@@ -147,7 +142,6 @@
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
 
-            // 2. Nếu là số Serial của Excel (25569 là khoảng cách từ 01/01/1900 đến 01/01/1970)
             if (typeof raw === 'number') {
                 const safeDate = new Date((raw - 25569) * 86400 * 1000 + (12 * 60 * 60 * 1000));
                 const d = String(safeDate.getDate()).padStart(2, '0');
@@ -156,14 +150,12 @@
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
 
-            // 3. Nếu nhập dưới dạng chuỗi chữ bình thường
             let str = String(raw).trim();
             let parts = str.match(/\d+/g); 
             if (parts && parts.length >= 3) {
                 let d = parts[0].padStart(2, '0'); 
                 let m = parts[1].padStart(2, '0'); 
                 let y = parts[2];
-                // Chỉ nhận số ngày/tháng hợp lệ (nhỏ hơn 31 và 12)
                 if (parseInt(d) <= 31 && parseInt(m) <= 12) {
                     if (y.length === 2) {
                         y = parseInt(y) > 50 ? "19" + y : "20" + y;
@@ -214,12 +206,15 @@
             if (drl < 90) return "tốt"; 
             return "xuất sắc";
         }
+        
+        // ĐÃ SỬA LỖI: Loại bỏ hoàn toàn dấu chấm ở cuối các câu nhận xét
         function evaluateKhuyetDiem(gpa, drl) {
-            if (gpa < 3.2 && drl < 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
-            if (gpa >= 3.2 && drl < 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
-            if (gpa < 3.2 && drl >= 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
-            return "Hoàn thành tốt nhiệm vụ được giao.";
+            if (gpa < 3.2 && drl < 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt";
+            if (gpa >= 3.2 && drl < 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt";
+            if (gpa < 3.2 && drl >= 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt";
+            return "Hoàn thành tốt nhiệm vụ được giao";
         }
+        
         function removeAccents(str) {
             if (!str) return "";
             return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
