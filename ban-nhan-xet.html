@@ -7,6 +7,36 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="logo.png" type="image/png">
     
+    <style>
+        .eval-select {
+            padding: 5px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #fff;
+            outline: none;
+            width: 100px;
+            cursor: pointer;
+        }
+        .eval-select:focus {
+            border-color: #b71a1a;
+        }
+        .preview-table th {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border-bottom: 2px solid #cbd5e1;
+            padding: 10px;
+            font-size: 12px;
+        }
+        .preview-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+    </style>
+
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://unpkg.com/docxtemplater@3.37.11/build/docxtemplater.js"></script>
@@ -45,7 +75,7 @@
         <h2 class="section-title">HỆ THỐNG TẠO BẢN NHẬN XÉT ĐẢNG VIÊN</h2>
         
         <div class="tool-description">
-            Hệ thống tự động trộn dữ liệu Excel vào tệp Word mẫu cá nhân. Dữ liệu đầu ra sẽ được xuất thành <strong>một tệp Word duy nhất</strong> chứa toàn bộ hồ sơ (tự động ngắt trang) để tối ưu hóa quá trình in ấn hàng loạt.
+            Hệ thống tự động trộn dữ liệu Excel vào tệp Word mẫu. Sau khi tải file, một <strong>bảng xem trước</strong> sẽ hiện ra để đồng chí rà soát và tùy chỉnh mức đánh giá trước khi xuất bản chính thức.
         </div>
 
         <div class="upload-grid">
@@ -67,7 +97,7 @@
         </div>
 
         <div class="action-area">
-            <button class="btn-submit" onclick="processData()">XỬ LÝ & TẢI XUỐNG TỆP WORD</button>
+            <button class="btn-submit" onclick="previewData()">XEM TRƯỚC VÀ XUẤT FILE</button>
         </div>
 
         <div id="statusBox" class="status-message"></div>
@@ -81,19 +111,53 @@
         </div>
     </footer>
 
-    <div id="customModalOverlay" class="modal-overlay">
+    <div id="customModalOverlay" class="modal-overlay" style="z-index: 9999;">
         <div class="modal-box" style="width: 600px;">
             <div id="modalTitle" class="modal-title">Thông báo</div>
             <div id="modalMessage" class="modal-message">Nội dung thông báo</div>
-            <input type="text" id="modalInput" class="modal-input" style="display: none;" autocomplete="off">
             <div class="modal-buttons">
-                <button id="modalCancelBtn" class="btn-modal btn-modal-cancel" style="display: none;">Hủy</button>
                 <button id="modalConfirmBtn" class="btn-modal btn-modal-confirm">Đã hiểu</button>
             </div>
         </div>
     </div>
 
+    <div id="previewModalOverlay" class="modal-overlay" style="z-index: 9998;">
+        <div class="modal-box" style="width: 1000px; max-width: 95%;">
+            <div class="modal-title">KIỂM TRA VÀ CHỈNH SỬA ĐÁNH GIÁ</div>
+            <div class="modal-message" style="text-align: left; margin-bottom: 15px; color: #475569;">
+                Vui lòng rà soát lại kết quả tự động đánh giá của hệ thống. Đồng chí có thể chủ động thay đổi mức xếp loại ở 2 cột cuối cùng bằng menu thả xuống trước khi xuất file.
+            </div>
+            <div style="max-height: 400px; overflow-y: auto; margin-bottom: 25px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <table class="preview-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <tr>
+                            <th style="width: 5%; text-align: center;">STT</th>
+                            <th style="width: 20%;">Họ và Tên</th>
+                            <th style="width: 10%; text-align: center;">GPA 2024.2</th>
+                            <th style="width: 10%; text-align: center;">GPA 2025.1</th>
+                            <th style="width: 10%; text-align: center;">TB 2 Kỳ</th>
+                            <th style="width: 10%; text-align: center;">Điểm RL</th>
+                            <th style="width: 15%; text-align: center;">Đánh giá Học tập</th>
+                            <th style="width: 15%; text-align: center;">Đánh giá Rèn luyện</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTableBody">
+                        </tbody>
+                </table>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-modal btn-modal-cancel" onclick="document.getElementById('previewModalOverlay').style.display='none'">Hủy thao tác</button>
+                <button class="btn-modal btn-modal-confirm" onclick="executeFinalExport()">Xuất bản nhận xét</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Các biến toàn cục để lưu trữ trạng thái giữa Bước 1 và Bước 2
+        window.pendingStudents = [];
+        window.missingDataWarnings = [];
+        window.currentYear = new Date().getFullYear();
+
         function showCustomModal(options) {
             return new Promise((resolve) => {
                 const overlay = document.getElementById('customModalOverlay');
@@ -132,7 +196,6 @@
 
         function parseDate(raw) {
             if (!raw || String(raw).trim() === "") return "";
-            
             if (raw instanceof Date) {
                 const safeDate = new Date(raw.getTime() + (12 * 60 * 60 * 1000));
                 const d = String(safeDate.getDate()).padStart(2, '0');
@@ -140,7 +203,6 @@
                 const y = safeDate.getFullYear();
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
-
             if (typeof raw === 'number') {
                 const safeDate = new Date((raw - 25569) * 86400 * 1000 + (12 * 60 * 60 * 1000));
                 const d = String(safeDate.getDate()).padStart(2, '0');
@@ -148,7 +210,6 @@
                 const y = safeDate.getFullYear();
                 return `ngày ${d} tháng ${m} năm ${y}`;
             }
-
             let str = String(raw).trim();
             let parts = str.match(/\d+/g); 
             if (parts && parts.length >= 3) {
@@ -165,21 +226,13 @@
             return String(raw); 
         }
 
-        // ===============================================
-        // ĐÃ NÂNG CẤP: Xử lý nhập 2 giá trị cho GPA & ĐRL
-        // ===============================================
         function parseGPA(raw) {
             if (!raw || String(raw).trim() === "") return { val: 0, missing: true };
             let str = String(raw).trim().replace(/,/g, '.');
-            
-            // Nhận diện dấu gạch ngang, gạch dưới, xuyệt
             let rangeMatch = str.match(/(\d+(?:\.\d+)?)\s*[-–—_/\\]+\s*(\d+(?:\.\d+)?)/);
             if (rangeMatch) {
-                let v1 = parseFloat(rangeMatch[1]);
-                let v2 = parseFloat(rangeMatch[2]);
-                return { val: (v1 + v2) / 2, missing: false }; // Trả về trung bình cộng
+                return { val: (parseFloat(rangeMatch[1]) + parseFloat(rangeMatch[2])) / 2, missing: false };
             }
-
             let match = str.match(/[\d.]+/);
             if (match && parseFloat(match[0]) > 0) {
                 return { val: parseFloat(match[0]), missing: false };
@@ -190,15 +243,10 @@
         function parseDRL(raw) {
             if (!raw || String(raw).trim() === "") return { val: 0, missing: true };
             let str = String(raw).trim().replace(/,/g, '.');
-            
-            // Nhận diện dấu gạch ngang, gạch dưới, xuyệt (VD: 72-39, 72/39)
             let rangeMatch = str.match(/(\d+(?:\.\d+)?)\s*[-–—_/\\]+\s*(\d+(?:\.\d+)?)/);
             if (rangeMatch) {
-                let v1 = parseFloat(rangeMatch[1]);
-                let v2 = parseFloat(rangeMatch[2]);
-                return { val: (v1 + v2) / 2, missing: false }; // Trả về trung bình cộng
+                return { val: (parseFloat(rangeMatch[1]) + parseFloat(rangeMatch[2])) / 2, missing: false };
             }
-            
             let match = str.match(/[\d.]+/);
             if (match && parseFloat(match[0]) > 0) {
                 return { val: parseFloat(match[0]), missing: false };
@@ -218,12 +266,7 @@
             if (drl < 90) return "tốt"; 
             return "xuất sắc";
         }
-        function evaluateKhuyetDiem(gpa, drl) {
-            if (gpa < 3.2 && drl < 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt";
-            if (gpa >= 3.2 && drl < 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt";
-            if (gpa < 3.2 && drl >= 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt";
-            return "Hoàn thành tốt nhiệm vụ được giao";
-        }
+
         function removeAccents(str) {
             if (!str) return "";
             return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
@@ -233,7 +276,6 @@
             for (let pKey of possibleKeys) {
                 for (let key in rowObj) {
                     let normalizedKey = removeAccents(key).toLowerCase().replace(/[^a-z0-9]/g, '');
-                    
                     let isExcluded = false;
                     for (let eKey of excludeKeys) {
                         if (normalizedKey.includes(eKey)) {
@@ -242,7 +284,6 @@
                         }
                     }
                     if (isExcluded) continue; 
-
                     if (normalizedKey === pKey || normalizedKey.includes(pKey)) {
                         let val = rowObj[key];
                         if (val !== undefined && val !== null && String(val).trim() !== "") {
@@ -254,7 +295,10 @@
             return "";
         }
 
-        async function processData() {
+        // ==========================================
+        // BƯỚC 1: ĐỌC EXCEL VÀ HIỂN THỊ BẢNG PREVIEW
+        // ==========================================
+        async function previewData() {
             const wordInput = document.getElementById('wordFile');
             const excelInput = document.getElementById('excelFile');
 
@@ -263,205 +307,275 @@
                 return;
             }
 
-            showStatus("⏳ Đang giải mã Word và cấu trúc lại mã nguồn XML... Vui lòng đợi!", "info");
+            showStatus("⏳ Đang phân tích dữ liệu Excel... Vui lòng đợi!", "info");
+
+            const excelReader = new FileReader();
+            excelReader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array', cellDates: true});
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                    
+                    let headerRowIndex = -1;
+                    for (let i = 0; i < rows.length; i++) {
+                        if (!rows[i]) continue;
+                        const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
+                        if (rowText.includes('hoten') || rowText.includes('hovaten')) {
+                            headerRowIndex = i; break;
+                        }
+                    }
+
+                    if (headerRowIndex === -1) throw new Error("Không tìm thấy dòng tiêu đề 'Họ tên' trong file Excel!");
+
+                    const headers = rows[headerRowIndex];
+                    const validStudents = [];
+
+                    for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                        const rowData = rows[i];
+                        if (!rowData || rowData.length === 0) continue;
+                        let rowObj = {};
+                        headers.forEach((h, index) => { if (h) rowObj[h] = rowData[index]; });
+
+                        let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
+                        let normalizedName = name ? removeAccents(String(name)).toLowerCase() : "";
+                        
+                        if (name && normalizedName.trim() !== "" && !normalizedName.includes('dong y')) {
+                            validStudents.push(rowObj);
+                        }
+                    }
+
+                    if (validStudents.length === 0) throw new Error("Không tìm thấy hàng dữ liệu sinh viên hợp lệ!");
+
+                    // Reset mảng dữ liệu toàn cục
+                    window.pendingStudents = [];
+                    window.missingDataWarnings = [];
+
+                    for (let index = 0; index < validStudents.length; index++) {
+                        const row = validStudents[index];
+                        let missingFields = [];
+                        
+                        const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "Sinh_Vien";
+
+                        // Cắt lấy các chuỗi điểm nguyên bản để hiển thị lên bảng pop-up
+                        const gpa242 = getColValue(row, ['2024.2', '20242', 'gpa1', 'ky1']) || "-";
+                        const gpa251 = getColValue(row, ['2025.1', '20251', 'gpa2', 'ky2']) || "-";
+                        const tbGpaRaw = getColValue(row, ['gpa', 'tb2ky', 'trungbinh', 'diemhoctap']);
+                        const drlRaw = getColValue(row, ['drl', 'diemrenluyen', 'renluyen']);
+
+                        let gpaObj = parseGPA(tbGpaRaw);
+                        if(gpaObj.missing) missingFields.push("GPA");
+
+                        let drlObj = parseDRL(drlRaw);
+                        if(drlObj.missing) missingFields.push("Điểm rèn luyện");
+
+                        let ngayHop = parseDate(getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan']));
+                        if(ngayHop === "") missingFields.push("Ngày họp Đoàn trường/LCĐ");
+
+                        let soBNX = getColValue(row, ['sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv']);
+                        if(!soBNX) missingFields.push("Số Bản nhận xét");
+
+                        let tenDoanTruong = getColValue(row, ['doantruong', 'lienchi', 'lcd'], ['ngay', 'thoigian', 'hop']);
+
+                        if (missingFields.length > 0) {
+                            window.missingDataWarnings.push(`<b style="color: #b71a1a;">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
+                        }
+
+                        // Đánh giá mặc định bằng AI
+                        let evalHT = evaluateHocTap(gpaObj.val);
+                        let evalRL = evaluateRenLuyen(drlObj.val);
+
+                        // Lưu vào bộ nhớ tạm
+                        window.pendingStudents.push({
+                            index: index,
+                            HoTen: HoTen,
+                            gpa242: gpa242,
+                            gpa251: gpa251,
+                            tbGpaRaw: tbGpaRaw || "-",
+                            drlRaw: drlRaw || "-",
+                            gpaObj: gpaObj,
+                            drlObj: drlObj,
+                            ngayHop: ngayHop,
+                            soBNX: soBNX,
+                            tenDoanTruong: tenDoanTruong,
+                            evalHT: evalHT,
+                            evalRL: evalRL
+                        });
+                    }
+
+                    // HIỂN THỊ LÊN BẢNG POP-UP
+                    let trHtml = '';
+                    const options = ["xuất sắc", "tốt", "khá", "trung bình"];
+                    
+                    window.pendingStudents.forEach((student, i) => {
+                        let htOpts = options.map(opt => `<option value="${opt}" ${opt === student.evalHT ? 'selected' : ''}>${opt}</option>`).join('');
+                        let rlOpts = options.map(opt => `<option value="${opt}" ${opt === student.evalRL ? 'selected' : ''}>${opt}</option>`).join('');
+
+                        trHtml += `<tr>
+                            <td style="text-align: center; font-weight: bold;">${i + 1}</td>
+                            <td style="font-weight: bold; color: #b71a1a;">${student.HoTen}</td>
+                            <td style="text-align: center;">${student.gpa242}</td>
+                            <td style="text-align: center;">${student.gpa251}</td>
+                            <td style="text-align: center; font-weight: bold;">${student.tbGpaRaw}</td>
+                            <td style="text-align: center; font-weight: bold;">${student.drlRaw}</td>
+                            <td style="text-align: center;"><select id="sel-ht-${i}" class="eval-select">${htOpts}</select></td>
+                            <td style="text-align: center;"><select id="sel-rl-${i}" class="eval-select">${rlOpts}</select></td>
+                        </tr>`;
+                    });
+
+                    document.getElementById('previewTableBody').innerHTML = trHtml;
+                    document.getElementById('statusBox').style.display = 'none'; // Ẩn loading
+                    document.getElementById('previewModalOverlay').style.display = 'flex'; // Hiện Pop-up
+                    
+                } catch (error) {
+                    console.error(error);
+                    showStatus("❌ Lỗi định dạng Excel. Không tìm thấy dòng tiêu đề hợp lệ.", "error");
+                }
+            };
+            excelReader.readAsArrayBuffer(excelInput.files[0]);
+        }
+
+        // ==========================================
+        // BƯỚC 2: XUẤT FILE WORD TỪ DỮ LIỆU ĐÃ DUYỆT
+        // ==========================================
+        async function executeFinalExport() {
+            document.getElementById('previewModalOverlay').style.display = 'none';
+            showStatus("⏳ Đang giải mã Word và gộp dữ liệu... Vui lòng đợi!", "info");
 
             try {
+                const wordInput = document.getElementById('wordFile');
                 const wordBuffer = await wordInput.files[0].arrayBuffer();
-                const excelReader = new FileReader();
-                
-                excelReader.onload = async function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, {type: 'array', cellDates: true});
-                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
-                        
-                        let headerRowIndex = -1;
-                        for (let i = 0; i < rows.length; i++) {
-                            if (!rows[i]) continue;
-                            const rowText = removeAccents(rows[i].join('').toLowerCase()).replace(/\s/g,'');
-                            if (rowText.includes('hoten') || rowText.includes('hovaten')) {
-                                headerRowIndex = i; break;
-                            }
-                        }
+                const danhSachHoSo = [];
 
-                        if (headerRowIndex === -1) throw new Error("Không tìm thấy dòng tiêu đề 'Họ tên' trong file Excel!");
+                // Quét qua bảng DOM để lấy giá trị Đánh giá mà người dùng đã chỉnh sửa (nếu có)
+                window.pendingStudents.forEach((student, index) => {
+                    let finalHT = document.getElementById(`sel-ht-${index}`).value;
+                    let finalRL = document.getElementById(`sel-rl-${index}`).value;
+                    
+                    let gpaVal = student.gpaObj.val;
+                    let drlVal = student.drlObj.val;
 
-                        const headers = rows[headerRowIndex];
-                        const validStudents = [];
+                    let nangLucStr = "";
+                    let khuyetDiemStr = "";
 
-                        for (let i = headerRowIndex + 1; i < rows.length; i++) {
-                            const rowData = rows[i];
-                            if (!rowData || rowData.length === 0) continue;
-                            let rowObj = {};
-                            headers.forEach((h, index) => { if (h) rowObj[h] = rowData[index]; });
-
-                            let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
-                            let normalizedName = name ? removeAccents(String(name)).toLowerCase() : "";
-                            
-                            if (name && normalizedName.trim() !== "" && !normalizedName.includes('dong y')) {
-                                validStudents.push(rowObj);
-                            }
-                        }
-
-                        if (validStudents.length === 0) throw new Error("Không tìm thấy hàng dữ liệu sinh viên hợp lệ!");
-
-                        let missingDataWarnings = [];
-                        const currentYear = new Date().getFullYear();
-                        const danhSachHoSo = [];
-
-                        for (let index = 0; index < validStudents.length; index++) {
-                            const row = validStudents[index];
-                            let missingFields = [];
-                            
-                            const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "Sinh_Vien";
-
-                            let gpaObj = parseGPA(getColValue(row, ['gpa', 'tb2ky', 'trungbinh', 'diemhoctap']));
-                            if(gpaObj.missing) missingFields.push("GPA");
-
-                            let drlObj = parseDRL(getColValue(row, ['drl', 'diemrenluyen', 'renluyen']));
-                            if(drlObj.missing) missingFields.push("Điểm rèn luyện");
-
-                            let ngayHop = parseDate(getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan']));
-                            if(ngayHop === "") missingFields.push("Ngày họp Đoàn trường/LCĐ");
-
-                            let soBNX = getColValue(row, ['sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv']);
-                            if(!soBNX) missingFields.push("Số Bản nhận xét");
-
-                            let tenDoanTruong = getColValue(row, ['doantruong', 'lienchi', 'lcd'], ['ngay', 'thoigian', 'hop']);
-
-                            if (missingFields.length > 0) {
-                                missingDataWarnings.push(`<b style="color: #b71a1a;">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
-                            }
-
-                            let nangLucStr = "";
-                            let khuyetDiemStr = "";
-
-                            if (gpaObj.val < 2.0 && drlObj.val < 50) {
-                                nangLucStr = "";
-                                khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
-                            } else if (gpaObj.val < 2.0) {
-                                nangLucStr = `Có kết quả rèn luyện ${evaluateRenLuyen(drlObj.val)}.`;
-                                khuyetDiemStr = (drlObj.val < 80) ? "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt." : "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
-                            } else if (drlObj.val < 50) {
-                                nangLucStr = `Có kết quả học tập ${evaluateHocTap(gpaObj.val)}.`;
-                                khuyetDiemStr = (gpaObj.val < 3.2) ? "Cần cố gắng hơn trong rèn luyện và học tập để đạt kết quả tốt." : "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
-                            } else {
-                                nangLucStr = `Có kết quả học tập ${evaluateHocTap(gpaObj.val)} và rèn luyện ${evaluateRenLuyen(drlObj.val)}, có tinh thần học để nâng cao trình độ chuyên môn.`;
-                                if (gpaObj.val < 3.2 && drlObj.val < 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
-                                else if (gpaObj.val >= 3.2 && drlObj.val < 80) khuyetDiemStr = "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
-                                else if (gpaObj.val < 3.2 && drlObj.val >= 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
-                                else khuyetDiemStr = "Hoàn thành tốt nhiệm vụ được giao.";
-                            }
-
-                            danhSachHoSo.push({
-                                STT: soBNX || "......",
-                                ThoiGian: ngayHop || `ngày......tháng......năm ${currentYear}`,
-                                TenChiBo: getColValue(row, ['chibo', 'tencb']) || "......................",
-                                TenDoanTruong: tenDoanTruong || "......................",
-                                HoTen: HoTen,
-                                NangLuc: nangLucStr,
-                                KhuyetDiem: khuyetDiemStr,
-                                PageBreak: index < validStudents.length - 1
-                            });
-                        }
-
-                        const zip = new PizZip(wordBuffer);
-                        
-                        for (let fileName in zip.files) {
-                            if (fileName.endsWith('.xml')) {
-                                let xml = zip.files[fileName].asText();
-                                xml = xml.replace(/<w:proofErr[^>]*>/g, '');
-                                zip.file(fileName, xml);
-                            }
-                        }
-
-                        let docXml = zip.files["word/document.xml"].asText();
-                        
-                        docXml = docXml.replace(/<w:body>/, '<w:body><w:p><w:r><w:t>[[#DanhSach]]</w:t></w:r></w:p>');
-                        
-                        let splitIndex = docXml.lastIndexOf('<w:sectPr');
-                        if (splitIndex === -1) {
-                            splitIndex = docXml.lastIndexOf('</w:body>');
-                        }
-                        
-                        if (splitIndex !== -1) {
-                            let before = docXml.substring(0, splitIndex);
-                            let after = docXml.substring(splitIndex);
-                            
-                            let lastParaEnd = before.lastIndexOf('</w:p>');
-                            if (lastParaEnd !== -1) {
-                                let inlinePageBreak = '<w:r><w:t>[[#PageBreak]]</w:t></w:r><w:r><w:br w:type="page"/></w:r><w:r><w:t>[[/PageBreak]]</w:t></w:r>';
-                                before = before.substring(0, lastParaEnd) + inlinePageBreak + '</w:p>';
-                            }
-                            
-                            docXml = before + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p>' + after;
-                        }
-                        
-                        zip.file("word/document.xml", docXml);
-
-                        const doc = new window.docxtemplater(zip, { 
-                            paragraphLoop: true, linebreaks: true, delimiters: { start: '[[', end: ']]' } 
-                        });
-                        
-                        doc.render({
-                            DanhSach: danhSachHoSo
-                        });
-
-                        const docOutput = doc.getZip().generate({
-                            type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        });
-
-                        const now = new Date();
-                        const dateStr = `${String(now.getDate()).padStart(2, '0')}_${String(now.getMonth() + 1).padStart(2, '0')}_${now.getFullYear()}`;
-                        const finalFileName = `Tong_Hop_Ban_Nhan_Xet_${dateStr}.docx`;
-
-                        saveAs(docOutput, finalFileName);
-                        
-                        const fileId = 'docx_' + Date.now();
-                        await localforage.setItem(fileId, docOutput);
-
-                        const timeString = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                        const historyRecord = {
-                            id: fileId,
-                            time: timeString,
-                            fileName: finalFileName,
-                            type: "Bản nhận xét Đảng viên",
-                            count: validStudents.length + " người",
-                            status: "Thành công"
-                        };
-
-                        let historyData = JSON.parse(localStorage.getItem('yumHistory')) || [];
-                        historyData.unshift(historyRecord);
-                        localStorage.setItem('yumHistory', JSON.stringify(historyData));
-
-                        showStatus(`🎉 THÀNH CÔNG! Đã gộp tự động ${validStudents.length} hồ sơ thành 1 file Word.`, "success");
-
-                        if (missingDataWarnings.length > 0) {
-                            let alertMsg = `Hệ thống đã xuất file Word tổng <b>thành công</b>, nhưng quá trình quét phát hiện một số sinh viên bị bỏ trống dữ liệu quan trọng trong Excel. Vui lòng kiểm tra lại file Word vừa tải về để điền bổ sung:<br><br>`;
-                            alertMsg += `<div style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 4px; border: 1px solid #e2e8f0; max-height: 250px; overflow-y: auto; font-size: 13.5px; line-height: 1.8;">`;
-                            alertMsg += missingDataWarnings.map(msg => `• ${msg}`).join("<br>");
-                            alertMsg += `</div>`;
-
-                            await showCustomModal({
-                                title: '⚠️ BÁO CÁO THIẾU DỮ LIỆU',
-                                message: alertMsg,
-                                confirmText: 'Tôi đã hiểu và sẽ bổ sung'
-                            });
-                        }
-
-                    } catch (error) {
-                        console.error(error);
-                        let msg = error.message;
-                        if (error.properties && error.properties.errors) {
-                            msg = `⚠️ Lỗi định dạng Word. Xin vui lòng kiểm tra lại các khung biến [[ ]].`;
-                        }
-                        showStatus("❌ " + msg, "error");
+                    // LOGIC NỐI CHUỖI KHUYẾT ĐIỂM DỰA TRÊN ĐIỀU KIỆN
+                    if (gpaVal < 2.0 && drlVal < 50) {
+                        nangLucStr = "";
+                        khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
+                    } else if (gpaVal < 2.0) {
+                        nangLucStr = `Có kết quả rèn luyện ${finalRL}.`;
+                        khuyetDiemStr = (drlVal < 80) ? "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt." : "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
+                    } else if (drlVal < 50) {
+                        nangLucStr = `Có kết quả học tập ${finalHT}.`;
+                        khuyetDiemStr = (gpaVal < 3.2) ? "Cần cố gắng hơn trong rèn luyện và học tập để đạt kết quả tốt." : "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
+                    } else {
+                        nangLucStr = `Có kết quả học tập ${finalHT} và rèn luyện ${finalRL}, có tinh thần học để nâng cao trình độ chuyên môn.`;
+                        if (gpaVal < 3.2 && drlVal < 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
+                        else if (gpaVal >= 3.2 && drlVal < 80) khuyetDiemStr = "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
+                        else if (gpaVal < 3.2 && drlVal >= 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
+                        else khuyetDiemStr = "Hoàn thành tốt nhiệm vụ được giao.";
                     }
+
+                    danhSachHoSo.push({
+                        STT: student.soBNX || "......",
+                        ThoiGian: student.ngayHop || `ngày......tháng......năm ${window.currentYear}`,
+                        TenChiBo: student.tenChiBo || "......................",
+                        TenDoanTruong: student.tenDoanTruong || "......................",
+                        HoTen: student.HoTen,
+                        NangLuc: nangLucStr,
+                        KhuyetDiem: khuyetDiemStr,
+                        PageBreak: index < window.pendingStudents.length - 1
+                    });
+                });
+
+                // XỬ LÝ CẤY GHÉP XML
+                const zip = new PizZip(wordBuffer);
+                for (let fileName in zip.files) {
+                    if (fileName.endsWith('.xml')) {
+                        let xml = zip.files[fileName].asText();
+                        xml = xml.replace(/<w:proofErr[^>]*>/g, '');
+                        zip.file(fileName, xml);
+                    }
+                }
+
+                let docXml = zip.files["word/document.xml"].asText();
+                docXml = docXml.replace(/<w:body>/, '<w:body><w:p><w:r><w:t>[[#DanhSach]]</w:t></w:r></w:p>');
+                
+                let splitIndex = docXml.lastIndexOf('<w:sectPr');
+                if (splitIndex === -1) {
+                    splitIndex = docXml.lastIndexOf('</w:body>');
+                }
+                
+                if (splitIndex !== -1) {
+                    let before = docXml.substring(0, splitIndex);
+                    let after = docXml.substring(splitIndex);
+                    
+                    let lastParaEnd = before.lastIndexOf('</w:p>');
+                    if (lastParaEnd !== -1) {
+                        let inlinePageBreak = '<w:r><w:t>[[#PageBreak]]</w:t></w:r><w:r><w:br w:type="page"/></w:r><w:r><w:t>[[/PageBreak]]</w:t></w:r>';
+                        before = before.substring(0, lastParaEnd) + inlinePageBreak + '</w:p>';
+                    }
+                    docXml = before + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p>' + after;
+                }
+                zip.file("word/document.xml", docXml);
+
+                const doc = new window.docxtemplater(zip, { 
+                    paragraphLoop: true, linebreaks: true, delimiters: { start: '[[', end: ']]' } 
+                });
+                
+                doc.render({ DanhSach: danhSachHoSo });
+
+                const docOutput = doc.getZip().generate({
+                    type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                });
+
+                const now = new Date();
+                const dateStr = `${String(now.getDate()).padStart(2, '0')}_${String(now.getMonth() + 1).padStart(2, '0')}_${now.getFullYear()}`;
+                const finalFileName = `Tong_Hop_Ban_Nhan_Xet_${dateStr}.docx`;
+
+                saveAs(docOutput, finalFileName);
+                
+                // LƯU LỊCH SỬ
+                const fileId = 'docx_' + Date.now();
+                await localforage.setItem(fileId, docOutput);
+
+                const timeString = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                const historyRecord = {
+                    id: fileId,
+                    time: timeString,
+                    fileName: finalFileName,
+                    type: "Bản nhận xét Đảng viên",
+                    count: window.pendingStudents.length + " người",
+                    status: "Thành công"
                 };
-                excelReader.readAsArrayBuffer(excelInput.files[0]);
-            } catch (err) {
-                showStatus("❌ Lỗi hệ thống: " + err.message, "error");
+
+                let historyData = JSON.parse(localStorage.getItem('yumHistory')) || [];
+                historyData.unshift(historyRecord);
+                localStorage.setItem('yumHistory', JSON.stringify(historyData));
+
+                showStatus(`🎉 THÀNH CÔNG! Đã gộp tự động ${window.pendingStudents.length} hồ sơ thành 1 file Word.`, "success");
+
+                // BẬT BÁO CÁO THIẾU DỮ LIỆU SAU KHI XUẤT XONG
+                if (window.missingDataWarnings.length > 0) {
+                    let alertMsg = `Hệ thống đã xuất file Word tổng <b>thành công</b>, nhưng quá trình quét phát hiện một số sinh viên bị bỏ trống dữ liệu quan trọng trong Excel. Vui lòng kiểm tra lại file Word vừa tải về để điền bổ sung:<br><br>`;
+                    alertMsg += `<div style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 4px; border: 1px solid #e2e8f0; max-height: 250px; overflow-y: auto; font-size: 13.5px; line-height: 1.8;">`;
+                    alertMsg += window.missingDataWarnings.map(msg => `• ${msg}`).join("<br>");
+                    alertMsg += `</div>`;
+
+                    await showCustomModal({
+                        title: '⚠️ BÁO CÁO THIẾU DỮ LIỆU',
+                        message: alertMsg,
+                        confirmText: 'Tôi đã hiểu và sẽ bổ sung'
+                    });
+                }
+
+            } catch (error) {
+                console.error(error);
+                let msg = error.message;
+                if (error.properties && error.properties.errors) {
+                    msg = `⚠️ Lỗi định dạng Word. Xin vui lòng kiểm tra lại các khung biến [[ ]].`;
+                }
+                showStatus("❌ " + msg, "error");
             }
         }
     </script>
