@@ -6,86 +6,170 @@
     <title>Hướng dẫn sử dụng - YUMOFFICE</title>
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
+    
+    <!-- KHỐI CSS GIAO DIỆN & HIỆU ỨNG MƯỢT MÀ CHO TRANG HƯỚNG DẪN -->
     <style>
+        :root {
+            --primary-red: #b71a1a;
+            --soft-red: #fef2f2;
+            --text-main: #1e293b;
+            --text-muted: #475569;
+        }
+
+        /* Hiệu ứng xuất hiện mượt mà (Fade-in Up) */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeInUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        .guide-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .guide-main-title {
+            font-size: 26px;
+            color: var(--primary-red);
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .guide-desc {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Khối Section Hướng dẫn dạng Card */
         .guide-section {
             background: #fff;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 25px;
-            margin-bottom: 25px;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
             text-align: left;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .guide-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; width: 4px;
+            background: var(--primary-red);
+        }
+        .guide-section:hover {
+            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
         }
         .guide-title {
-            color: #b71a1a;
-            font-size: 18px;
-            font-weight: bold;
-            border-bottom: 2px solid #b71a1a;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
+            color: var(--primary-red);
+            font-size: 19px;
+            font-weight: 800;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
             gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
+        /* Định dạng danh sách các bước */
         .step-list {
             list-style-type: none;
             padding-left: 0;
+            margin: 0;
         }
         .step-item {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             position: relative;
-            padding-left: 35px;
+            padding-left: 45px;
         }
         .step-number {
             position: absolute;
             left: 0;
-            top: 2px;
-            background: #b71a1a;
+            top: -2px;
+            background: linear-gradient(135deg, var(--primary-red) 0%, #e11d48 100%);
             color: #fff;
-            width: 22px;
-            height: 22px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             text-align: center;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
-            line-height: 22px;
+            line-height: 30px;
+            box-shadow: 0 4px 10px rgba(183, 26, 26, 0.3);
         }
         .step-heading {
-            font-weight: bold;
-            color: #1e293b;
-            font-size: 15px;
-            margin-bottom: 5px;
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 16px;
+            margin-bottom: 8px;
         }
         .step-content {
-            color: #475569;
-            font-size: 14.5px;
-            line-height: 1.7;
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.8;
             text-align: justify;
         }
+
+        /* Định dạng thẻ Code */
         .code-tag {
-            background: #f1f5f9;
-            color: #b71a1a;
-            padding: 2px 6px;
-            border-radius: 4px;
+            background: var(--soft-red);
+            color: var(--primary-red);
+            padding: 3px 8px;
+            border-radius: 6px;
             font-family: Consolas, monospace;
             font-weight: bold;
             font-size: 13.5px;
+            border: 1px solid #fecaca;
+        }
+
+        /* Bảng hiển thị từ khóa */
+        .table-container {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .table-spec {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 13.5px;
+            font-size: 14.5px;
         }
         .table-spec th {
             background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            padding: 8px;
-            color: #1e293b;
+            border-bottom: 2px solid #cbd5e1;
+            padding: 12px 15px;
+            color: var(--text-main);
+            font-weight: 700;
+            text-align: left;
         }
         .table-spec td {
-            border: 1px solid #cbd5e1;
-            padding: 8px;
-            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .table-spec tr:last-child td {
+            border-bottom: none;
+        }
+        .table-spec tr:hover {
+            background-color: #f1f5f9;
         }
     </style>
 </head>
@@ -117,69 +201,77 @@
     </nav>
 
     <div class="content-wrapper">
-        <h2 class="section-title">HƯỚNG DẪN VẬN HÀNH HỆ THỐNG YUMOFFICE</h2>
         
-        <div class="tool-description">
-            Cẩm nang hướng dẫn chi tiết quy trình đồng bộ dữ liệu Excel, cấu hình phôi mẫu Word và thao tác rà soát, hiệu chỉnh xếp loại nghiệp vụ trực tiếp trên giao diện website.
+        <!-- TIÊU ĐỀ TRANG MƯỢT MÀ -->
+        <div class="guide-header fade-in">
+            <div class="guide-main-title">HƯỚNG DẪN VẬN HÀNH HỆ THỐNG YUMOFFICE</div>
+            <div class="guide-desc">
+                Cẩm nang hướng dẫn chi tiết quy trình đồng bộ dữ liệu Excel, cấu hình phôi mẫu Word và thao tác rà soát, hiệu chỉnh xếp loại nghiệp vụ trực tiếp trên giao diện website.
+            </div>
         </div>
 
-        <div class="guide-section">
-            <div class="guide-title">⚙️ 1. QUY QUY ĐỊNH ĐẶT BIẾN TRÊN PHÔI WORD</div>
+        <!-- KHỐI 1: CẤU HÌNH BIẾN HỒ SƠ -->
+        <div class="guide-section fade-in delay-1">
+            <div class="guide-title">⚙️ 1. QUY ĐỊNH ĐẶT BIẾN TRÊN PHÔI WORD</div>
             <div class="step-content">
                 Hệ thống sử dụng lõi quét ký tự đóng khung vuông kép để tìm kiếm và tự động thay thế văn bản. Để phôi hồ sơ hoạt động chính xác, đồng chí cần thiết lập các từ khóa biến chính xác như sau trong tệp mẫu <span class="code-tag">.docx</span>:
-                <table class="table-spec">
-                    <thead>
-                        <tr>
-                            <th style="width: 25%;">Từ khóa biến</th>
-                            <th style="width: 35%;">Ý nghĩa hành chính</th>
-                            <th style="width: 40%;">Dữ liệu tự động sinh ra</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span class="code-tag">[[STT]]</span></td>
-                            <td>Số Bản nhận xét</td>
-                            <td>Trích xuất từ cột Số BNX trong bảng Excel (Ví dụ: 03 - BNX/ĐT)</td>
-                        </tr>
-                        <tr>
-                            <td><span class="code-tag">[[HoTen]]</span></td>
-                            <td>Họ và tên của sinh viên</td>
-                            <td>Tự động viết hoa và bốc tách chính xác theo từng hàng dữ liệu.</td>
-                        </tr>
-                        <tr>
-                            <td><span class="code-tag">[[TenChiBo]]</span></td>
-                            <td>Tên Chi bộ Sinh viên</td>
-                            <td>Đổ dữ liệu tên Chi bộ tương ứng từ bảng Excel vào văn bản.</td>
-                        </tr>
-                        <tr>
-                            <td><span class="code-tag">[[TenDoanTruong]]</span></td>
-                            <td>Tên Đoàn trường / Liên chi Đoàn</td>
-                            <td>Nhận diện thông minh cấp ban hành để điền vào căn cứ văn bản.</td>
-                        </tr>
-                        <tr>
-                            <td><span class="code-tag">[[ThoiGian]]</span></td>
-                            <td>Ngày họp thông qua hồ sơ</td>
-                            <td>Tự động dịch định dạng số sang chữ hành chính (Ví dụ: ngày 04 tháng 06 năm 2026).</td>
-                        </tr>
-                        <tr>
-                            <td><span class="code-tag">[[NangLuc]]</span></td>
-                            <td>Nhận xét năng lực, học tập, rèn luyện</td>
-                            <td>Tự động kết hợp kết quả xếp loại học tập, rèn luyện và nối câu khen ngợi động.</td>
-                        </tr>
-                        <tr>
-                            <td><span class="code-tag">[[KhuyetDiem]]</span></td>
-                            <td>Nhận xét khuyết điểm, lưu ý</td>
-                            <td>Đưa ra câu nhận xét khuyết điểm hoặc nhắc nhở cố gắng dựa trên điểm số.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                
+                <div class="table-container">
+                    <table class="table-spec">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Từ khóa biến</th>
+                                <th style="width: 35%;">Ý nghĩa hành chính</th>
+                                <th style="width: 40%;">Dữ liệu tự động sinh ra</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="code-tag">[[STT]]</span></td>
+                                <td>Số Bản nhận xét</td>
+                                <td>Trích xuất từ cột Số BNX trong bảng Excel (Ví dụ: 03 - BNX/ĐT)</td>
+                            </tr>
+                            <tr>
+                                <td><span class="code-tag">[[HoTen]]</span></td>
+                                <td>Họ và tên của sinh viên</td>
+                                <td>Tự động viết hoa và bốc tách chính xác theo từng hàng dữ liệu.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="code-tag">[[TenChiBo]]</span></td>
+                                <td>Tên Chi bộ Sinh viên</td>
+                                <td>Đổ dữ liệu tên Chi bộ tương ứng từ bảng Excel vào văn bản.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="code-tag">[[TenDoanTruong]]</span></td>
+                                <td>Tên Đoàn trường / Liên chi Đoàn</td>
+                                <td>Nhận diện thông minh cấp ban hành để điền vào căn cứ văn bản.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="code-tag">[[ThoiGian]]</span></td>
+                                <td>Ngày họp thông qua hồ sơ</td>
+                                <td>Tự động dịch định dạng số sang chữ hành chính (Ví dụ: ngày 04 tháng 06 năm 2026).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="code-tag">[[NangLuc]]</span></td>
+                                <td>Nhận xét năng lực, học tập, rèn luyện</td>
+                                <td>Tự động kết hợp kết quả xếp loại học tập, rèn luyện và nối câu khen ngợi động.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="code-tag">[[KhuyetDiem]]</span></td>
+                                <td>Nhận xét khuyết điểm, lưu ý</td>
+                                <td>Đưa ra câu nhận xét khuyết điểm hoặc nhắc nhở cố gắng dựa trên điểm số.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 <p style="margin-top: 15px; font-size: 13.5px; color: #b71a1a; font-weight: bold;">
                     * Lưu ý: Đồng chí KHÔNG cần chèn các thẻ đóng mở vòng lặp hay lệnh ngắt trang phức tạp vào file Word, hệ thống đã tích hợp công nghệ cấy ghép XML tự động ngắt trang chuẩn lề lối cho từng sinh viên.
                 </p>
             </div>
         </div>
 
-        <div class="guide-section">
+        <!-- KHỐI 2: QUY TRÌNH 3 BƯỚC XỬ LÝ -->
+        <div class="guide-section fade-in delay-2">
             <div class="guide-title">🚀 2. QUY TRÌNH 3 BƯỚC TRỘN HỒ SƠ HÀNG LOẠT</div>
             <ul class="step-list">
                 <li class="step-item">
@@ -201,13 +293,14 @@
                     <div class="step-number">3</div>
                     <div class="step-heading">Xuất tệp Word tổng hợp và kiểm tra báo cáo lỗi</div>
                     <div class="step-content">
-                        Nhấn nút "Xuất bản nhận xét", hệ thống sẽ biên dịch siêu tốc và tải xuống máy tính của đồng chí duy nhất 1 file Word (.docx) chứa toàn bộ các hồ sơ liên tiếp nhau (mỗi người 1 trang khít lề, không tạo trang trắng thừa). Sau khi tải xong, nếu có sinh viên bị thiếu dữ liệu trong Excel, cửa sổ kiểm toán (Audit Report) sẽ hiển thị để nhắc nhở đồng chí rà soát.
+                        Nhấn nút "Xuất bản nhận xét", hệ thống sẽ biên dịch siêu tốc và tải xuống máy tính của đồng chí duy nhất 1 file Word (<span class="code-tag">.docx</span>) chứa toàn bộ các hồ sơ liên tiếp nhau (mỗi người 1 trang khít lề, không tạo trang trắng thừa). Sau khi tải xong, nếu có sinh viên bị thiếu dữ liệu trong Excel, cửa sổ kiểm toán (Audit Report) sẽ hiển thị để nhắc nhở đồng chí rà soát.
                     </div>
                 </li>
             </ul>
         </div>
 
-        <div class="guide-section">
+        <!-- KHỐI 3: KHO TÀI LIỆU VÀ BẢO MẬT -->
+        <div class="guide-section fade-in delay-3">
             <div class="guide-title">🛡️ 3. KHAI THÁC KHO TÀI LIỆU VÀ CƠ CHẾ BẢO MẬT</div>
             <div class="step-content" style="line-height: 1.8;">
                 • <strong>Tính năng xem trước tại Kho tài liệu:</strong> Đồng chí có thể bấm nút "Xem trước" (hoặc Xem trực tiếp) để đọc nhanh cấu trúc phôi mẫu Word, Excel, PDF chuẩn ngay trên cửa sổ Pop-up iframe của website mà không cần phải tải về máy hay mở tab mới.
