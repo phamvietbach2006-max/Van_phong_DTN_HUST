@@ -165,9 +165,21 @@
             return String(raw); 
         }
 
+        // ===============================================
+        // ĐÃ NÂNG CẤP: Xử lý nhập 2 giá trị cho GPA & ĐRL
+        // ===============================================
         function parseGPA(raw) {
             if (!raw || String(raw).trim() === "") return { val: 0, missing: true };
             let str = String(raw).trim().replace(/,/g, '.');
+            
+            // Nhận diện dấu gạch ngang, gạch dưới, xuyệt
+            let rangeMatch = str.match(/(\d+(?:\.\d+)?)\s*[-–—_/\\]+\s*(\d+(?:\.\d+)?)/);
+            if (rangeMatch) {
+                let v1 = parseFloat(rangeMatch[1]);
+                let v2 = parseFloat(rangeMatch[2]);
+                return { val: (v1 + v2) / 2, missing: false }; // Trả về trung bình cộng
+            }
+
             let match = str.match(/[\d.]+/);
             if (match && parseFloat(match[0]) > 0) {
                 return { val: parseFloat(match[0]), missing: false };
@@ -179,11 +191,12 @@
             if (!raw || String(raw).trim() === "") return { val: 0, missing: true };
             let str = String(raw).trim().replace(/,/g, '.');
             
-            let rangeMatch = str.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/);
+            // Nhận diện dấu gạch ngang, gạch dưới, xuyệt (VD: 72-39, 72/39)
+            let rangeMatch = str.match(/(\d+(?:\.\d+)?)\s*[-–—_/\\]+\s*(\d+(?:\.\d+)?)/);
             if (rangeMatch) {
                 let v1 = parseFloat(rangeMatch[1]);
                 let v2 = parseFloat(rangeMatch[2]);
-                return { val: (v1 + v2) / 2, missing: false };
+                return { val: (v1 + v2) / 2, missing: false }; // Trả về trung bình cộng
             }
             
             let match = str.match(/[\d.]+/);
@@ -206,10 +219,10 @@
             return "xuất sắc";
         }
         function evaluateKhuyetDiem(gpa, drl) {
-            if (gpa < 3.2 && drl < 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
-            if (gpa >= 3.2 && drl < 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
-            if (gpa < 3.2 && drl >= 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
-            return "Hoàn thành tốt nhiệm vụ được giao.";
+            if (gpa < 3.2 && drl < 80) return "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt";
+            if (gpa >= 3.2 && drl < 80) return "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt";
+            if (gpa < 3.2 && drl >= 80) return "Cần cố gắng hơn trong học tập để đạt kết quả tốt";
+            return "Hoàn thành tốt nhiệm vụ được giao";
         }
         function removeAccents(str) {
             if (!str) return "";
@@ -353,10 +366,6 @@
                             });
                         }
 
-                        // ===============================================
-                        // ĐÃ SỬA LỖI: Triệt tiêu trang trắng thừa giữa các hồ sơ
-                        // Bằng cách gắn lệnh ngắt trang chung dòng (inline)
-                        // ===============================================
                         const zip = new PizZip(wordBuffer);
                         
                         for (let fileName in zip.files) {
@@ -369,10 +378,8 @@
 
                         let docXml = zip.files["word/document.xml"].asText();
                         
-                        // Cấy lệnh mở vòng lặp
                         docXml = docXml.replace(/<w:body>/, '<w:body><w:p><w:r><w:t>[[#DanhSach]]</w:t></w:r></w:p>');
                         
-                        // Tìm vị trí kết thúc phần nội dung (trước sectPr hoặc body)
                         let splitIndex = docXml.lastIndexOf('<w:sectPr');
                         if (splitIndex === -1) {
                             splitIndex = docXml.lastIndexOf('</w:body>');
@@ -382,15 +389,12 @@
                             let before = docXml.substring(0, splitIndex);
                             let after = docXml.substring(splitIndex);
                             
-                            // Tìm đoạn kết thúc dòng cuối cùng của văn bản để nhét ngắt trang inline vào
                             let lastParaEnd = before.lastIndexOf('</w:p>');
                             if (lastParaEnd !== -1) {
-                                // Lệnh inline này tuyệt đối không tạo ra dòng trắng mới
                                 let inlinePageBreak = '<w:r><w:t>[[#PageBreak]]</w:t></w:r><w:r><w:br w:type="page"/></w:r><w:r><w:t>[[/PageBreak]]</w:t></w:r>';
                                 before = before.substring(0, lastParaEnd) + inlinePageBreak + '</w:p>';
                             }
                             
-                            // Đóng vòng lặp
                             docXml = before + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p>' + after;
                         }
                         
