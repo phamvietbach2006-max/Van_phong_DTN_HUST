@@ -6,6 +6,39 @@
     <title>Kho tài liệu - YUMOFFICE</title>
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .btn-group {
+            margin-top: 15px; 
+            display: flex; 
+            gap: 10px;
+        }
+        .btn-preview {
+            background-color: #475569 !important;
+        }
+        .btn-preview:hover {
+            background-color: #334155 !important;
+        }
+        .preview-modal-box {
+            width: 90%; 
+            max-width: 1200px; 
+            height: 85vh; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .iframe-container {
+            flex: 1; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 4px; 
+            overflow: hidden; 
+            background: #f8fafc;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <header class="top-header">
@@ -38,12 +71,11 @@
         <h2 class="section-title">KHO TÀI LIỆU & BIỂU MẪU NGHIỆP VỤ</h2>
         
         <div class="tool-description">
-            Khu vực lưu trữ và cung cấp các biểu mẫu chuẩn hành chính của Đoàn Thanh niên Đại học Bách khoa Hà Nội. Dữ liệu được lưu trữ trực tiếp trên hệ thống máy chủ Google Drive.
+            Khu vực lưu trữ và cung cấp các biểu mẫu chuẩn hành chính của Đoàn Thanh niên Đại học Bách khoa Hà Nội. Dữ liệu được tích hợp bộ xem trước trực tuyến và tải về trực tiếp từ máy chủ Google Drive.
         </div>
 
         <div class="upload-grid">
             
-            <!-- TÀI LIỆU 1: BẢN NHẬN XÉT WORD -->
             <div class="upload-box" style="text-align: left; padding: 30px 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="box-icon" style="text-align: left; margin-bottom: 10px;">📄</div>
@@ -53,12 +85,12 @@
                 <div class="box-desc">
                     Biểu mẫu Word đã được cấu hình sẵn các biến đóng khung vuông [[HoTen]], [[STT]] để chạy tự động trên hệ thống YUMOFFICE.
                 </div>
-                <div style="margin-top: 15px;">
-                    <button class="btn-submit" style="padding: 8px 20px; font-size: 13px;" onclick="window.open('https://drive.google.com/uc?export=download&id=1c-PvhHwsG5p2IoZM3J8c2FWGi29siHhv', '_blank')">⬇️ Tải file từ Drive</button>
+                <div class="btn-group">
+                    <button class="btn-submit" style="padding: 8px 15px; font-size: 13px;" onclick="window.open('https://drive.google.com/uc?export=download&id=1c-PvhHwsG5p2IoZM3J8c2FWGi29siHhv', '_blank')">⬇️ Tải file</button>
+                    <button class="btn-submit btn-preview" style="padding: 8px 15px; font-size: 13px;" onclick="openDocPreview('MẪU BẢN NHẬN XÉT ĐẢNG VIÊN (.DOCX)', 'https://docs.google.com/document/d/1c-PvhHwsG5p2IoZM3J8c2FWGi29siHhv/preview')">👁️ Xem trước</button>
                 </div>
             </div>
 
-            <!-- TÀI LIỆU 2: DATA EXCEL -->
             <div class="upload-box" style="text-align: left; padding: 30px 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="box-icon" style="text-align: left; margin-bottom: 10px;">📊</div>
@@ -68,12 +100,12 @@
                 <div class="box-desc">
                     File Excel phôi với các cột tiêu đề chuẩn xác (Họ tên, Chi đoàn...). Giúp hệ thống tự động dò tìm và đọc dữ liệu không bị lỗi.
                 </div>
-                <div style="margin-top: 15px;">
-                    <button class="btn-submit" style="padding: 8px 20px; font-size: 13px; background-color: #16a34a;" onclick="window.open('https://drive.google.com/uc?export=download&id=1CxT3hHNGBXZDvdsb7BhQRq6XjrALrBaj', '_blank')">⬇️ Tải file từ Drive</button>
+                <div class="btn-group">
+                    <button class="btn-submit" style="padding: 8px 15px; font-size: 13px; background-color: #16a34a;" onclick="window.open('https://drive.google.com/uc?export=download&id=1CxT3hHNGBXZDvdsb7BhQRq6XjrALrBaj', '_blank')">⬇️ Tải file</button>
+                    <button class="btn-submit btn-preview" style="padding: 8px 15px; font-size: 13px;" onclick="openDocPreview('MẪU DATA DANH SÁCH EXCEL (.XLSX)', 'https://docs.google.com/spreadsheets/d/1CxT3hHNGBXZDvdsb7BhQRq6XjrALrBaj/preview')">👁️ Xem trước</button>
                 </div>
             </div>
 
-            <!-- TÀI LIỆU 3: NGHỊ QUYẾT WORD -->
             <div class="upload-box" style="text-align: left; padding: 30px 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="box-icon" style="text-align: left; margin-bottom: 10px;">📜</div>
@@ -87,7 +119,6 @@
                 </div>
             </div>
 
-            <!-- TÀI LIỆU 4: CẨM NANG PDF -->
             <div class="upload-box" style="text-align: left; padding: 30px 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="box-icon" style="text-align: left; margin-bottom: 10px;">📕</div>
@@ -96,11 +127,23 @@
                 <div class="box-desc">
                     Tài liệu hướng dẫn chi tiết về font chữ, cỡ chữ, lề lối, cách trình bày thể thức văn bản chuẩn của Đoàn TNCS Hồ Chí Minh.
                 </div>
-                <div style="margin-top: 15px;">
-                    <button class="btn-submit" style="padding: 8px 20px; font-size: 13px; background-color: #2b2b2b;" onclick="window.open('https://drive.google.com/file/d/1ioy8KkMPsPbQB8kfgdkQvGojpN3Ei89h/view?usp=sharing', '_blank')">👁️ Xem tài liệu</button>
+                <div class="btn-group">
+                    <button class="btn-submit" style="padding: 8px 20px; font-size: 13px; background-color: #2b2b2b;" onclick="openDocPreview('CẨM NANG THỂ THỨC VĂN BẢN ĐOÀN (.PDF)', 'https://drive.google.com/file/d/1ioy8KkMPsPbQB8kfgdkQvGojpN3Ei89h/preview')">👁️ Xem trực tiếp</button>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <div id="docPreviewModal" class="modal-overlay" style="z-index: 9999; display: none;">
+        <div class="preview-modal-box">
+            <div id="previewModalTitle" class="modal-title" style="margin-bottom: 0;">Xem trước tài liệu</div>
+            <div class="iframe-container">
+                <iframe id="previewIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+            <div class="modal-buttons" style="margin-top: 15px; justify-content: flex-end; padding: 0;">
+                <button class="btn-modal btn-modal-cancel" style="padding: 10px 30px;" onclick="closeDocPreview()">Đóng cửa sổ</button>
+            </div>
         </div>
     </div>
 
@@ -112,5 +155,19 @@
         </div>
     </footer>
 
+    <script>
+        // Hàm mở cửa sổ nổi xem trước tài liệu
+        function openDocPreview(title, url) {
+            document.getElementById('previewModalTitle').innerText = title;
+            document.getElementById('previewIframe').src = url;
+            document.getElementById('docPreviewModal').style.display = 'flex';
+        }
+
+        // Hàm đóng cửa sổ nổi giải phóng bộ nhớ iframe
+        function closeDocPreview() {
+            document.getElementById('docPreviewModal').style.display = 'none';
+            document.getElementById('previewIframe').src = ''; // Clear src chống tải ngầm tốn ram
+        }
+    </script>
 </body>
 </html>
