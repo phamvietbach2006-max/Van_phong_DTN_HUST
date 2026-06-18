@@ -82,7 +82,7 @@
             <div class="upload-box" onclick="document.getElementById('wordFile').click()">
                 <div class="box-icon">📄</div>
                 <div class="box-title">TẢI LÊN MẪU WORD (.DOCX)</div>
-                <div class="box-desc">Chỉ cần tải phôi Word gốc chứa các biến [[HoTen]], [[STT]]... Hệ thống sẽ tự cấy mã lặp.</div>
+                <div class="box-desc">Lưu ý: Chỉnh sửa lại cấu trúc Năng lực công tác thành: [[NangLuc]] [[KhuyetDiem]]</div>
                 <input type="file" id="wordFile" accept=".docx" style="display: none;">
                 <div id="wordFileName" class="file-name">Chưa có tệp nào được chọn</div>
             </div>
@@ -111,6 +111,7 @@
         </div>
     </footer>
 
+    <!-- CỬA SỔ NỔI 1: BÁO CÁO THIẾU DỮ LIỆU -->
     <div id="customModalOverlay" class="modal-overlay" style="z-index: 9999;">
         <div class="modal-box" style="width: 600px;">
             <div id="modalTitle" class="modal-title">Thông báo</div>
@@ -121,6 +122,7 @@
         </div>
     </div>
 
+    <!-- CỬA SỔ NỔI 2: BẢNG PREVIEW VÀ CHỈNH SỬA ĐÁNH GIÁ -->
     <div id="previewModalOverlay" class="modal-overlay" style="z-index: 9998;">
         <div class="modal-box" style="width: 1000px; max-width: 95%;">
             <div class="modal-title">KIỂM TRA VÀ CHỈNH SỬA ĐÁNH GIÁ</div>
@@ -142,7 +144,8 @@
                         </tr>
                     </thead>
                     <tbody id="previewTableBody">
-                        </tbody>
+                        <!-- Dữ liệu render bằng JS -->
+                    </tbody>
                 </table>
             </div>
             <div class="modal-buttons">
@@ -153,7 +156,6 @@
     </div>
 
     <script>
-        // Các biến toàn cục để lưu trữ trạng thái giữa Bước 1 và Bước 2
         window.pendingStudents = [];
         window.missingDataWarnings = [];
         window.currentYear = new Date().getFullYear();
@@ -254,13 +256,16 @@
             return { val: 0, missing: true };
         }
 
+        // ĐÃ NÂNG CẤP: Bổ sung logic gán "bỏ" tự động vào các hàm đánh giá
         function evaluateHocTap(gpa) {
+            if (gpa < 2.0) return "bỏ"; 
             if (gpa < 2.5) return "trung bình"; 
             if (gpa < 3.2) return "khá";
             if (gpa < 3.6) return "tốt"; 
             return "xuất sắc";
         }
         function evaluateRenLuyen(drl) {
+            if (drl < 50) return "bỏ"; 
             if (drl < 65) return "trung bình"; 
             if (drl < 80) return "khá";
             if (drl < 90) return "tốt"; 
@@ -295,9 +300,6 @@
             return "";
         }
 
-        // ==========================================
-        // BƯỚC 1: ĐỌC EXCEL VÀ HIỂN THỊ BẢNG PREVIEW
-        // ==========================================
         async function previewData() {
             const wordInput = document.getElementById('wordFile');
             const excelInput = document.getElementById('excelFile');
@@ -347,7 +349,6 @@
 
                     if (validStudents.length === 0) throw new Error("Không tìm thấy hàng dữ liệu sinh viên hợp lệ!");
 
-                    // Reset mảng dữ liệu toàn cục
                     window.pendingStudents = [];
                     window.missingDataWarnings = [];
 
@@ -357,7 +358,6 @@
                         
                         const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "Sinh_Vien";
 
-                        // Cắt lấy các chuỗi điểm nguyên bản để hiển thị lên bảng pop-up
                         const gpa242 = getColValue(row, ['2024.2', '20242', 'gpa1', 'ky1']) || "-";
                         const gpa251 = getColValue(row, ['2025.1', '20251', 'gpa2', 'ky2']) || "-";
                         const tbGpaRaw = getColValue(row, ['gpa', 'tb2ky', 'trungbinh', 'diemhoctap']);
@@ -381,11 +381,9 @@
                             window.missingDataWarnings.push(`<b style="color: #b71a1a;">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
                         }
 
-                        // Đánh giá mặc định bằng AI
                         let evalHT = evaluateHocTap(gpaObj.val);
                         let evalRL = evaluateRenLuyen(drlObj.val);
 
-                        // Lưu vào bộ nhớ tạm
                         window.pendingStudents.push({
                             index: index,
                             HoTen: HoTen,
@@ -403,9 +401,9 @@
                         });
                     }
 
-                    // HIỂN THỊ LÊN BẢNG POP-UP
+                    // ĐÃ NÂNG CẤP: Bổ sung lựa chọn "bỏ" vào Menu
                     let trHtml = '';
-                    const options = ["xuất sắc", "tốt", "khá", "trung bình"];
+                    const options = ["xuất sắc", "tốt", "khá", "trung bình", "bỏ"];
                     
                     window.pendingStudents.forEach((student, i) => {
                         let htOpts = options.map(opt => `<option value="${opt}" ${opt === student.evalHT ? 'selected' : ''}>${opt}</option>`).join('');
@@ -424,8 +422,8 @@
                     });
 
                     document.getElementById('previewTableBody').innerHTML = trHtml;
-                    document.getElementById('statusBox').style.display = 'none'; // Ẩn loading
-                    document.getElementById('previewModalOverlay').style.display = 'flex'; // Hiện Pop-up
+                    document.getElementById('statusBox').style.display = 'none';
+                    document.getElementById('previewModalOverlay').style.display = 'flex';
                     
                 } catch (error) {
                     console.error(error);
@@ -435,9 +433,6 @@
             excelReader.readAsArrayBuffer(excelInput.files[0]);
         }
 
-        // ==========================================
-        // BƯỚC 2: XUẤT FILE WORD TỪ DỮ LIỆU ĐÃ DUYỆT
-        // ==========================================
         async function executeFinalExport() {
             document.getElementById('previewModalOverlay').style.display = 'none';
             showStatus("⏳ Đang giải mã Word và gộp dữ liệu... Vui lòng đợi!", "info");
@@ -447,7 +442,6 @@
                 const wordBuffer = await wordInput.files[0].arrayBuffer();
                 const danhSachHoSo = [];
 
-                // Quét qua bảng DOM để lấy giá trị Đánh giá mà người dùng đã chỉnh sửa (nếu có)
                 window.pendingStudents.forEach((student, index) => {
                     let finalHT = document.getElementById(`sel-ht-${index}`).value;
                     let finalRL = document.getElementById(`sel-rl-${index}`).value;
@@ -458,14 +452,14 @@
                     let nangLucStr = "";
                     let khuyetDiemStr = "";
 
-                    // LOGIC NỐI CHUỖI KHUYẾT ĐIỂM DỰA TRÊN ĐIỀU KIỆN
-                    if (gpaVal < 2.0 && drlVal < 50) {
+                    // ĐÃ NÂNG CẤP: Logic sinh từ hoàn toàn phụ thuộc vào thanh Dropdown (Bao gồm giá trị "bỏ")
+                    if (finalHT === "bỏ" && finalRL === "bỏ") {
                         nangLucStr = "";
                         khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
-                    } else if (gpaVal < 2.0) {
+                    } else if (finalHT === "bỏ") {
                         nangLucStr = `Có kết quả rèn luyện ${finalRL}.`;
                         khuyetDiemStr = (drlVal < 80) ? "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt." : "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
-                    } else if (drlVal < 50) {
+                    } else if (finalRL === "bỏ") {
                         nangLucStr = `Có kết quả học tập ${finalHT}.`;
                         khuyetDiemStr = (gpaVal < 3.2) ? "Cần cố gắng hơn trong rèn luyện và học tập để đạt kết quả tốt." : "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
                     } else {
@@ -488,7 +482,6 @@
                     });
                 });
 
-                // XỬ LÝ CẤY GHÉP XML
                 const zip = new PizZip(wordBuffer);
                 for (let fileName in zip.files) {
                     if (fileName.endsWith('.xml')) {
@@ -535,7 +528,6 @@
 
                 saveAs(docOutput, finalFileName);
                 
-                // LƯU LỊCH SỬ
                 const fileId = 'docx_' + Date.now();
                 await localforage.setItem(fileId, docOutput);
 
@@ -555,7 +547,6 @@
 
                 showStatus(`🎉 THÀNH CÔNG! Đã gộp tự động ${window.pendingStudents.length} hồ sơ thành 1 file Word.`, "success");
 
-                // BẬT BÁO CÁO THIẾU DỮ LIỆU SAU KHI XUẤT XONG
                 if (window.missingDataWarnings.length > 0) {
                     let alertMsg = `Hệ thống đã xuất file Word tổng <b>thành công</b>, nhưng quá trình quét phát hiện một số sinh viên bị bỏ trống dữ liệu quan trọng trong Excel. Vui lòng kiểm tra lại file Word vừa tải về để điền bổ sung:<br><br>`;
                     alertMsg += `<div style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 4px; border: 1px solid #e2e8f0; max-height: 250px; overflow-y: auto; font-size: 13.5px; line-height: 1.8;">`;
