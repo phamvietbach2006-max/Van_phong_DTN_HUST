@@ -111,7 +111,6 @@
         </div>
     </footer>
 
-    <!-- CỬA SỔ NỔI 1: BÁO CÁO THIẾU DỮ LIỆU -->
     <div id="customModalOverlay" class="modal-overlay" style="z-index: 9999;">
         <div class="modal-box" style="width: 600px;">
             <div id="modalTitle" class="modal-title">Thông báo</div>
@@ -122,7 +121,6 @@
         </div>
     </div>
 
-    <!-- CỬA SỔ NỔI 2: BẢNG PREVIEW VÀ CHỈNH SỬA ĐÁNH GIÁ -->
     <div id="previewModalOverlay" class="modal-overlay" style="z-index: 9998;">
         <div class="modal-box" style="width: 1000px; max-width: 95%;">
             <div class="modal-title">KIỂM TRA VÀ CHỈNH SỬA ĐÁNH GIÁ</div>
@@ -144,8 +142,7 @@
                         </tr>
                     </thead>
                     <tbody id="previewTableBody">
-                        <!-- Dữ liệu render bằng JS -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
             <div class="modal-buttons">
@@ -375,6 +372,9 @@
                         if(!soBNX) missingFields.push("Số Bản nhận xét");
 
                         let tenDoanTruong = getColValue(row, ['doantruong', 'lienchi', 'lcd'], ['ngay', 'thoigian', 'hop']);
+                        
+                        // ĐÃ SỬA LỖI Ở ĐÂY: Lưu lại tenChiBo
+                        let tenChiBo = getColValue(row, ['chibo', 'tencb']);
 
                         if (missingFields.length > 0) {
                             window.missingDataWarnings.push(`<b style="color: #b71a1a;">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
@@ -394,6 +394,7 @@
                             drlObj: drlObj,
                             ngayHop: ngayHop,
                             soBNX: soBNX,
+                            tenChiBo: tenChiBo, // Đã bổ sung biến
                             tenDoanTruong: tenDoanTruong,
                             evalHT: evalHT,
                             evalRL: evalRL
@@ -450,7 +451,6 @@
                     let nangLucStr = "";
                     let khuyetDiemStr = "";
 
-                    // ĐÃ ĐIỀU CHỈNH: Chỉ thêm câu "có tinh thần học..." nếu Học tập Khá, Tốt hoặc Xuất sắc
                     let tinhThanHoc = (finalHT === "tốt" || finalHT === "khá" || finalHT === "xuất sắc") 
                                       ? ", có tinh thần học để nâng cao trình độ chuyên môn" 
                                       : "";
@@ -476,6 +476,7 @@
                     danhSachHoSo.push({
                         STT: student.soBNX || "......",
                         ThoiGian: student.ngayHop || `ngày......tháng......năm ${window.currentYear}`,
+                        // Đã cập nhật lại gọi biến Chi bộ
                         TenChiBo: student.tenChiBo || "......................",
                         TenDoanTruong: student.tenDoanTruong || "......................",
                         HoTen: student.HoTen,
