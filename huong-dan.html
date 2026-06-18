@@ -3,9 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hướng dẫn sử dụng</title>
+    <title>Hướng dẫn sử dụng - YUMOFFICE</title>
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .guide-section {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .guide-title {
+            color: #b71a1a;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 2px solid #b71a1a;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .step-item {
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 35px;
+        }
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            background: #b71a1a;
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 22px;
+        }
+        .step-heading {
+            font-weight: bold;
+            color: #1e293b;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        .step-content {
+            color: #475569;
+            font-size: 14.5px;
+            line-height: 1.7;
+            text-align: justify;
+        }
+        .code-tag {
+            background: #f1f5f9;
+            color: #b71a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+            font-size: 13.5px;
+        }
+        .table-spec {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13.5px;
+        }
+        .table-spec th {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            color: #1e293b;
+        }
+        .table-spec td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            color: #475569;
+        }
+    </style>
 </head>
 <body>
     <header class="top-header">
@@ -18,7 +100,7 @@
                 </div>
             </div>
             <div class="action-buttons">
-                <span class="version-badge">YUMOFFICE v2.0</span>
+                <span class="version-badge" style="display: inline-block; padding: 8px 15px; color: #fff; font-size: 12px; font-weight: bold; border-radius: 3px; background-color: #2b2b2b;">YUMOFFICE v2.0</span>
             </div>
         </div>
     </header>
@@ -35,51 +117,104 @@
     </nav>
 
     <div class="content-wrapper">
-        <h2 class="section-title">HƯỚNG DẪN SỬ DỤNG HỆ THỐNG YUMOFFICE</h2>
+        <h2 class="section-title">HƯỚNG DẪN VẬN HÀNH HỆ THỐNG YUMOFFICE</h2>
         
         <div class="tool-description">
-            Chào mừng đồng chí đến với tài liệu hướng dẫn sử dụng hệ thống quản lý văn bản tự động YUMOFFICE v2.0. Vui lòng đọc kỹ các quy tắc về định dạng file để hệ thống hoạt động chính xác 100%.
+            Cẩm nang hướng dẫn chi tiết quy trình đồng bộ dữ liệu Excel, cấu hình phôi mẫu Word và thao tác rà soát, hiệu chỉnh xếp loại nghiệp vụ trực tiếp trên giao diện website.
         </div>
 
-        <div style="line-height: 1.8; color: #333; font-size: 15px;">
-            <h3 style="color: #b71a1a; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">1. Quy trình tạo Bản nhận xét Đảng viên</h3>
-            <p><strong>Bước 1: Chuẩn bị file mẫu Word (.docx)</strong></p>
-            <ul style="margin-left: 20px; margin-bottom: 15px;">
-                <li>Mở file Word mẫu hành chính của Đoàn trường.</li>
-                <li>Tại những vị trí cần điền thông tin tự động, hãy sử dụng dấu ngoặc vuông kép: <code>[[Tên_Biến]]</code>.</li>
-                <li><em>Ví dụ:</em> Kính gửi đồng chí <strong>[[HoTen]]</strong>, sinh viên lớp <strong>[[Lop]]</strong>...</li>
-                <li><span style="color: #cc0000; font-weight: bold;">⚠️ Lưu ý cực kỳ quan trọng:</span> Đôi khi Microsoft Word tự động kiểm tra lỗi chính tả (dấu gạch chân đỏ) và làm đứt gãy biến <code>[[ ]]</code> ngầm bên trong. Hãy đảm bảo gõ liền mạch hoặc Copy/Paste nguyên cụm biến vào Word để tránh lỗi phân mảnh XML.</li>
-            </ul>
-
-            <p><strong>Bước 2: Chuẩn bị file dữ liệu Excel (.xlsx)</strong></p>
-            <ul style="margin-left: 20px; margin-bottom: 15px;">
-                <li>File Excel cần có dòng tiêu đề cột rõ ràng.</li>
-                <li>Tên các tiêu đề cột trong Excel <strong>PHẢI</strong> chứa các từ khóa tương ứng với biến trong Word (Ví dụ: cột "Họ và Tên", cột "STT", cột "Điểm rèn luyện", "GPA").</li>
-                <li>Hệ thống được lập trình thuật toán làm sạch dữ liệu: tự động bỏ qua các dòng trống hoặc các dòng có đánh dấu "Đồng ý" lạc lõng. Dòng tiêu đề sẽ được hệ thống tự động dò tìm thông qua cột có chữ "Họ tên".</li>
-            </ul>
-
-            <p><strong>Bước 3: Xử lý và tải xuống</strong></p>
-            <ul style="margin-left: 20px; margin-bottom: 15px;">
-                <li>Truy cập mục <strong>Bản nhận xét chuyển Đảng chính thức</strong>.</li>
-                <li>Tải lên file Word và Excel đã chuẩn bị. Bấm <strong>XỬ LÝ & TẢI XUỐNG</strong>.</li>
-                <li>Hệ thống sẽ chạy ngầm, trộn dữ liệu và trả về cho đồng chí một tệp nén <code>.ZIP</code>. Trong đó chứa hàng loạt các file Word đã được điền tên từng người, xuất thành các file riêng lẻ vô cùng gọn gàng.</li>
-            </ul>
-
-            <h3 style="color: #b71a1a; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">2. Tính năng Lịch sử tạo văn bản & Bảo mật dữ liệu</h3>
-            <ul style="margin-left: 20px; margin-bottom: 15px;">
-                <li><strong>Không cần mạng Internet liên tục:</strong> Quá trình xử lý và trộn file Word diễn ra 100% bằng sức mạnh xử lý trên máy tính (trình duyệt) của đồng chí. Dữ liệu KHÔNG bị tải lên bất kỳ máy chủ nào.</li>
-                <li><strong>Lưu trữ Ổ đĩa ảo (IndexedDB):</strong> Sau khi tạo file ZIP, hệ thống tự động lưu một bản sao an toàn vào ổ đĩa ảo của trình duyệt.</li>
-                <li>Đồng chí có thể sang tab <strong>LỊCH SỬ TẠO VĂN BẢN</strong> để tải lại file ZIP bất cứ lúc nào. Tuy nhiên, nếu đồng chí chủ động <strong>Xóa lịch sử duyệt web (Clear Cache)</strong> của trình duyệt, các file lưu trữ này sẽ bị mất đi.</li>
-            </ul>
-
-            <h3 style="color: #b71a1a; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">3. Hỗ trợ Kỹ thuật</h3>
-            <p>Nếu hệ thống báo lỗi <em>"Không tìm thấy dòng tiêu đề"</em> hoặc <em>"Lỗi định dạng thẻ Word"</em>, vui lòng:</p>
-            <ol style="margin-left: 20px; margin-bottom: 15px;">
-                <li>Mở file Word ra, xóa đi gõ lại cụm <code>[[HoTen]]</code>.</li>
-                <li>Đảm bảo file Excel không bị gộp ô (Merge Cells) ở dòng tiêu đề cột.</li>
-                <li>Liên hệ Ban Tổ chức - Kiểm tra Đoàn trường Đại học Bách khoa Hà Nội nếu cần hỗ trợ cấu trúc lại file mẫu.</li>
-            </ol>
+        <div class="guide-section">
+            <div class="guide-title">⚙️ 1. QUY QUY ĐỊNH ĐẶT BIẾN TRÊN PHÔI WORD</div>
+            <div class="step-content">
+                Hệ thống sử dụng lõi quét ký tự đóng khung vuông kép để tìm kiếm và tự động thay thế văn bản. Để phôi hồ sơ hoạt động chính xác, đồng chí cần thiết lập các từ khóa biến chính xác như sau trong tệp mẫu <span class="code-tag">.docx</span>:
+                <table class="table-spec">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Từ khóa biến</th>
+                            <th style="width: 35%;">Ý nghĩa hành chính</th>
+                            <th style="width: 40%;">Dữ liệu tự động sinh ra</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="code-tag">[[STT]]</span></td>
+                            <td>Số Bản nhận xét</td>
+                            <td>Trích xuất từ cột Số BNX trong bảng Excel (Ví dụ: 03 - BNX/ĐT)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-tag">[[HoTen]]</span></td>
+                            <td>Họ và tên của sinh viên</td>
+                            <td>Tự động viết hoa và bốc tách chính xác theo từng hàng dữ liệu.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-tag">[[TenChiBo]]</span></td>
+                            <td>Tên Chi bộ Sinh viên</td>
+                            <td>Đổ dữ liệu tên Chi bộ tương ứng từ bảng Excel vào văn bản.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-tag">[[TenDoanTruong]]</span></td>
+                            <td>Tên Đoàn trường / Liên chi Đoàn</td>
+                            <td>Nhận diện thông minh cấp ban hành để điền vào căn cứ văn bản.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-tag">[[ThoiGian]]</span></td>
+                            <td>Ngày họp thông qua hồ sơ</td>
+                            <td>Tự động dịch định dạng số sang chữ hành chính (Ví dụ: ngày 04 tháng 06 năm 2026).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-tag">[[NangLuc]]</span></td>
+                            <td>Nhận xét năng lực, học tập, rèn luyện</td>
+                            <td>Tự động kết hợp kết quả xếp loại học tập, rèn luyện và nối câu khen ngợi động.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-tag">[[KhuyetDiem]]</span></td>
+                            <td>Nhận xét khuyết điểm, lưu ý</td>
+                            <td>Đưa ra câu nhận xét khuyết điểm hoặc nhắc nhở cố gắng dựa trên điểm số.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 15px; font-size: 13.5px; color: #b71a1a; font-weight: bold;">
+                    * Lưu ý: Đồng chí KHÔNG cần chèn các thẻ đóng mở vòng lặp hay lệnh ngắt trang phức tạp vào file Word, hệ thống đã tích hợp công nghệ cấy ghép XML tự động ngắt trang chuẩn lề lối cho từng sinh viên.
+                </p>
+            </div>
         </div>
+
+        <div class="guide-section">
+            <div class="guide-title">🚀 2. QUY TRÌNH 3 BƯỚC TRỘN HỒ SƠ HÀNG LOẠT</div>
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-heading">Nạp tệp tài liệu đầu vào</div>
+                    <div class="step-content">
+                        Tại phân hệ "Bản nhận xét chuyển Đảng chính thức", đồng chí click vào hai ô hộp tải lên để chọn tệp: Ổ số 1 nạp file phôi Word gốc (<span class="code-tag">.docx</span>), ổ số 2 nạp file danh sách dữ liệu sinh viên ưu tú trích xuất từ Excel (<span class="code-tag">.xlsx</span>).
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-heading">Rà soát và Tùy chỉnh trên Bảng xem trước (Preview Modal)</div>
+                    <div class="step-content">
+                        Ngay khi nhận tệp, hệ thống sẽ mở ra một cửa sổ nổi hiển thị toàn bộ danh sách sinh viên. Bộ lọc thông minh của hệ thống sẽ tự động đổi dấu phẩy thành chấm, bóc tách khoảng điểm nhiều kỳ (Ví dụ: <span class="code-tag">72-39</span>) thành trung bình cộng để đưa ra xếp loại gợi ý. 
+                        <br>Tại đây, đồng chí có toàn quyền thay đổi xếp loại Học tập hoặc Rèn luyện bằng thanh thả xuống nếu cần điều chỉnh theo đặc thù nghiệp vụ. Đặc biệt, nếu chọn tùy chọn <span class="code-tag">bỏ</span>, hệ thống sẽ tự động lược vế câu tương ứng để văn bản trơn tru nhất.
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-heading">Xuất tệp Word tổng hợp và kiểm tra báo cáo lỗi</div>
+                    <div class="step-content">
+                        Nhấn nút "Xuất bản nhận xét", hệ thống sẽ biên dịch siêu tốc và tải xuống máy tính của đồng chí duy nhất 1 file Word (.docx) chứa toàn bộ các hồ sơ liên tiếp nhau (mỗi người 1 trang khít lề, không tạo trang trắng thừa). Sau khi tải xong, nếu có sinh viên bị thiếu dữ liệu trong Excel, cửa sổ kiểm toán (Audit Report) sẽ hiển thị để nhắc nhở đồng chí rà soát.
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="guide-section">
+            <div class="guide-title">🛡️ 3. KHAI THÁC KHO TÀI LIỆU VÀ CƠ CHẾ BẢO MẬT</div>
+            <div class="step-content" style="line-height: 1.8;">
+                • <strong>Tính năng xem trước tại Kho tài liệu:</strong> Đồng chí có thể bấm nút "Xem trước" (hoặc Xem trực tiếp) để đọc nhanh cấu trúc phôi mẫu Word, Excel, PDF chuẩn ngay trên cửa sổ Pop-up iframe của website mà không cần phải tải về máy hay mở tab mới.
+                <br>• <strong>Cơ chế bảo mật an toàn tuyệt đối:</strong> YUMOFFICE v2.0 hoạt động theo mô hình Client-side (xử lý tại máy trạm). Toàn bộ dữ liệu điểm số, thông tin nhạy cảm của sinh viên và Đảng viên dự bị được xử lý ngầm bằng RAM của máy tính cá nhân, hoàn toàn KHÔNG gửi lên server mạng. Do đó, hệ thống bảo mật an toàn 100%, không lo rò rỉ thông tin nội bộ.
+            </div>
+        </div>
+
     </div>
 
     <footer>
