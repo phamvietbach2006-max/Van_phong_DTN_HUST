@@ -256,7 +256,6 @@
             return { val: 0, missing: true };
         }
 
-        // ĐÃ NÂNG CẤP: Bổ sung logic gán "bỏ" tự động vào các hàm đánh giá
         function evaluateHocTap(gpa) {
             if (gpa < 2.0) return "bỏ"; 
             if (gpa < 2.5) return "trung bình"; 
@@ -401,7 +400,6 @@
                         });
                     }
 
-                    // ĐÃ NÂNG CẤP: Bổ sung lựa chọn "bỏ" vào Menu
                     let trHtml = '';
                     const options = ["xuất sắc", "tốt", "khá", "trung bình", "bỏ"];
                     
@@ -452,7 +450,11 @@
                     let nangLucStr = "";
                     let khuyetDiemStr = "";
 
-                    // ĐÃ NÂNG CẤP: Logic sinh từ hoàn toàn phụ thuộc vào thanh Dropdown (Bao gồm giá trị "bỏ")
+                    // ĐÃ ĐIỀU CHỈNH: Chỉ thêm câu "có tinh thần học..." nếu Học tập Khá, Tốt hoặc Xuất sắc
+                    let tinhThanHoc = (finalHT === "tốt" || finalHT === "khá" || finalHT === "xuất sắc") 
+                                      ? ", có tinh thần học để nâng cao trình độ chuyên môn" 
+                                      : "";
+
                     if (finalHT === "bỏ" && finalRL === "bỏ") {
                         nangLucStr = "";
                         khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
@@ -460,10 +462,11 @@
                         nangLucStr = `Có kết quả rèn luyện ${finalRL}.`;
                         khuyetDiemStr = (drlVal < 80) ? "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt." : "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
                     } else if (finalRL === "bỏ") {
-                        nangLucStr = `Có kết quả học tập ${finalHT}.`;
+                        nangLucStr = `Có kết quả học tập ${finalHT}${tinhThanHoc}.`;
                         khuyetDiemStr = (gpaVal < 3.2) ? "Cần cố gắng hơn trong rèn luyện và học tập để đạt kết quả tốt." : "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
                     } else {
-                        nangLucStr = `Có kết quả học tập ${finalHT} và rèn luyện ${finalRL}, có tinh thần học để nâng cao trình độ chuyên môn.`;
+                        nangLucStr = `Có kết quả học tập ${finalHT} và rèn luyện ${finalRL}${tinhThanHoc}.`;
+                        
                         if (gpaVal < 3.2 && drlVal < 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
                         else if (gpaVal >= 3.2 && drlVal < 80) khuyetDiemStr = "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
                         else if (gpaVal < 3.2 && drlVal >= 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
