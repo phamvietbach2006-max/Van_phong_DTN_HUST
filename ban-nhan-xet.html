@@ -321,23 +321,44 @@
                                 missingDataWarnings.push(`<b style="color: #b71a1a;">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
                             }
 
+                            let nangLucStr = "";
+                            let khuyetDiemStr = "";
+
+                            if (gpaObj.val < 2.0 && drlObj.val < 50) {
+                                nangLucStr = "";
+                                khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
+                            } else if (gpaObj.val < 2.0) {
+                                nangLucStr = `Có kết quả rèn luyện ${evaluateRenLuyen(drlObj.val)}.`;
+                                khuyetDiemStr = (drlObj.val < 80) ? "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt." : "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
+                            } else if (drlObj.val < 50) {
+                                nangLucStr = `Có kết quả học tập ${evaluateHocTap(gpaObj.val)}.`;
+                                khuyetDiemStr = (gpaObj.val < 3.2) ? "Cần cố gắng hơn trong rèn luyện và học tập để đạt kết quả tốt." : "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
+                            } else {
+                                nangLucStr = `Có kết quả học tập ${evaluateHocTap(gpaObj.val)} và rèn luyện ${evaluateRenLuyen(drlObj.val)}, có tinh thần học để nâng cao trình độ chuyên môn.`;
+                                if (gpaObj.val < 3.2 && drlObj.val < 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập và rèn luyện để đạt kết quả tốt.";
+                                else if (gpaObj.val >= 3.2 && drlObj.val < 80) khuyetDiemStr = "Cần cố gắng hơn trong rèn luyện để đạt kết quả tốt.";
+                                else if (gpaObj.val < 3.2 && drlObj.val >= 80) khuyetDiemStr = "Cần cố gắng hơn trong học tập để đạt kết quả tốt.";
+                                else khuyetDiemStr = "Hoàn thành tốt nhiệm vụ được giao.";
+                            }
+
                             danhSachHoSo.push({
                                 STT: soBNX || "......",
                                 ThoiGian: ngayHop || `ngày......tháng......năm ${currentYear}`,
                                 TenChiBo: getColValue(row, ['chibo', 'tencb']) || "......................",
                                 TenDoanTruong: tenDoanTruong || "......................",
                                 HoTen: HoTen,
-                                NangLuc: `Có kết quả học tập ${evaluateHocTap(gpaObj.val)} và rèn luyện ${evaluateRenLuyen(drlObj.val)}`,
-                                KhuyetDiem: evaluateKhuyetDiem(gpaObj.val, drlObj.val),
-                                // Biến cờ hiệu kích hoạt lệnh ngắt trang (Trừ hồ sơ cuối cùng)
+                                NangLuc: nangLucStr,
+                                KhuyetDiem: khuyetDiemStr,
                                 PageBreak: index < validStudents.length - 1
                             });
                         }
 
-                        // THUẬT TOÁN CẤY GHÉP XML (XML INJECTION)
+                        // ===============================================
+                        // ĐÃ SỬA LỖI: Triệt tiêu trang trắng thừa giữa các hồ sơ
+                        // Bằng cách gắn lệnh ngắt trang chung dòng (inline)
+                        // ===============================================
                         const zip = new PizZip(wordBuffer);
                         
-                        // Xóa rác đánh dấu chính tả
                         for (let fileName in zip.files) {
                             if (fileName.endsWith('.xml')) {
                                 let xml = zip.files[fileName].asText();
@@ -346,23 +367,31 @@
                             }
                         }
 
-                        // Mở file lõi document.xml để cấy lệnh lặp DanhSach và ngắt trang
                         let docXml = zip.files["word/document.xml"].asText();
                         
-                        // 1. Cấy lệnh mở vòng lặp [[#DanhSach]] ngay sau thẻ <w:body>
+                        // Cấy lệnh mở vòng lặp
                         docXml = docXml.replace(/<w:body>/, '<w:body><w:p><w:r><w:t>[[#DanhSach]]</w:t></w:r></w:p>');
                         
-                        // Mã XML của lệnh ngắt trang được điều khiển bằng biến boolean [[#PageBreak]]
-                        const pageBreakXml = '<w:p><w:r><w:t>[[#PageBreak]]</w:t></w:r></w:p><w:p><w:r><w:br w:type="page"/></w:r></w:p><w:p><w:r><w:t>[[/PageBreak]]</w:t></w:r></w:p>';
+                        // Tìm vị trí kết thúc phần nội dung (trước sectPr hoặc body)
+                        let splitIndex = docXml.lastIndexOf('<w:sectPr');
+                        if (splitIndex === -1) {
+                            splitIndex = docXml.lastIndexOf('</w:body>');
+                        }
                         
-                        // 2. Cấy lệnh kết thúc [[/DanhSach]] và ngắt trang vào cuối khối văn bản
-                        let sectPrIndex = docXml.lastIndexOf('<w:sectPr');
-                        if (sectPrIndex !== -1) {
-                            let before = docXml.substring(0, sectPrIndex);
-                            let after = docXml.substring(sectPrIndex);
-                            docXml = before + pageBreakXml + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p>' + after;
-                        } else {
-                            docXml = docXml.replace(/<\/w:body>/, pageBreakXml + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p></w:body>');
+                        if (splitIndex !== -1) {
+                            let before = docXml.substring(0, splitIndex);
+                            let after = docXml.substring(splitIndex);
+                            
+                            // Tìm đoạn kết thúc dòng cuối cùng của văn bản để nhét ngắt trang inline vào
+                            let lastParaEnd = before.lastIndexOf('</w:p>');
+                            if (lastParaEnd !== -1) {
+                                // Lệnh inline này tuyệt đối không tạo ra dòng trắng mới
+                                let inlinePageBreak = '<w:r><w:t>[[#PageBreak]]</w:t></w:r><w:r><w:br w:type="page"/></w:r><w:r><w:t>[[/PageBreak]]</w:t></w:r>';
+                                before = before.substring(0, lastParaEnd) + inlinePageBreak + '</w:p>';
+                            }
+                            
+                            // Đóng vòng lặp
+                            docXml = before + '<w:p><w:r><w:t>[[/DanhSach]]</w:t></w:r></w:p>' + after;
                         }
                         
                         zip.file("word/document.xml", docXml);
