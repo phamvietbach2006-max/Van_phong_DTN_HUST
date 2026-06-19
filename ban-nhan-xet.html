@@ -63,8 +63,10 @@
     <nav class="main-nav" aria-label="Điều hướng chính">
         <div class="nav-container">
             <a href="index.html">TRANG CHỦ</a>
+            <a href="https://docs.google.com/spreadsheets/d/11Z_n_19ldXi3ZFsTS6Vn9K6Y87g5BbgPQdHOfeJmxow/edit?usp=sharing" target="_blank" rel="noopener noreferrer">HỒ SƠ ĐẢNG</a>
             <a href="ban-nhan-xet.html" class="active" aria-current="page">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
             <a href="#" class="disabled-link" aria-disabled="true" tabindex="-1">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="https://husteduvn-my.sharepoint.com/:x:/r/personal/dtn_hust_edu_vn/Documents/C%C3%B4ng%20v%C4%83n%20nhi%E1%BB%87m%20k%E1%BB%B3%2036/%5BV%C4%82N%20PH%C3%92NG%20%C4%90O%C3%80N%5D%20S%E1%BB%95%20%C4%91%C4%83ng%20k%C3%BD%20C%C3%B4ng%20v%C4%83n%20%C4%91i%202026.xlsx?d=w3c7b2d02c90a43a896c16a8bc1db2b25&amp;csf=1&amp;web=1&amp;e=fWuJts" target="_blank" rel="noopener noreferrer">SỔ CÔNG VĂN</a>
             <a href="kho-tai-lieu.html">KHO TÀI LIỆU</a>
             <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
             <a href="huong-dan.html">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
@@ -372,8 +374,6 @@
                         if(!soBNX) missingFields.push("Số Bản nhận xét");
 
                         let tenDoanTruong = getColValue(row, ['doantruong', 'lienchi', 'lcd'], ['ngay', 'thoigian', 'hop']);
-                        
-                        // ĐÃ SỬA LỖI Ở ĐÂY: Lưu lại tenChiBo
                         let tenChiBo = getColValue(row, ['chibo', 'tencb']);
 
                         if (missingFields.length > 0) {
@@ -394,7 +394,7 @@
                             drlObj: drlObj,
                             ngayHop: ngayHop,
                             soBNX: soBNX,
-                            tenChiBo: tenChiBo, // Đã bổ sung biến
+                            tenChiBo: tenChiBo,
                             tenDoanTruong: tenDoanTruong,
                             evalHT: evalHT,
                             evalRL: evalRL
@@ -476,7 +476,6 @@
                     danhSachHoSo.push({
                         STT: student.soBNX || "......",
                         ThoiGian: student.ngayHop || `ngày......tháng......năm ${window.currentYear}`,
-                        // Đã cập nhật lại gọi biến Chi bộ
                         TenChiBo: student.tenChiBo || "......................",
                         TenDoanTruong: student.tenDoanTruong || "......................",
                         HoTen: student.HoTen,
