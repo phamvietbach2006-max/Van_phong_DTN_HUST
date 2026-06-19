@@ -29,8 +29,10 @@
     <nav class="main-nav" aria-label="Điều hướng chính">
         <div class="nav-container">
             <a href="index.html">TRANG CHỦ</a>
+            <a href="https://docs.google.com/spreadsheets/d/11Z_n_19ldXi3ZFsTS6Vn9K6Y87g5BbgPQdHOfeJmxow/edit?usp=sharing" target="_blank" rel="noopener noreferrer">HỒ SƠ ĐẢNG</a>
             <a href="ban-nhan-xet.html">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
             <a href="#" class="disabled-link" aria-disabled="true" tabindex="-1">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="https://husteduvn-my.sharepoint.com/:x:/r/personal/dtn_hust_edu_vn/Documents/C%C3%B4ng%20v%C4%83n%20nhi%E1%BB%87m%20k%E1%BB%B3%2036/%5BV%C4%82N%20PH%C3%92NG%20%C4%90O%C3%80N%5D%20S%E1%BB%95%20%C4%91%C4%83ng%20k%C3%BD%20C%C3%B4ng%20v%C4%83n%20%C4%91i%202026.xlsx?d=w3c7b2d02c90a43a896c16a8bc1db2b25&amp;csf=1&amp;web=1&amp;e=fWuJts" target="_blank" rel="noopener noreferrer">SỔ CÔNG VĂN</a>
             <a href="kho-tai-lieu.html">KHO TÀI LIỆU</a>
             <a href="lich-su.html" class="active" aria-current="page">LỊCH SỬ TẠO VĂN BẢN</a>
             <a href="huong-dan.html">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
@@ -42,7 +44,7 @@
         
         <div style="background-color: #fff1f0; border: 1px solid #ffa39e; padding: 15px; border-radius: 4px; margin-bottom: 25px;">
             <p style="color: #cf1322; font-size: 14px; margin-bottom: 5px;"><strong>⚠️ CẢNH BÁO QUAN TRỌNG:</strong></p>
-            <p style="color: #cf1322; font-size: 13px; line-height: 1.5;">Toàn bộ dữ liệu hồ sơ đang được lưu trữ trực tiếp trên thiết bị này (không lưu trên máy chủ Cloud). Nếu đồng chí chọn <strong>"Xóa dữ liệu"</strong> hoặc dọn dẹp lịch sử duyệt web sâu (Clear Cache), các file ZIP lưu tại đây sẽ bị mất vĩnh viễn. Vui lòng cân nhắc kỹ trước khi xóa!</p>
+            <p style="color: #cf1322; font-size: 13px; line-height: 1.5;">Toàn bộ dữ liệu hồ sơ đang được lưu trữ trực tiếp trên thiết bị này (không lưu trên máy chủ Cloud). Nếu đồng chí chọn <strong>"Xóa dữ liệu"</strong> hoặc dọn dẹp lịch sử duyệt web sâu (Clear Cache), các file lưu tại đây sẽ bị mất vĩnh viễn. Vui lòng cân nhắc kỹ trước khi xóa!</p>
         </div>
 
         <div class="history-controls">
@@ -66,7 +68,7 @@
                     <tr>
                         <th style="width: 5%; text-align: center;">STT</th>
                         <th style="width: 15%;">Thời gian tạo</th>
-                        <th style="width: 25%;">Tên lô hồ sơ (Tệp ZIP)</th>
+                        <th style="width: 25%;">Tên lô hồ sơ</th>
                         <th style="width: 20%;">Loại nghiệp vụ</th>
                         <th style="width: 10%; text-align: center;">Số lượng</th>
                         <th style="width: 10%; text-align: center;">Trạng thái</th>
@@ -74,7 +76,7 @@
                     </tr>
                 </thead>
                 <tbody id="historyBody">
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
@@ -198,7 +200,7 @@
         async function clearHistory() {
             const userInput = await showCustomModal({
                 title: '⚠️ CẢNH BÁO NGUY HIỂM',
-                message: 'Hành động này sẽ xóa vĩnh viễn toàn bộ lịch sử và file ZIP đã lưu trên máy tính này!<br><br>Để xác nhận chắc chắn muốn xóa, vui lòng gõ chữ: <b>XOA</b>',
+                message: 'Hành động này sẽ xóa vĩnh viễn toàn bộ lịch sử và file đã lưu trên máy tính này!<br><br>Để xác nhận chắc chắn muốn xóa, vui lòng gõ chữ: <b>XOA</b>',
                 type: 'prompt',
                 confirmText: 'Xác nhận xóa'
             });
