@@ -7,195 +7,99 @@
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
     
-    <!-- KHỐI CSS GIAO DIỆN & HIỆU ỨNG MƯỢT MÀ CHO TRANG CHỦ -->
+    <script>
+        const savedTheme = localStorage.getItem('yumTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
     <style>
-        :root {
-            --primary-red: #b71a1a;
-            --soft-red: #fef2f2;
-            --text-main: #1e293b;
-            --text-muted: #475569;
+        :root { --primary-red: #b71a1a; --soft-red: #fef2f2; --text-main: #1e293b; --text-muted: #475569; }
+        [data-theme="dark"] { --primary-red: #ef4444; --soft-red: #451a1a; --text-main: #f1f5f9; --text-muted: #94a3b8; }
+        
+        /* Iridescence Background */
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+            opacity: 0.6; /* Chỉnh độ đậm nhạt của background tại đây */
+            transition: opacity 0.5s ease;
+        }
+        [data-theme="dark"] #canvas-container {
+            opacity: 0.1; /* Ở Dark Mode, làm mờ đi để không bị chói */
         }
 
-        /* Hiệu ứng xuất hiện mượt mà (Fade-in Up) */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Tối ưu lại Gooey Nav CSS cho Vanilla */
+        .gooey-nav-container {
+            position: sticky; top: 0; z-index: 40;
+            width: 100%; display: flex; justify-content: center;
+            padding: 10px 0; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(127,16,20,0.1);
         }
-        .fade-in {
-            animation: fadeInUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            opacity: 0;
-        }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-
-        /* Khu vực Hero Banner (Chào mừng) */
-        .hero-banner {
-            background: linear-gradient(135deg, var(--soft-red) 0%, #ffffff 100%);
-            border: 1px solid #fecaca;
-            border-radius: 16px;
-            padding: 45px 30px;
-            text-align: center;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 30px -10px rgba(183, 26, 26, 0.1);
-        }
-        .hero-title {
-            font-size: 26px;
-            color: var(--primary-red);
-            font-weight: 800;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .hero-desc {
-            font-size: 16px;
-            line-height: 1.8;
-            color: var(--text-muted);
-            max-width: 850px;
-            margin: 0 auto;
-        }
-
-        /* Thẻ tính năng mượt mà */
-        .upload-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 50px;
-        }
-        .feature-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 30px 25px;
-            text-align: left;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        [data-theme="dark"] .gooey-nav-container {
+            background: rgba(15,23,42,0.8); border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         
-        /* Đường line đỏ chạy trên đầu thẻ khi trỏ chuột */
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 4px;
-            background: var(--primary-red);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s ease;
-        }
-
-        .feature-card:not(.is-disabled):hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-            border-color: #cbd5e1;
-        }
-        .feature-card:not(.is-disabled):hover::before {
-            transform: scaleX(1);
-        }
-
-        /* Icon bọc trong khối màu */
-        .icon-wrapper {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 55px;
-            height: 55px;
-            background-color: var(--soft-red);
-            border-radius: 14px;
-            font-size: 26px;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
-        }
-        .feature-card:hover .icon-wrapper {
-            transform: scale(1.1) rotate(5deg);
-        }
-        .is-disabled .icon-wrapper {
-            background-color: #f1f5f9;
-            filter: grayscale(100%);
-        }
-
-        /* Khối Ưu điểm nổi bật */
-        .info-box {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-left: 5px solid var(--primary-red);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-        .info-box:hover {
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-        }
-        .info-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            line-height: 1.9;
-            font-size: 15px;
-            color: var(--text-main);
-        }
-        .info-list li {
-            position: relative;
-            padding-left: 32px;
-            margin-bottom: 15px;
-        }
-        .info-list li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            top: 0;
-            color: #16a34a;
-            font-weight: bold;
-            font-size: 18px;
-            background: #dcfce7;
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Nút bắt đầu siêu mượt */
-        .btn-start {
-            background: linear-gradient(135deg, var(--primary-red) 0%, #e11d48 100%);
-            color: #fff;
-            padding: 16px 45px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 10px 20px -5px rgba(183, 26, 26, 0.4);
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .btn-start:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 25px -5px rgba(183, 26, 26, 0.5);
-        }
+        .gooey-nav-container nav { position: relative; transform: translate3d(0, 0, 0.01px); }
+        .gooey-nav-container nav ul { display: flex; gap: 1em; list-style: none; padding: 0 1em; margin: 0; position: relative; z-index: 3; }
+        .gooey-nav-container nav ul li { border-radius: 100vw; position: relative; cursor: pointer; color: var(--text-main); font-weight: bold; font-size: 13px; text-transform: uppercase; transition: color 0.3s ease; }
+        .gooey-nav-container nav ul li a { display: inline-block; padding: 0.8em 1.2em; text-decoration: none; color: inherit; }
         
-        /* Tiêu đề mục */
-        .section-heading {
-            color: var(--text-main);
-            margin-top: 40px;
-            margin-bottom: 25px;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* Active text color */
+        .gooey-nav-container nav ul li.active { color: #fff; }
+        [data-theme="dark"] .gooey-nav-container nav ul li.active { color: #fff; }
+
+        /* The blobs */
+        .gooey-nav-container .effect { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; display: grid; place-items: center; z-index: 1; }
+        .gooey-nav-container .effect.filter { filter: blur(6px) contrast(100) blur(0); mix-blend-mode: normal; }
+        
+        /* The main active bubble */
+        .gooey-nav-container .effect.filter::after {
+            content: ''; position: absolute; inset: 0;
+            background: var(--primary-red); /* Màu hạt dẻo thay đổi theo theme */
+            transform: scale(0); opacity: 0; z-index: -1; border-radius: 100vw;
         }
+        .gooey-nav-container .effect.active::after { animation: pill 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes pill { to { transform: scale(1); opacity: 1; } }
+
+        /* Particles */
+        .particle, .point { display: block; opacity: 0; width: 20px; height: 20px; border-radius: 100%; transform-origin: center; }
+        .particle { position: absolute; top: calc(50% - 10px); left: calc(50% - 10px); animation: particle calc(var(--time)) ease 1 -350ms; }
+        .point { background: var(--primary-red); opacity: 1; animation: point calc(var(--time)) ease 1 -350ms; }
+        
+        @keyframes particle {
+            0% { transform: rotate(0deg) translate(calc(var(--start-x)), calc(var(--start-y))); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+            70% { transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.2), calc(var(--end-y) * 1.2)); opacity: 1; animation-timing-function: ease; }
+            85% { transform: rotate(calc(var(--rotate) * 0.66)) translate(calc(var(--end-x)), calc(var(--end-y))); opacity: 1; }
+            100% { transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)); opacity: 1; }
+        }
+        @keyframes point {
+            0% { transform: scale(0); opacity: 0; animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+            25% { transform: scale(calc(var(--scale) * 0.25)); }
+            38% { opacity: 1; }
+            65% { transform: scale(var(--scale)); opacity: 1; animation-timing-function: ease; }
+            85% { transform: scale(var(--scale)); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* Các style khác giữ nguyên */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeInUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
+        .hero-banner { background: linear-gradient(135deg, var(--soft-red) 0%, transparent 100%); border: 1px solid rgba(183,26,26,0.2); border-radius: 16px; padding: 45px 30px; text-align: center; margin-bottom: 40px; backdrop-filter: blur(5px); }
+        .hero-title { font-size: 26px; color: var(--primary-red); font-weight: 800; margin-bottom: 15px; }
+        .hero-desc { font-size: 16px; line-height: 1.8; color: var(--text-muted); max-width: 850px; margin: 0 auto; }
+        .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 50px; }
+        .feature-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 30px 25px; text-decoration: none; display: flex; flex-direction: column; transition: all 0.3s; z-index: 2; position: relative;}
+        .feature-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--primary-red); }
+        .icon-wrapper { display: inline-flex; justify-content: center; align-items: center; width: 50px; height: 50px; background: var(--soft-red); border-radius: 12px; font-size: 24px; margin-bottom: 15px; transition: 0.3s; }
+        .feature-card:hover .icon-wrapper { transform: scale(1.1) rotate(5deg); }
+        .btn-start { background: linear-gradient(135deg, var(--primary-red) 0%, #e11d48 100%); color: #fff; padding: 16px 45px; font-size: 16px; font-weight: bold; border-radius: 50px; border: none; cursor: pointer; transition: 0.3s; z-index: 2; position: relative;}
+        .btn-start:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 25px -5px rgba(183, 26, 26, 0.5); }
     </style>
 </head>
 <body>
+    <div id="canvas-container"></div>
+
     <header class="top-header">
         <div class="header-container">
             <div class="logo-group">
@@ -205,119 +109,258 @@
                     <div class="sub-title">Đại học Bách khoa Hà Nội</div>
                 </div>
             </div>
-            
             <div class="action-buttons">
-                <span class="version-badge" style="display: inline-block; padding: 8px 15px; color: #fff; font-size: 12px; font-weight: bold; border-radius: 3px; background-color: #2b2b2b;">YUMOFFICE v2.0</span>
+                <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" style="z-index: 10;">☀️ Sáng / Tối</button>
+                <span class="version-badge" style="z-index: 10;">YUMOFFICE v2.0</span>
             </div>
         </div>
     </header>
 
-    <nav class="main-nav" aria-label="Điều hướng chính">
-        <div class="nav-container">
-            <a href="index.html" class="active" aria-current="page">TRANG CHỦ</a>
-            <a href="https://docs.google.com/spreadsheets/d/11Z_n_19ldXi3ZFsTS6Vn9K6Y87g5BbgPQdHOfeJmxow/edit?usp=sharing" target="_blank" rel="noopener noreferrer">HỒ SƠ ĐẢNG</a>
-            <a href="ban-nhan-xet.html">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
-            <a href="#" class="disabled-link" aria-disabled="true" tabindex="-1">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
-            <a href="https://husteduvn-my.sharepoint.com/:x:/r/personal/dtn_hust_edu_vn/Documents/C%C3%B4ng%20v%C4%83n%20nhi%E1%BB%87m%20k%E1%BB%B3%2036/%5BV%C4%82N%20PH%C3%92NG%20%C4%90O%C3%80N%5D%20S%E1%BB%95%20%C4%91%C4%83ng%20k%C3%BD%20C%C3%B4ng%20v%C4%83n%20%C4%91i%202026.xlsx?d=w3c7b2d02c90a43a896c16a8bc1db2b25&amp;csf=1&amp;web=1&amp;e=fWuJts" target="_blank" rel="noopener noreferrer">SỔ CÔNG VĂN</a>
-            <a href="kho-tai-lieu.html">KHO TÀI LIỆU</a>
-            <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
-            <a href="huong-dan.html">HƯỚNG DẪN SỬ DỤNG TRANG WEB</a>
-        </div>
-    </nav>
+    <div class="gooey-nav-container" id="navContainer">
+        <nav>
+            <ul id="navList">
+                <li class="active"><a href="index.html">TRANG CHỦ</a></li>
+                <li><a href="https://docs.google.com/spreadsheets/d/11Z_n_19ldXi3ZFsTS6Vn9K6Y87g5BbgPQdHOfeJmxow/edit?usp=sharing" target="_blank">HỒ SƠ ĐẢNG</a></li>
+                <li><a href="ban-nhan-xet.html">BẢN NHẬN XÉT ĐẢNG</a></li>
+                <li><a href="#" style="opacity: 0.5">NGHỊ QUYẾT</a></li>
+                <li><a href="https://husteduvn-my.sharepoint.com/:x:/r/personal/dtn_hust_edu_vn/Documents/C%C3%B4ng%20v%C4%83n%20nhi%E1%BB%87m%20k%E1%BB%B3%2036/%5BV%C4%82N%20PH%C3%92NG%20%C4%90O%C3%80N%5D%20S%E1%BB%95%20%C4%91%C4%83ng%20k%C3%BD%20C%C3%B4ng%20v%C4%83n%20%C4%91i%202026.xlsx?d=w3c7b2d02c90a43a896c16a8bc1db2b25&csf=1&web=1&e=fWuJts" target="_blank">SỔ CÔNG VĂN</a></li>
+                <li><a href="kho-tai-lieu.html">KHO TÀI LIỆU</a></li>
+                <li><a href="lich-su.html">LỊCH SỬ</a></li>
+                <li><a href="huong-dan.html">HƯỚNG DẪN</a></li>
+            </ul>
+        </nav>
+        <span class="effect filter" id="navFilter"></span>
+    </div>
 
     <div class="content-wrapper">
-        
-        <!-- KHU VỰC HERO BANNER -->
         <div class="hero-banner fade-in">
             <div class="hero-title">HỆ THỐNG YUMOFFICE V2.0</div>
             <div class="hero-desc">
                 Nền tảng chuyển đổi số toàn diện dành riêng cho công tác quản lý nghiệp vụ Văn phòng Đoàn Thanh niên Đại học Bách khoa Hà Nội.<br>
-                Cung cấp bộ công cụ tự động hóa thông minh giúp các cán bộ Đoàn cơ sở tiết kiệm tối đa thời gian xử lý hồ sơ, tránh sai sót dữ liệu và đảm bảo tuân thủ tuyệt đối thể thức văn bản hành chính.
+                Cung cấp bộ công cụ tự động hóa thông minh giúp các cán bộ Đoàn cơ sở tiết kiệm tối đa thời gian.
             </div>
         </div>
 
-        <!-- PHẦN 1: CÁC PHÂN HỆ CỐT LÕI -->
-        <h3 class="section-heading fade-in delay-1">🔥 Các phân hệ và tính năng cốt lõi</h3>
-        
-        <div class="upload-grid">
-            <!-- Tính năng 1 -->
-            <a class="feature-card fade-in delay-1" href="ban-nhan-xet.html">
+        <div class="upload-grid fade-in">
+            <a class="feature-card" href="ban-nhan-xet.html">
                 <div class="icon-wrapper">📋</div>
-                <div class="box-title" style="font-size: 16px; color: #b71a1a; margin-bottom: 10px;">BẢN NHẬN XÉT ĐẢNG VIÊN</div>
-                <div class="box-desc" style="color: #475569; flex: 1;">
-                    Trích xuất tự động hàng loạt Bản nhận xét từ dữ liệu Excel. Tích hợp AI chấm điểm, bảng rà soát (Preview) để chỉnh sửa và xuất gộp 1 file Word duy nhất tối ưu cho in ấn.
-                </div>
-                <div style="margin-top: 20px; font-size: 13px; color: #b71a1a; font-weight: bold; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
-                    Truy cập phân hệ <span style="font-size: 16px;">&rarr;</span>
-                </div>
+                <div class="box-title" style="color: var(--primary-red);">BẢN NHẬN XÉT ĐẢNG VIÊN</div>
+                <div class="box-desc">Trích xuất tự động hàng loạt Bản nhận xét từ dữ liệu Excel. Tích hợp AI chấm điểm.</div>
             </a>
-
-            <!-- Tính năng 2 -->
-            <a class="feature-card fade-in delay-2" href="kho-tai-lieu.html">
+            <a class="feature-card" href="kho-tai-lieu.html">
                 <div class="icon-wrapper">📁</div>
-                <div class="box-title" style="font-size: 16px; color: #b71a1a; margin-bottom: 10px;">KHO TÀI LIỆU BIỂU MẪU</div>
-                <div class="box-desc" style="color: #475569; flex: 1;">
-                    Trung tâm lưu trữ các phôi mẫu Word, Excel, PDF chuẩn xác nhất của Đoàn trường. Tích hợp tính năng xem trước trực tuyến và tải xuống trực tiếp với tốc độ cao.
-                </div>
-                <div style="margin-top: 20px; font-size: 13px; color: #b71a1a; font-weight: bold; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
-                    Truy cập phân hệ <span style="font-size: 16px;">&rarr;</span>
-                </div>
+                <div class="box-title" style="color: var(--primary-red);">KHO TÀI LIỆU BIỂU MẪU</div>
+                <div class="box-desc">Lưu trữ phôi mẫu Word, Excel chuẩn xác nhất. Tích hợp xem trước trực tuyến.</div>
             </a>
-
-            <!-- Tính năng 3 -->
-            <a class="feature-card fade-in delay-3" href="lich-su.html">
+            <a class="feature-card" href="lich-su.html">
                 <div class="icon-wrapper">💾</div>
-                <div class="box-title" style="font-size: 16px; color: #b71a1a; margin-bottom: 10px;">LỊCH SỬ LƯU TRỮ ẢO</div>
-                <div class="box-desc" style="color: #475569; flex: 1;">
-                    Hệ thống tích hợp ổ đĩa ảo (IndexedDB) ngay trên trình duyệt, tự động lưu lại các lô hồ sơ đã tạo. Người dùng có thể tải lại bất cứ lúc nào mà không cần chạy lại.
-                </div>
-                <div style="margin-top: 20px; font-size: 13px; color: #b71a1a; font-weight: bold; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
-                    Truy cập phân hệ <span style="font-size: 16px;">&rarr;</span>
-                </div>
+                <div class="box-title" style="color: var(--primary-red);">LỊCH SỬ LƯU TRỮ ẢO</div>
+                <div class="box-desc">Hệ thống lưu lại các lô hồ sơ đã tạo. Người dùng có thể tải lại bất cứ lúc nào.</div>
             </a>
-
-            <!-- Tính năng 4 -->
-            <div class="feature-card is-disabled fade-in delay-4" aria-disabled="true" style="cursor: not-allowed; background-color: #f8fafc;">
-                <div class="icon-wrapper" style="color: #64748b;">📜</div>
-                <div class="box-title" style="font-size: 16px; color: #64748b; margin-bottom: 10px;">NGHỊ QUYẾT GIỚI THIỆU</div>
-                <div class="box-desc" style="color: #94a3b8; flex: 1;">
-                    Tự động hóa quy trình tổng hợp số liệu biểu quyết và trích xuất hệ thống Nghị quyết giới thiệu Đoàn viên ưu tú vào Đảng của BCH Đoàn trường hoặc Liên chi Đoàn.
-                </div>
-                <div style="margin-top: 20px; font-size: 13px; color: #94a3b8; font-weight: bold; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
-                    Đang phát triển...
-                </div>
-            </div>
         </div>
 
-        <!-- PHẦN 2: ƯU ĐIỂM VƯỢT TRỘI -->
-        <h3 class="section-heading fade-in delay-2">⭐ Tại sao nên sử dụng YUMOFFICE?</h3>
-        
-        <div class="info-box fade-in delay-3">
-            <ul class="info-list">
-                <li><strong>Bảo mật dữ liệu tuyệt đối (Client-side Processing):</strong> Toàn bộ quá trình phân tích Excel và xuất Word diễn ra 100% bằng sức mạnh xử lý trên máy tính của đồng chí. Dữ liệu nhạy cảm KHÔNG bao giờ bị tải lên bất kỳ máy chủ mạng nào.</li>
-                <li><strong>Trí tuệ nhân tạo (AI) thông minh:</strong> Hệ thống tự động bóc tách khoảng điểm, tính trung bình cộng, tự động chuyển đổi định dạng ngày tháng, cho phép rà soát - chỉnh sửa linh hoạt qua bảng Pop-up và cảnh báo (Audit) ngay khi thiếu sót dữ liệu.</li>
-                <li><strong>Tốc độ xử lý siêu tốc & Chuẩn lề lối:</strong> Tự động trộn, định tuyến câu từ chữ và gộp hàng trăm hồ sơ thành một file Word duy nhất. Cơ chế chèn mã "ngắt trang tự động" thông minh giúp in ấn hàng loạt dễ dàng bằng 1 click chuột, tiết kiệm đến 95% thời gian làm thủ công.</li>
-            </ul>
+        <div class="fade-in" style="text-align: center; margin-top: 55px; margin-bottom: 30px;">
+            <button class="btn-start" onclick="location.href='ban-nhan-xet.html'">🚀 Bắt đầu sử dụng ngay</button>
         </div>
-
-        <!-- PHẦN 3: NÚT BẮT ĐẦU -->
-        <div class="fade-in delay-4" style="text-align: center; margin-top: 55px; margin-bottom: 30px;">
-            <button class="btn-start" onclick="location.href='ban-nhan-xet.html'">
-                🚀 Bắt đầu sử dụng ngay
-            </button>
-            <p style="margin-top: 18px; font-size: 14px; color: #64748b;">
-                Khuyên dùng trình duyệt Google Chrome hoặc Microsoft Edge để có trải nghiệm tốt nhất.
-            </p>
-        </div>
-
     </div>
 
     <footer>
         <div class="footer-content">
             <p><strong>Bản quyền thuộc về Đoàn Thanh niên Đại học Bách khoa Hà Nội</strong></p>
-            <p>Địa chỉ: Phòng C1-226, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
-            <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ YUMOFFICE 2026</p>
         </div>
     </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById('navContainer');
+            const list = document.getElementById('navList');
+            const items = list.querySelectorAll('li');
+            const filter = document.getElementById('navFilter');
+            let activeIndex = 0; // Trang chủ là 0
+            
+            const noise = (n = 1) => n / 2 - Math.random() * n;
+            const getXY = (distance, pointIndex, totalPoints) => {
+                const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
+                return [distance * Math.cos(angle), distance * Math.sin(angle)];
+            };
+
+            const particleCount = 15;
+            const particleDistances = [70, 10];
+            const particleR = 100;
+            const animationTime = 600;
+            const timeVariance = 300;
+
+            function createParticle(i, t, d, r) {
+                let rotate = noise(r / 10);
+                return {
+                    start: getXY(d[0], particleCount - i, particleCount),
+                    end: getXY(d[1] + noise(7), particleCount - i, particleCount),
+                    time: t, scale: 1 + noise(0.2), rotate: rotate > 0 ? (rotate + r / 20) * 10 : (rotate - r / 20) * 10
+                };
+            }
+
+            function makeParticles(element) {
+                const bubbleTime = animationTime * 2 + timeVariance;
+                element.style.setProperty('--time', `${bubbleTime}ms`);
+
+                for (let i = 0; i < particleCount; i++) {
+                    const t = animationTime * 2 + noise(timeVariance * 2);
+                    const p = createParticle(i, t, particleDistances, particleR);
+                    element.classList.remove('active');
+
+                    setTimeout(() => {
+                        const particle = document.createElement('span');
+                        const point = document.createElement('span');
+                        particle.classList.add('particle');
+                        particle.style.setProperty('--start-x', `${p.start[0]}px`);
+                        particle.style.setProperty('--start-y', `${p.start[1]}px`);
+                        particle.style.setProperty('--end-x', `${p.end[0]}px`);
+                        particle.style.setProperty('--end-y', `${p.end[1]}px`);
+                        particle.style.setProperty('--time', `${p.time}ms`);
+                        particle.style.setProperty('--scale', `${p.scale}`);
+                        particle.style.setProperty('--rotate', `${p.rotate}deg`);
+                        point.classList.add('point');
+                        particle.appendChild(point);
+                        element.appendChild(particle);
+
+                        requestAnimationFrame(() => { element.classList.add('active'); });
+                        setTimeout(() => { try { element.removeChild(particle); } catch(e){} }, t);
+                    }, 30);
+                }
+            }
+
+            function updateEffectPosition(el) {
+                if(!el) return;
+                const containerRect = container.getBoundingClientRect();
+                const pos = el.getBoundingClientRect();
+                filter.style.left = `${pos.x - containerRect.x}px`;
+                filter.style.top = `${pos.y - containerRect.y}px`;
+                filter.style.width = `${pos.width}px`;
+                filter.style.height = `${pos.height}px`;
+            }
+
+            // Init
+            updateEffectPosition(items[activeIndex]);
+            filter.classList.add('active');
+
+            items.forEach((item, index) => {
+                // Chỉ apply click effect nếu link không mở tab mới
+                const anchor = item.querySelector('a');
+                if(!anchor.hasAttribute('target')) {
+                    anchor.addEventListener('click', (e) => {
+                        if(activeIndex === index) return;
+                        items.forEach(li => li.classList.remove('active'));
+                        item.classList.add('active');
+                        activeIndex = index;
+                        updateEffectPosition(item);
+                        
+                        const particles = filter.querySelectorAll('.particle');
+                        particles.forEach(p => filter.removeChild(p));
+                        makeParticles(filter);
+                    });
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                updateEffectPosition(items[activeIndex]);
+            });
+        });
+    </script>
+
+    <script type="module">
+        import { Renderer, Program, Mesh, Color, Triangle } from 'https://cdn.jsdelivr.net/npm/ogl@0.0.117/src/index.js';
+
+        // Khởi tạo Shader cho Iridescence
+        const vertexShader = `attribute vec2 uv; attribute vec2 position; varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position, 0, 1); }`;
+        const fragmentShader = `
+            precision highp float;
+            uniform float uTime; uniform vec3 uColor; uniform vec3 uResolution; uniform vec2 uMouse; uniform float uAmplitude; uniform float uSpeed;
+            varying vec2 vUv;
+            void main() {
+                float mr = min(uResolution.x, uResolution.y);
+                vec2 uv = (vUv.xy * 2.0 - 1.0) * uResolution.xy / mr;
+                uv += (uMouse - vec2(0.5)) * uAmplitude;
+                float d = -uTime * 0.5 * uSpeed;
+                float a = 0.0;
+                for (float i = 0.0; i < 8.0; ++i) {
+                    a += cos(i - d - a * uv.x);
+                    d += sin(uv.y * i + a);
+                }
+                d += uTime * 0.5 * uSpeed;
+                vec3 col = vec3(cos(uv * vec2(d, a)) * 0.6 + 0.4, cos(a + d) * 0.5 + 0.5);
+                col = cos(col * cos(vec3(d, a, 2.5)) * 0.5 + 0.5) * uColor;
+                gl_FragColor = vec4(col, 1.0);
+            }
+        `;
+
+        const ctn = document.getElementById('canvas-container');
+        const renderer = new Renderer();
+        const gl = renderer.gl;
+        gl.clearColor(1, 1, 1, 0); // Trong suốt để không đè nền CSS
+
+        let program;
+        let mousePos = { x: 0.5, y: 0.5 };
+
+        function resize() {
+            renderer.setSize(ctn.offsetWidth, ctn.offsetHeight);
+            if (program) {
+                program.uniforms.uResolution.value = new Color(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height);
+            }
+        }
+        window.addEventListener('resize', resize, false);
+
+        // Khuyên dùng mảng màu nhạt cho Light Mode để trông tinh tế (Màu hồng/vàng nhạt)
+        const bgColor = [0.95, 0.9, 0.95]; 
+
+        const geometry = new Triangle(gl);
+        program = new Program(gl, {
+            vertex: vertexShader,
+            fragment: fragmentShader,
+            uniforms: {
+                uTime: { value: 0 },
+                uColor: { value: new Color(...bgColor) },
+                uResolution: { value: new Color(window.innerWidth, window.innerHeight, window.innerWidth / window.innerHeight) },
+                uMouse: { value: new Float32Array([mousePos.x, mousePos.y]) },
+                uAmplitude: { value: 0.1 },
+                uSpeed: { value: 0.6 } // Tốc độ dịu nhẹ
+            }
+        });
+
+        const mesh = new Mesh(gl, { geometry, program });
+        ctn.appendChild(gl.canvas);
+        resize();
+
+        function update(t) {
+            requestAnimationFrame(update);
+            program.uniforms.uTime.value = t * 0.001;
+            renderer.render({ scene: mesh });
+        }
+        requestAnimationFrame(update);
+
+        // Chuột tương tác với Background
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = 1.0 - e.clientY / window.innerHeight;
+            program.uniforms.uMouse.value[0] = x;
+            program.uniforms.uMouse.value[1] = y;
+        });
+
+        // Toggle Theme
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('yumTheme', newTheme);
+            updateThemeIcon();
+        };
+
+        function updateThemeIcon() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const btn = document.getElementById('themeToggleBtn');
+            if(btn) btn.innerHTML = theme === 'dark' ? '☀️ Giao diện Sáng' : '🌙 Giao diện Tối';
+        }
+        updateThemeIcon();
+    </script>
 </body>
 </html>
