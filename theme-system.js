@@ -43,6 +43,7 @@
         if (persist) saveTheme(currentTheme);
         if (shaderController) shaderController.setTheme(currentTheme);
         resetBentoTransforms();
+        resetBorderGlow();
 
         window.dispatchEvent(new CustomEvent('yumoffice:themechange', {
             detail: { theme: currentTheme }
@@ -277,6 +278,29 @@
         ].join(',')));
     }
 
+    function borderGlowCards() {
+        return Array.from(document.querySelectorAll([
+            '.content-wrapper .hero-banner',
+            '.content-wrapper .guide-header',
+            '.content-wrapper .feature-card',
+            '.content-wrapper .upload-box',
+            '.content-wrapper .guide-section',
+            '.content-wrapper .info-box',
+            '.content-wrapper .doc-card',
+            '.content-wrapper .cta-panel',
+            '.content-wrapper .alert-panel',
+            '.content-wrapper .history-controls',
+            '.content-wrapper .table-scroll',
+            '.content-wrapper .table-container',
+            '.content-wrapper .review-hero',
+            '.content-wrapper .review-note',
+            '.content-wrapper .review-step-card',
+            '.content-wrapper .review-action-panel',
+            '.modal-box',
+            '.preview-modal-box'
+        ].join(',')));
+    }
+
     function resetBentoTransforms() {
         bentoCards().forEach((card) => {
             card.style.removeProperty('--tilt-x');
@@ -284,6 +308,82 @@
             card.style.removeProperty('--magnet-x');
             card.style.removeProperty('--magnet-y');
             card.style.setProperty('--glow-intensity', '0');
+        });
+    }
+
+    function resetBorderGlow() {
+        borderGlowCards().forEach((card) => {
+            card.classList.remove('is-border-glow-active');
+            card.style.setProperty('--edge-proximity', '0');
+        });
+    }
+
+    function getBorderGlowEdgeProximity(rect, x, y) {
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const dx = x - cx;
+        const dy = y - cy;
+        let kx = Infinity;
+        let ky = Infinity;
+
+        if (dx !== 0) kx = cx / Math.abs(dx);
+        if (dy !== 0) ky = cy / Math.abs(dy);
+
+        return Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+    }
+
+    function getBorderGlowCursorAngle(rect, x, y) {
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const dx = x - cx;
+        const dy = y - cy;
+        if (dx === 0 && dy === 0) return 0;
+
+        const degrees = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+        return degrees < 0 ? degrees + 360 : degrees;
+    }
+
+    function initBorderGlowCards() {
+        const cards = borderGlowCards();
+        if (!cards.length) return;
+
+        cards.forEach((card) => {
+            if (card.dataset.borderGlowReady === 'true') return;
+
+            card.dataset.borderGlowReady = 'true';
+            card.classList.add('border-glow-card');
+
+            if (!card.querySelector(':scope > .border-glow-surface')) {
+                const surface = document.createElement('span');
+                surface.className = 'border-glow-surface';
+                surface.setAttribute('aria-hidden', 'true');
+                card.prepend(surface);
+            }
+
+            if (!card.querySelector(':scope > .border-glow-edge')) {
+                const edge = document.createElement('span');
+                edge.className = 'border-glow-edge';
+                edge.setAttribute('aria-hidden', 'true');
+                card.prepend(edge);
+            }
+
+            card.addEventListener('pointermove', (event) => {
+                if (currentTheme !== 'dark' || reducedMotion.matches || window.innerWidth <= 768) return;
+                const rect = card.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const edge = getBorderGlowEdgeProximity(rect, x, y);
+                const angle = getBorderGlowCursorAngle(rect, x, y);
+
+                card.classList.add('is-border-glow-active');
+                card.style.setProperty('--edge-proximity', `${(edge * 100).toFixed(3)}`);
+                card.style.setProperty('--cursor-angle', `${angle.toFixed(3)}deg`);
+            }, { passive: true });
+
+            card.addEventListener('pointerleave', () => {
+                card.classList.remove('is-border-glow-active');
+                card.style.setProperty('--edge-proximity', '0');
+            }, { passive: true });
         });
     }
 
@@ -530,6 +630,7 @@
     addAccessibilityHelpers();
     initGooeyNav();
     initMagicBento();
+    initBorderGlowCards();
     shaderController = initIridescence();
     applyTheme(currentTheme, false);
 })();
