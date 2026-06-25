@@ -467,15 +467,15 @@
         function draw(time) {
             resize();
             const color = shaderTheme === 'dark'
-                ? [0.28, 0.66, 0.62]
+                ? [0.22, 0.08, 0.08]
                 : [1.0, 0.86, 0.76];
             gl.useProgram(program);
             gl.uniform1f(uniforms.time, time * 0.001);
             gl.uniform3fv(uniforms.color, color);
             gl.uniform3f(uniforms.resolution, canvas.width, canvas.height, canvas.width / canvas.height);
             gl.uniform2f(uniforms.mouse, mouseX, mouseY);
-            gl.uniform1f(uniforms.amplitude, shaderTheme === 'dark' ? 0.07 : 0.1);
-            gl.uniform1f(uniforms.speed, shaderTheme === 'dark' ? 0.65 : 1.0);
+            gl.uniform1f(uniforms.amplitude, shaderTheme === 'dark' ? 0.045 : 0.1);
+            gl.uniform1f(uniforms.speed, shaderTheme === 'dark' ? 0.42 : 1.0);
             gl.drawArrays(gl.TRIANGLES, 0, 3);
         }
 

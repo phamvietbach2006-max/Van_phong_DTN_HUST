@@ -44,23 +44,23 @@
     <div class="content-wrapper">
         <h2 class="section-title">LỊCH SỬ TẠO VĂN BẢN & HỒ SƠ</h2>
         
-        <div style="background-color: #fff1f0; border: 1px solid #ffa39e; padding: 15px; border-radius: 4px; margin-bottom: 25px;">
-            <p style="color: #cf1322; font-size: 14px; margin-bottom: 5px;"><strong>⚠️ CẢNH BÁO QUAN TRỌNG:</strong></p>
-            <p style="color: #cf1322; font-size: 13px; line-height: 1.5;">Toàn bộ dữ liệu hồ sơ đang được lưu trữ trực tiếp trên thiết bị này (không lưu trên máy chủ Cloud). Nếu đồng chí chọn <strong>"Xóa dữ liệu"</strong> hoặc dọn dẹp lịch sử duyệt web sâu (Clear Cache), các file lưu tại đây sẽ bị mất vĩnh viễn. Vui lòng cân nhắc kỹ trước khi xóa!</p>
+        <div class="alert-panel">
+            <p class="alert-panel-title">Cảnh báo quan trọng</p>
+            <p>Toàn bộ dữ liệu hồ sơ đang được lưu trực tiếp trên thiết bị này, không lưu trên máy chủ Cloud. Nếu đồng chí chọn <strong>"Xóa dữ liệu"</strong> hoặc dọn dẹp lịch sử duyệt web sâu, các file lưu tại đây sẽ bị mất vĩnh viễn.</p>
         </div>
 
         <div class="history-controls">
-            <div>
-                <strong style="font-size: 14px; margin-right: 10px;">Lọc nghiệp vụ:</strong>
-                <select id="filterType" onchange="loadHistory()" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+            <div class="history-filter">
+                <strong class="history-label">Lọc nghiệp vụ:</strong>
+                <select id="filterType" onchange="loadHistory()">
                     <option value="all">Tất cả các loại</option>
                     <option value="Bản nhận xét Đảng viên">Bản nhận xét Đảng viên</option>
                     <option value="Nghị quyết giới thiệu">Nghị quyết giới thiệu</option>
                 </select>
             </div>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span style="font-size: 14px; color: #555;">Dữ liệu lưu nội bộ 100% bảo mật.</span>
-                <button onclick="clearHistory()" style="background-color: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s;">⚠️ Xóa dữ liệu</button>
+            <div class="history-actions">
+                <span class="history-meta">Dữ liệu lưu nội bộ trên trình duyệt.</span>
+                <button class="btn-danger-subtle" onclick="clearHistory()">Xóa dữ liệu</button>
             </div>
         </div>
 
@@ -68,13 +68,13 @@
             <table class="history-table">
                 <thead>
                     <tr>
-                        <th style="width: 5%; text-align: center;">STT</th>
-                        <th style="width: 15%;">Thời gian tạo</th>
-                        <th style="width: 25%;">Tên lô hồ sơ</th>
-                        <th style="width: 20%;">Loại nghiệp vụ</th>
-                        <th style="width: 10%; text-align: center;">Số lượng</th>
-                        <th style="width: 10%; text-align: center;">Trạng thái</th>
-                        <th style="width: 15%; text-align: center;">Thao tác</th>
+                        <th class="cell-center">STT</th>
+                        <th>Thời gian tạo</th>
+                        <th>Tên lô hồ sơ</th>
+                        <th>Loại nghiệp vụ</th>
+                        <th class="cell-center">Số lượng</th>
+                        <th class="cell-center">Trạng thái</th>
+                        <th class="cell-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="historyBody">
@@ -154,7 +154,7 @@
             }
 
             if (historyData.length === 0) {
-                historyBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">Không tìm thấy lịch sử tạo văn bản nào phù hợp.</td></tr>`;
+                historyBody.innerHTML = `<tr><td colspan="7" class="table-empty">Chưa có lịch sử tạo văn bản phù hợp.</td></tr>`;
                 return;
             }
 
@@ -162,14 +162,14 @@
             historyData.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="text-align: center; font-weight: bold;">${index + 1}</td>
+                    <td class="cell-center cell-strong">${index + 1}</td>
                     <td>${item.time}</td>
-                    <td style="font-weight: bold; color: #b71a1a;">${item.fileName}</td>
+                    <td class="file-link">${item.fileName}</td>
                     <td>${item.type}</td>
-                    <td style="text-align: center;">${item.count}</td>
-                    <td style="text-align: center;"><span class="badge-status">${item.status}</span></td>
-                    <td style="text-align: center;">
-                        <button class="btn-download-sm" onclick="downloadOldFile('${item.id}', '${item.fileName}')">⬇️ Tải lại</button>
+                    <td class="cell-center">${item.count}</td>
+                    <td class="cell-center"><span class="badge-status">${item.status}</span></td>
+                    <td class="cell-center">
+                        <button class="btn-download-sm" onclick="downloadOldFile('${item.id}', '${item.fileName}')">Tải lại</button>
                     </td>
                 `;
                 historyBody.appendChild(tr);
@@ -183,16 +183,16 @@
                     saveAs(blob, fileName);
                 } else {
                     await showCustomModal({
-                        title: '⚠️ FILE KHÔNG TỒN TẠI',
-                        message: 'Xin lỗi đồng chí, tệp tin này đã bị xóa hoặc không còn tồn tại trong bộ nhớ cache của trình duyệt!',
+                        title: 'FILE KHÔNG TỒN TẠI',
+                        message: 'Tệp tin này đã bị xóa hoặc không còn tồn tại trong bộ nhớ cache của trình duyệt.',
                         type: 'alert',
                         confirmText: 'Đóng lại'
                     });
                 }
             } catch (err) {
                 await showCustomModal({
-                    title: '❌ LỖI HỆ THỐNG',
-                    message: 'Có lỗi xảy ra khi truy xuất file từ ổ đĩa ảo!',
+                    title: 'LỖI HỆ THỐNG',
+                    message: 'Có lỗi xảy ra khi truy xuất file từ bộ nhớ nội bộ.',
                     type: 'alert',
                     confirmText: 'Đóng lại'
                 });
@@ -201,8 +201,8 @@
 
         async function clearHistory() {
             const userInput = await showCustomModal({
-                title: '⚠️ CẢNH BÁO NGUY HIỂM',
-                message: 'Hành động này sẽ xóa vĩnh viễn toàn bộ lịch sử và file đã lưu trên máy tính này!<br><br>Để xác nhận chắc chắn muốn xóa, vui lòng gõ chữ: <b>XOA</b>',
+                title: 'XÁC NHẬN XÓA DỮ LIỆU',
+                message: 'Hành động này sẽ xóa vĩnh viễn toàn bộ lịch sử và file đã lưu trên máy tính này.<br><br>Để xác nhận chắc chắn muốn xóa, vui lòng gõ chữ: <b>XOA</b>',
                 type: 'prompt',
                 confirmText: 'Xác nhận xóa'
             });
@@ -214,14 +214,14 @@
                     loadHistory();
                     
                     await showCustomModal({
-                        title: '✅ ĐÃ XÓA THÀNH CÔNG',
-                        message: 'Toàn bộ dữ liệu lịch sử và bộ nhớ lưu trữ đã được dọn sạch!',
+                        title: 'ĐÃ XÓA THÀNH CÔNG',
+                        message: 'Toàn bộ dữ liệu lịch sử và bộ nhớ lưu trữ đã được dọn sạch.',
                         type: 'alert',
                         confirmText: 'Đã hiểu'
                     });
                 } else {
                     await showCustomModal({
-                        title: '❌ HỦY THAO TÁC',
+                        title: 'HỦY THAO TÁC',
                         message: 'Lệnh xóa đã bị hủy do đồng chí nhập không đúng chữ <b>XOA</b>.',
                         type: 'alert',
                         confirmText: 'Đóng lại'

@@ -186,7 +186,7 @@
                 </div>
             </div>
             <div class="action-buttons">
-                <span class="version-badge" style="display: inline-block; padding: 8px 15px; color: #fff; font-size: 12px; font-weight: bold; border-radius: 3px; background-color: #2b2b2b;">YUMOFFICE v2.0</span>
+                <span class="version-badge">YUMOFFICE v2.0</span>
             </div>
         </div>
     </header>
@@ -216,7 +216,7 @@
 
         <!-- KHỐI 1: CẤU HÌNH BIẾN HỒ SƠ -->
         <div class="guide-section fade-in delay-1">
-            <div class="guide-title">⚙️ 1. QUY ĐỊNH ĐẶT BIẾN TRÊN PHÔI WORD</div>
+            <div class="guide-title">1. QUY ĐỊNH ĐẶT BIẾN TRÊN PHÔI WORD</div>
             <div class="step-content">
                 Hệ thống sử dụng lõi quét ký tự đóng khung vuông kép để tìm kiếm và tự động thay thế văn bản. Để phôi hồ sơ hoạt động chính xác, đồng chí cần thiết lập các từ khóa biến chính xác như sau trong tệp mẫu <span class="code-tag">.docx</span>:
                 
@@ -224,9 +224,9 @@
                     <table class="table-spec">
                         <thead>
                             <tr>
-                                <th style="width: 25%;">Từ khóa biến</th>
-                                <th style="width: 35%;">Ý nghĩa hành chính</th>
-                                <th style="width: 40%;">Dữ liệu tự động sinh ra</th>
+                                <th class="col-25">Từ khóa biến</th>
+                                <th class="col-35">Ý nghĩa hành chính</th>
+                                <th class="col-40">Dữ liệu tự động sinh ra</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -268,7 +268,7 @@
                         </tbody>
                     </table>
                 </div>
-                <p style="margin-top: 15px; font-size: 13.5px; color: #b71a1a; font-weight: bold;">
+                <p class="guide-note">
                     * Lưu ý: Đồng chí KHÔNG cần chèn các thẻ đóng mở vòng lặp hay lệnh ngắt trang phức tạp vào file Word, hệ thống đã tích hợp công nghệ cấy ghép XML tự động ngắt trang chuẩn lề lối cho từng sinh viên.
                 </p>
             </div>
@@ -276,13 +276,13 @@
 
         <!-- KHỐI 2: QUY TRÌNH 3 BƯỚC XỬ LÝ -->
         <div class="guide-section fade-in delay-2">
-            <div class="guide-title">🚀 2. QUY TRÌNH 3 BƯỚC TRỘN HỒ SƠ HÀNG LOẠT</div>
+            <div class="guide-title">2. QUY TRÌNH 3 BƯỚC TRỘN HỒ SƠ HÀNG LOẠT</div>
             <ul class="step-list">
                 <li class="step-item">
                     <div class="step-number">1</div>
                     <div class="step-heading">Nạp tệp tài liệu đầu vào</div>
                     <div class="step-content">
-                        Tại phân hệ "Bản nhận xét chuyển Đảng chính thức", đồng chí click vào hai ô hộp tải lên để chọn tệp: Ổ số 1 nạp file phôi Word gốc (<span class="code-tag">.docx</span>), ổ số 2 nạp file danh sách dữ liệu sinh viên ưu tú trích xuất từ Excel (<span class="code-tag">.xlsx</span>).
+                        Tại phân hệ "Bản nhận xét chuyển Đảng chính thức", mẫu Word <span class="code-tag">Mau_Ban_Nhan_Xet.docx</span> đã được hệ thống lấy tự động. Đồng chí chỉ cần chọn file danh sách dữ liệu sinh viên ưu tú trích xuất từ Excel (<span class="code-tag">.xlsx</span>).
                     </div>
                 </li>
                 <li class="step-item">
@@ -305,10 +305,12 @@
 
         <!-- KHỐI 3: KHO TÀI LIỆU VÀ BẢO MẬT -->
         <div class="guide-section fade-in delay-3">
-            <div class="guide-title">🛡️ 3. KHAI THÁC KHO TÀI LIỆU VÀ CƠ CHẾ BẢO MẬT</div>
-            <div class="step-content" style="line-height: 1.8;">
-                • <strong>Tính năng xem trước tại Kho tài liệu:</strong> Đồng chí có thể bấm nút "Xem trước" (hoặc Xem trực tiếp) để đọc nhanh cấu trúc phôi mẫu Word, Excel, PDF chuẩn ngay trên cửa sổ Pop-up iframe của website mà không cần phải tải về máy hay mở tab mới.
-                <br>• <strong>Cơ chế bảo mật an toàn tuyệt đối:</strong> YUMOFFICE v2.0 hoạt động theo mô hình Client-side (xử lý tại máy trạm). Toàn bộ dữ liệu điểm số, thông tin nhạy cảm của sinh viên và Đảng viên dự bị được xử lý ngầm bằng RAM của máy tính cá nhân, hoàn toàn KHÔNG gửi lên server mạng. Do đó, hệ thống bảo mật an toàn 100%, không lo rò rỉ thông tin nội bộ.
+            <div class="guide-title">3. KHAI THÁC KHO TÀI LIỆU VÀ CƠ CHẾ BẢO MẬT</div>
+            <div class="step-content">
+                <ul class="guide-bullet-list">
+                    <li><strong>Tính năng xem trước tại Kho tài liệu:</strong> Đồng chí có thể bấm nút "Xem trước" hoặc "Xem trực tiếp" để đọc nhanh cấu trúc phôi mẫu Word, Excel, PDF chuẩn ngay trên cửa sổ của website.</li>
+                    <li><strong>Cơ chế bảo mật an toàn:</strong> YUMOFFICE v2.0 xử lý dữ liệu trực tiếp trên máy của người dùng. Dữ liệu điểm số, thông tin sinh viên và hồ sơ nội bộ không được gửi lên máy chủ của website.</li>
+                </ul>
             </div>
         </div>
 
