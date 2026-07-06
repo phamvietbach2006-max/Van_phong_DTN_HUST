@@ -700,14 +700,14 @@
 
         function evaluateHocTap(gpa) {
             if (gpa < 2.0) return "bỏ"; 
-            if (gpa < 2.5) return "trung bình"; 
+            if (gpa < 2.5) return "bỏ"; 
             if (gpa < 3.2) return "khá";
             if (gpa < 3.6) return "tốt"; 
             return "xuất sắc";
         }
         function evaluateRenLuyen(drl) {
             if (drl < 50) return "bỏ"; 
-            if (drl < 65) return "trung bình"; 
+            if (drl < 65) return "bỏ"; 
             if (drl < 80) return "khá";
             if (drl < 90) return "tốt"; 
             return "xuất sắc";
@@ -845,7 +845,7 @@
                     }
 
                     let trHtml = '';
-                    const options = ["xuất sắc", "tốt", "khá", "trung bình", "bỏ"];
+                    const options = ["xuất sắc", "tốt", "khá", "bỏ"];
                     
                     window.pendingStudents.forEach((student, i) => {
                         let htOpts = options.map(opt => `<option value="${opt}" ${opt === student.evalHT ? 'selected' : ''}>${opt}</option>`).join('');

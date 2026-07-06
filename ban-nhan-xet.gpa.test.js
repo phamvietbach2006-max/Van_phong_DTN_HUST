@@ -11,12 +11,18 @@ const lookupBlock = html.slice(
   html.indexOf('        function removeAccents(str) {'),
   html.indexOf('        async function previewData() {')
 );
+const evaluationBlock = html.slice(
+  html.indexOf('        function evaluateHocTap(gpa) {'),
+  html.indexOf('        function removeAccents(str) {')
+);
 
-assert(parseBlock && lookupBlock, 'Could not find GPA helpers in HTML');
+assert(parseBlock && lookupBlock && evaluationBlock, 'Could not find GPA helpers in HTML');
 
 const sandbox = {};
-vm.runInNewContext(`${parseBlock}\n${lookupBlock}
+vm.runInNewContext(`${parseBlock}\n${evaluationBlock}\n${lookupBlock}
 this.calculateAverageGPA = calculateAverageGPA;
+this.evaluateHocTap = evaluateHocTap;
+this.evaluateRenLuyen = evaluateRenLuyen;
 this.getColValue = getColValue;`, sandbox);
 
 const row = {
@@ -38,5 +44,9 @@ const fromSheet = sandbox.calculateAverageGPA('-', '-', '3.25');
 assert.strictEqual(fromSheet.raw, '3.25');
 assert.strictEqual(fromSheet.obj.val, 3.25);
 assert.strictEqual(fromSheet.obj.missing, false);
+
+assert.strictEqual(sandbox.evaluateHocTap(2.3), 'bỏ');
+assert.strictEqual(sandbox.evaluateRenLuyen(60), 'bỏ');
+assert(!html.includes('"trung bình"'));
 
 console.log('GPA average check passed');
