@@ -534,6 +534,7 @@
             <div id="modalTitle" class="modal-title">Thông báo</div>
             <div id="modalMessage" class="modal-message">Nội dung thông báo</div>
             <div class="modal-buttons">
+                <button id="modalCancelBtn" class="btn-modal btn-modal-cancel" style="display: none;">Sẽ sửa sau</button>
                 <button id="modalConfirmBtn" class="btn-modal btn-modal-confirm">Đã hiểu</button>
             </div>
         </div>
@@ -595,16 +596,23 @@
                 const titleEl = document.getElementById('modalTitle');
                 const msgEl = document.getElementById('modalMessage');
                 const confirmBtn = document.getElementById('modalConfirmBtn');
+                const cancelBtn = document.getElementById('modalCancelBtn');
 
                 titleEl.innerHTML = options.title || 'Thông báo';
                 msgEl.innerHTML = options.message || '';
                 confirmBtn.innerHTML = options.confirmText || 'Đồng ý';
+                cancelBtn.innerHTML = options.cancelText || '';
+                cancelBtn.style.display = options.cancelText ? 'inline-flex' : 'none';
 
                 overlay.style.display = 'flex';
 
                 confirmBtn.onclick = function() {
                     overlay.style.display = 'none';
                     resolve(true);
+                };
+                cancelBtn.onclick = function() {
+                    overlay.style.display = 'none';
+                    resolve(false);
                 };
             });
         }
@@ -721,7 +729,7 @@
         function getColValue(rowObj, possibleKeys, excludeKeys = []) {
             for (let pKey of possibleKeys) {
                 for (let key in rowObj) {
-                    let normalizedKey = removeAccents(key).toLowerCase().replace(/[^a-z0-9]/g, '');
+                    let normalizedKey = normalizeColumnKey(key);
                     let isExcluded = false;
                     for (let eKey of excludeKeys) {
                         if (normalizedKey.includes(eKey)) {
@@ -739,6 +747,83 @@
                 }
             }
             return "";
+        }
+
+        function normalizeColumnKey(key) {
+            return removeAccents(key).toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+
+        function hasColumn(headers, possibleKeys, excludeKeys = []) {
+            return headers.some((header) => {
+                const normalizedKey = normalizeColumnKey(header || "");
+                return normalizedKey
+                    && !excludeKeys.some((eKey) => normalizedKey.includes(eKey))
+                    && possibleKeys.some((pKey) => normalizedKey === pKey || normalizedKey.includes(pKey));
+            });
+        }
+
+        function getMissingColumns(headers) {
+            const missing = [];
+            const hasGpa242 = hasColumn(headers, ['2024.2', '20242', 'gpa1', 'ky1']);
+            const hasGpa251 = hasColumn(headers, ['2025.1', '20251', 'gpa2', 'ky2']);
+            const hasAverageGpa = hasColumn(headers, ['tb2ky', 'trungbinh', 'diemhoctap', 'gpatrungbinh', 'gpa'], ['20242', '20251', 'gpa1', 'gpa2', 'ky1', 'ky2']);
+
+            if (!hasColumn(headers, ['hoten', 'hovaten', 'ten'])) missing.push("Họ tên");
+            if (!hasAverageGpa && !hasGpa242) missing.push("GPA 2024.2");
+            if (!hasAverageGpa && !hasGpa251) missing.push("GPA 2025.1");
+            if (!hasColumn(headers, ['drl', 'diemrenluyen', 'renluyen'])) missing.push("Điểm rèn luyện");
+            if (!hasColumn(headers, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan'])) missing.push("Ngày họp Đoàn trường/LCĐ");
+            if (!hasColumn(headers, ['sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv'])) missing.push("Số Bản nhận xét");
+            return missing;
+        }
+
+        function hasInputValue(raw) {
+            return raw !== undefined && raw !== null && !["", "-"].includes(String(raw).trim());
+        }
+
+        function hasBadNumberFormat(raw) {
+            return !/^\d+(?:[,.]\d+)?(?:\s*[-\u2013\u2014_/\\]\s*\d+(?:[,.]\d+)?)*(?:\s*\([^)]*\))?$/.test(String(raw).trim());
+        }
+
+        function isBadGPA(raw) {
+            if (!hasInputValue(raw)) return false;
+            if (hasBadNumberFormat(raw)) return true;
+            const parsed = parseGPA(raw);
+            return parsed.missing || parsed.val <= 0 || parsed.val > 4;
+        }
+
+        function isBadDRL(raw) {
+            if (!hasInputValue(raw)) return false;
+            if (hasBadNumberFormat(raw)) return true;
+            const parsed = parseDRL(raw);
+            return parsed.missing || parsed.val <= 0 || parsed.val > 100;
+        }
+
+        function isValidDateValue(raw) {
+            if (!hasInputValue(raw)) return false;
+            if (raw instanceof Date) return !Number.isNaN(raw.getTime());
+            if (typeof raw === 'number') return raw > 0;
+
+            const parts = String(raw).match(/\d+/g);
+            if (!parts || parts.length < 3) return false;
+
+            let year = Number(parts[2]);
+            if (year < 100) year += year > 50 ? 1900 : 2000;
+
+            const day = Number(parts[0]);
+            const month = Number(parts[1]);
+            const date = new Date(year, month - 1, day);
+            return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, (char) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
         }
 
         async function previewData() {
@@ -771,6 +856,17 @@
                     if (headerRowIndex === -1) throw new Error("Không tìm thấy dòng tiêu đề 'Họ tên' trong file Excel!");
 
                     const headers = rows[headerRowIndex];
+                    const missingColumns = getMissingColumns(headers);
+                    if (missingColumns.length > 0) {
+                        showStatus("File Excel thiếu cột bắt buộc. Vui lòng kiểm tra lại trước khi xuất.", "error");
+                        await showCustomModal({
+                            title: 'KIỂM TRA CỘT EXCEL',
+                            message: `File Excel đang thiếu cột: <b>${missingColumns.map(escapeHtml).join(', ')}</b>`,
+                            confirmText: 'Tôi sẽ kiểm tra lại'
+                        });
+                        return;
+                    }
+
                     const validStudents = [];
 
                     for (let i = headerRowIndex + 1; i < rows.length; i++) {
@@ -778,6 +874,7 @@
                         if (!rowData || rowData.length === 0) continue;
                         let rowObj = {};
                         headers.forEach((h, index) => { if (h) rowObj[h] = rowData[index]; });
+                        rowObj.__excelRowNumber = i + 1;
 
                         let name = getColValue(rowObj, ['hoten', 'hovaten', 'ten']);
                         let normalizedName = name ? removeAccents(String(name)).toLowerCase() : "";
@@ -791,17 +888,36 @@
 
                     window.pendingStudents = [];
                     window.missingDataWarnings = [];
+                    const validationErrors = [];
+                    const seenNames = new Map();
 
                     for (let index = 0; index < validStudents.length; index++) {
                         const row = validStudents[index];
                         let missingFields = [];
                         
                         const HoTen = getColValue(row, ['hoten', 'hovaten', 'ten']) || "Sinh_Vien";
+                        const safeName = escapeHtml(HoTen);
+                        const normalizedStudentName = removeAccents(HoTen).toLowerCase().replace(/\s+/g, ' ').trim();
+                        if (seenNames.has(normalizedStudentName)) {
+                            validationErrors.push(`<b class="warning-name">${safeName}</b>: Trùng họ tên ở dòng ${seenNames.get(normalizedStudentName)} và dòng ${row.__excelRowNumber}`);
+                        } else {
+                            seenNames.set(normalizedStudentName, row.__excelRowNumber);
+                        }
 
                         const gpa242 = getColValue(row, ['2024.2', '20242', 'gpa1', 'ky1']) || "-";
                         const gpa251 = getColValue(row, ['2025.1', '20251', 'gpa2', 'ky2']) || "-";
                         const tbGpaRawFromSheet = getColValue(row, ['tb2ky', 'trungbinh', 'diemhoctap', 'gpatrungbinh', 'gpa'], ['20242', '20251', 'gpa1', 'gpa2', 'ky1', 'ky2']);
                         const drlRaw = getColValue(row, ['drl', 'diemrenluyen', 'renluyen']);
+                        const badGpaFields = [];
+                        const badGpa242 = isBadGPA(gpa242);
+                        const badGpa251 = isBadGPA(gpa251);
+                        const hasUsableSemesterGpa = !badGpa242 && !badGpa251 && !parseGPA(gpa242).missing && !parseGPA(gpa251).missing;
+                        if (badGpa242) badGpaFields.push("GPA 2024.2");
+                        if (badGpa251) badGpaFields.push("GPA 2025.1");
+                        if (!hasUsableSemesterGpa && isBadGPA(tbGpaRawFromSheet)) badGpaFields.push("TB 2 kỳ/GPA");
+                        if (badGpaFields.length > 0) {
+                            validationErrors.push(`<b class="warning-name">${safeName}</b>: ${badGpaFields.join(', ')} sai định dạng hoặc ngoài khoảng 0-4`);
+                        }
 
                         const averageGPA = calculateAverageGPA(gpa242, gpa251, tbGpaRawFromSheet);
                         let gpaObj = averageGPA.obj;
@@ -809,9 +925,14 @@
 
                         let drlObj = parseDRL(drlRaw);
                         if(drlObj.missing) missingFields.push("Điểm rèn luyện");
+                        if (isBadDRL(drlRaw)) {
+                            validationErrors.push(`<b class="warning-name">${safeName}</b>: Điểm rèn luyện sai định dạng hoặc ngoài khoảng 0-100`);
+                        }
 
-                        let ngayHop = parseDate(getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan']));
+                        const ngayHopRaw = getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan']);
+                        let ngayHop = parseDate(ngayHopRaw);
                         if(ngayHop === "") missingFields.push("Ngày họp Đoàn trường/LCĐ");
+                        else if (!isValidDateValue(ngayHopRaw)) validationErrors.push(`<b class="warning-name">${safeName}</b>: Ngày họp không đúng định dạng`);
 
                         let soBNX = getColValue(row, ['sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv']);
                         if(!soBNX) missingFields.push("Số Bản nhận xét");
@@ -820,7 +941,7 @@
                         let tenChiBo = getColValue(row, ['chibo', 'tencb']);
 
                         if (missingFields.length > 0) {
-                            window.missingDataWarnings.push(`<b class="warning-name">${HoTen}</b>: Thiếu ${missingFields.join(', ')}`);
+                            window.missingDataWarnings.push(`<b class="warning-name">${safeName}</b>: Thiếu ${missingFields.join(', ')}`);
                         }
 
                         let evalHT = evaluateHocTap(gpaObj.val);
@@ -841,6 +962,25 @@
                             tenDoanTruong: tenDoanTruong,
                             evalHT: evalHT,
                             evalRL: evalRL
+                        });
+                    }
+
+                    if (validationErrors.length > 0) {
+                        showStatus("File Excel có dữ liệu chưa hợp lệ. Vui lòng sửa trước khi xuất.", "error");
+                        const shouldFixNow = await showCustomModal({
+                            title: 'KIỂM TRA DỮ LIỆU EXCEL',
+                            message: `<div class="missing-warning-list">${validationErrors.map(msg => `- ${msg}`).join("<br>")}</div>`,
+                            confirmText: 'Tôi sẽ sửa file Excel',
+                            cancelText: 'Sẽ sửa sau'
+                        });
+                        if (shouldFixNow) return;
+                    }
+
+                    if (window.missingDataWarnings.length > 0) {
+                        await showCustomModal({
+                            title: 'CẢNH BÁO THIẾU DỮ LIỆU',
+                            message: `<div class="missing-warning-list">${window.missingDataWarnings.map(msg => `- ${msg}`).join("<br>")}</div>`,
+                            confirmText: 'Tiếp tục rà soát'
                         });
                     }
 

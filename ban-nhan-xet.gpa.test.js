@@ -7,6 +7,10 @@ const parseBlock = html.slice(
   html.indexOf('        function parseGPA(raw) {'),
   html.indexOf('        function parseDRL(raw) {')
 );
+const drlBlock = html.slice(
+  html.indexOf('        function parseDRL(raw) {'),
+  html.indexOf('        function evaluateHocTap(gpa) {')
+);
 const lookupBlock = html.slice(
   html.indexOf('        function removeAccents(str) {'),
   html.indexOf('        async function previewData() {')
@@ -16,14 +20,18 @@ const evaluationBlock = html.slice(
   html.indexOf('        function removeAccents(str) {')
 );
 
-assert(parseBlock && lookupBlock && evaluationBlock, 'Could not find GPA helpers in HTML');
+assert(parseBlock && drlBlock && lookupBlock && evaluationBlock, 'Could not find GPA helpers in HTML');
 
 const sandbox = {};
-vm.runInNewContext(`${parseBlock}\n${evaluationBlock}\n${lookupBlock}
+vm.runInNewContext(`${parseBlock}\n${drlBlock}\n${evaluationBlock}\n${lookupBlock}
 this.calculateAverageGPA = calculateAverageGPA;
 this.evaluateHocTap = evaluateHocTap;
 this.evaluateRenLuyen = evaluateRenLuyen;
-this.getColValue = getColValue;`, sandbox);
+this.getColValue = getColValue;
+this.getMissingColumns = getMissingColumns;
+this.isBadGPA = isBadGPA;
+this.isBadDRL = isBadDRL;
+this.isValidDateValue = isValidDateValue;`, sandbox);
 
 const row = {
   'GPA 2024.2': '3,20',
@@ -48,5 +56,19 @@ assert.strictEqual(fromSheet.obj.missing, false);
 assert.strictEqual(sandbox.evaluateHocTap(2.3), 'bỏ');
 assert.strictEqual(sandbox.evaluateRenLuyen(60), 'bỏ');
 assert(!html.includes('"trung bình"'));
+
+assert.strictEqual(
+  sandbox.getMissingColumns(['Ho ten', 'GPA 2024.2', 'GPA 2025.1', 'DRL', 'Ngay hop', 'So BNX']).length,
+  0
+);
+assert(sandbox.getMissingColumns(['Ho ten', 'DRL', 'Ngay hop', 'So BNX']).includes('GPA 2024.2'));
+assert.strictEqual(sandbox.isBadGPA('3,5'), false);
+assert.strictEqual(sandbox.isBadGPA('3.59 (Da tot nghiep)'), false);
+assert.strictEqual(sandbox.isBadGPA('4.5'), true);
+assert.strictEqual(sandbox.isBadGPA('abc3'), true);
+assert.strictEqual(sandbox.isBadDRL('72-88'), false);
+assert.strictEqual(sandbox.isBadDRL('101'), true);
+assert.strictEqual(sandbox.isValidDateValue('06/07/2026'), true);
+assert.strictEqual(sandbox.isValidDateValue('31/02/2026'), false);
 
 console.log('GPA average check passed');

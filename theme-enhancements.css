@@ -1076,6 +1076,59 @@ body[data-theme="light"] .preview-table td {
     background: transparent;
 }
 
+body[data-theme="dark"] .review-preview-modal {
+    background: #090909 !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .modal-title {
+    color: #ff7a80 !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .review-modal-copy {
+    color: #d4d4d8 !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .preview-table-shell {
+    overflow: auto;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: #080808;
+}
+
+body[data-theme="dark"] .review-preview-modal .preview-table th {
+    color: #f4f4f5 !important;
+    border-bottom-color: rgba(255, 255, 255, 0.18) !important;
+    background: #161010 !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .preview-table td {
+    color: #f4f4f5 !important;
+    border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .preview-table tbody tr {
+    background: #080808 !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .preview-table tbody tr:nth-child(even) {
+    background: #181818 !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .preview-table tbody tr:hover {
+    background: rgba(183, 26, 26, 0.18) !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .eval-select {
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.24) !important;
+    background: #0c0c0c !important;
+}
+
+body[data-theme="dark"] .review-preview-modal .eval-select:focus {
+    border-color: rgba(255, 90, 95, 0.72) !important;
+    box-shadow: 0 0 0 3px rgba(255, 90, 95, 0.18) !important;
+}
+
 body[data-theme="dark"] .history-table tbody tr:hover,
 body[data-theme="light"] .history-table tbody tr:hover {
     background: rgba(var(--modern-accent-rgb), 0.07);
