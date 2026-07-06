@@ -671,6 +671,19 @@
             return { val: 0, missing: true };
         }
 
+        function calculateAverageGPA(gpaKy1Raw, gpaKy2Raw, fallbackRaw) {
+            const gpaKy1 = parseGPA(gpaKy1Raw);
+            const gpaKy2 = parseGPA(gpaKy2Raw);
+
+            if (!gpaKy1.missing && !gpaKy2.missing) {
+                const val = Number(((gpaKy1.val + gpaKy2.val) / 2).toFixed(2));
+                return { raw: val.toFixed(2), obj: { val: val, missing: false } };
+            }
+
+            const fallback = parseGPA(fallbackRaw);
+            return { raw: fallbackRaw || "-", obj: fallback };
+        }
+
         function parseDRL(raw) {
             if (!raw || String(raw).trim() === "") return { val: 0, missing: true };
             let str = String(raw).trim().replace(/,/g, '.');
@@ -787,10 +800,11 @@
 
                         const gpa242 = getColValue(row, ['2024.2', '20242', 'gpa1', 'ky1']) || "-";
                         const gpa251 = getColValue(row, ['2025.1', '20251', 'gpa2', 'ky2']) || "-";
-                        const tbGpaRaw = getColValue(row, ['gpa', 'tb2ky', 'trungbinh', 'diemhoctap']);
+                        const tbGpaRawFromSheet = getColValue(row, ['tb2ky', 'trungbinh', 'diemhoctap', 'gpatrungbinh', 'gpa'], ['20242', '20251', 'gpa1', 'gpa2', 'ky1', 'ky2']);
                         const drlRaw = getColValue(row, ['drl', 'diemrenluyen', 'renluyen']);
 
-                        let gpaObj = parseGPA(tbGpaRaw);
+                        const averageGPA = calculateAverageGPA(gpa242, gpa251, tbGpaRawFromSheet);
+                        let gpaObj = averageGPA.obj;
                         if(gpaObj.missing) missingFields.push("GPA");
 
                         let drlObj = parseDRL(drlRaw);
@@ -817,7 +831,7 @@
                             HoTen: HoTen,
                             gpa242: gpa242,
                             gpa251: gpa251,
-                            tbGpaRaw: tbGpaRaw || "-",
+                            tbGpaRaw: averageGPA.raw,
                             drlRaw: drlRaw || "-",
                             gpaObj: gpaObj,
                             drlObj: drlObj,
