@@ -77,14 +77,15 @@ assert.strictEqual(sandbox.isValidDateValue('06/07/2026'), true);
 assert.strictEqual(sandbox.isValidDateValue('31/02/2026'), false);
 
 const sampleDocXml = [
-  '<w:p><w:pPr><w:ind w:left="1080"/></w:pPr><w:r><w:t xml:space="preserve">         Kính gửi:</w:t></w:r><w:r><w:t>Điện - Điện tử</w:t></w:r></w:p>',
+  '<w:p><w:pPr><w:ind w:left="1080"/></w:pPr><w:r><w:t xml:space="preserve">         Kính gửi:</w:t></w:r><w:r><w:t xml:space="preserve">    - Chi ủy Chi bộ Sinh viên</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t>Điện - Điện tử</w:t></w:r></w:p>',
   '<w:p><w:r><w:t xml:space="preserve">                             - Đảng uỷ Đại học Bách khoa Hà Nội.</w:t></w:r></w:p>',
-  '<w:p><w:pPr><w:ind w:left="1080"/></w:pPr><w:r><w:t xml:space="preserve">         Kính gửi:</w:t></w:r><w:r><w:t>Công nghệ Thông tin và Truyền thông</w:t></w:r></w:p>',
+  '<w:p><w:pPr><w:ind w:left="1080"/></w:pPr><w:r><w:t xml:space="preserve">         Kính gửi:</w:t></w:r><w:r><w:t xml:space="preserve">    - Chi ủy Chi bộ Sinh viên</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t>Công nghệ Thông tin và Truyền thông</w:t></w:r></w:p>',
   '<w:p><w:r><w:t xml:space="preserve">                             - Đảng uỷ Đại học Bách khoa Hà Nội.</w:t></w:r></w:p>',
 ].join('');
 const fixedDocXml = sandbox.fixIctKinhGuiLayout(sampleDocXml);
 assert.strictEqual((fixedDocXml.match(/<w:ind w:left="1080"\/>/g) || []).length, 1);
-assert(fixedDocXml.includes('<w:t xml:space="preserve">          Kính gửi:</w:t>'));
+assert(fixedDocXml.includes(`<w:t xml:space="preserve">${' '.repeat(13)}Kính gửi:</w:t>`));
+assert(fixedDocXml.includes('<w:t xml:space="preserve"> - Chi ủy Chi bộ Sinh viên</w:t>'));
 assert(fixedDocXml.includes('<w:t xml:space="preserve">            - Đảng uỷ Đại học Bách khoa Hà Nội.</w:t>'));
 
 console.log('GPA average check passed');

@@ -592,14 +592,16 @@
 
         function fixIctKinhGuiLayout(docXml) {
             const ictChiBo = 'Công nghệ Thông tin và Truyền thông';
+            const leadingSpaces = ' '.repeat(13);
             let fixNextRecipientLine = false;
 
             return docXml.replace(/<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g, (paragraph) => {
                 if (paragraph.includes('Kính gửi:') && paragraph.includes(ictChiBo)) {
                     fixNextRecipientLine = true;
                     return paragraph
-                        .replace(/<w:ind w:left="1080"\s*\/>/, '')
-                        .replace(/(<w:t xml:space="preserve">)\s*Kính gửi:(<\/w:t>)/, '$1          Kính gửi:$2');
+                        .replace(/<w:ind\b[^>]*\bw:left="1080"[^>]*\/>/, '')
+                        .replace(/(<w:t(?:\s[^>]*)?>)\s*Kính gửi:(<\/w:t>)/, `$1${leadingSpaces}Kính gửi:$2`)
+                        .replace(/(<w:t(?:\s[^>]*)?>)\s*-\s*Chi ủy Chi bộ Sinh viên\s*(<\/w:t>)/, '$1 - Chi ủy Chi bộ Sinh viên$2');
                 }
 
                 if (fixNextRecipientLine) {
