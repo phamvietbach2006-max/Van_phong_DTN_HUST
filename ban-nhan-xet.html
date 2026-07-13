@@ -590,6 +590,30 @@
             }
         }
 
+        function fixIctKinhGuiLayout(docXml) {
+            const ictChiBo = 'Công nghệ Thông tin và Truyền thông';
+            let fixNextRecipientLine = false;
+
+            return docXml.replace(/<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g, (paragraph) => {
+                if (paragraph.includes('Kính gửi:') && paragraph.includes(ictChiBo)) {
+                    fixNextRecipientLine = true;
+                    return paragraph
+                        .replace(/<w:ind w:left="1080"\s*\/>/, '')
+                        .replace(/(<w:t xml:space="preserve">)\s*Kính gửi:(<\/w:t>)/, '$1          Kính gửi:$2');
+                }
+
+                if (fixNextRecipientLine) {
+                    fixNextRecipientLine = false;
+                    return paragraph.replace(
+                        /(<w:t xml:space="preserve">)\s*(- Đảng uỷ Đại học Bách khoa Hà Nội\.<\/w:t>)/,
+                        '$1            $2'
+                    );
+                }
+
+                return paragraph;
+            });
+        }
+
         function showCustomModal(options) {
             return new Promise((resolve) => {
                 const overlay = document.getElementById('customModalOverlay');
@@ -1103,7 +1127,12 @@
                 
                 doc.render({ DanhSach: danhSachHoSo });
 
-                const docOutput = doc.getZip().generate({
+                const renderedZip = doc.getZip();
+                let renderedDocXml = renderedZip.files["word/document.xml"].asText();
+                renderedDocXml = fixIctKinhGuiLayout(renderedDocXml);
+                renderedZip.file("word/document.xml", renderedDocXml);
+
+                const docOutput = renderedZip.generate({
                     type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 });
 
