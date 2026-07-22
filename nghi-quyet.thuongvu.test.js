@@ -59,7 +59,7 @@ assert(!fixedNghiQuyetXml.includes('w:firstLine="720"'));
 assert(fixedNghiQuyetXml.includes(`<w:t xml:space="preserve">${' '.repeat(13)}Kính </w:t>`));
 assert(fixedNghiQuyetXml.includes('<w:t xml:space="preserve">gửi:</w:t></w:r><w:r><w:rPr>'));
 assert(fixedNghiQuyetXml.includes('<w:t xml:space="preserve"> - </w:t>'));
-assert(fixedNghiQuyetXml.includes(`<w:t xml:space="preserve">${' '.repeat(16)}- Đảng </w:t>`));
+assert(fixedNghiQuyetXml.includes(`<w:t xml:space="preserve">${' '.repeat(28)}- Đảng </w:t>`));
 assert(fixedNghiQuyetXml.includes('<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>'));
 assert(fixedNghiQuyetXml.includes('<w:b/><w:bCs/><w:i/><w:iCs/>'));
 assert(fixedNghiQuyetXml.includes('<w:sz w:val="24"/><w:szCs w:val="24"/>'));
