@@ -64,4 +64,12 @@ assert(fixedNghiQuyetXml.includes('<w:rFonts w:ascii="Times New Roman" w:hAnsi="
 assert(fixedNghiQuyetXml.includes('<w:b/><w:bCs/><w:i/><w:iCs/>'));
 assert(fixedNghiQuyetXml.includes('<w:sz w:val="24"/><w:szCs w:val="24"/>'));
 
+const singleRunKinhGuiXml = [
+  `<w:p><w:r><w:t xml:space="preserve">${' '.repeat(15)}Kính gửi:    - Chi ủy Chi bộ Sinh viên Công nghệ Thông tin và Truyền thông;</w:t></w:r></w:p>`,
+  `<w:p><w:r><w:t xml:space="preserve">${' '.repeat(16)}- Đảng uỷ Đại học Bách khoa Hà Nội.</w:t></w:r></w:p>`
+].join('');
+const fixedSingleRunXml = sandbox.fixIctKinhGuiLayout(singleRunKinhGuiXml);
+assert(fixedSingleRunXml.includes(`<w:t xml:space="preserve">${' '.repeat(13)}Kính gửi: - Chi ủy Chi bộ Sinh viên Công nghệ Thông tin và Truyền thông;</w:t>`));
+assert(fixedSingleRunXml.includes(`<w:t xml:space="preserve">${' '.repeat(30)}- Đảng uỷ Đại học Bách khoa Hà Nội.</w:t>`));
+
 console.log('Nghị quyết Thường vụ check passed');

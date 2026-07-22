@@ -617,6 +617,7 @@
                     paragraph = trimSpaceRunsBefore(paragraph, '<w:r(?:\\s[^>]*)?>[\\s\\S]*?<w:t(?:\\s[^>]*)?>\\s*Kính\\s*<\\/w:t>');
                     return applyRecipientStyle(paragraph
                         .replace(/<w:ind\b[^>]*\b(?:w:left="1080"|w:firstLine="720")[^>]*\/>/g, '')
+                        .replace(/(<w:t(?:\s[^>]*)?>)\s*Kính gửi:\s*-\s*/g, `$1${leadingSpaces}Kính gửi: - `)
                         .replace(/(<w:t(?:\s[^>]*)?>)\s*Kính gửi:(<\/w:t>)/, `$1${leadingSpaces}Kính gửi:$2`)
                         .replace(/(<w:t(?:\s[^>]*)?>)\s*Kính\s*(<\/w:t>)/, `$1${leadingSpaces}Kính $2`)
                         .replace(/(<w:t(?:\s[^>]*)?>)\s*gửi:\s*(<\/w:t>)/, '$1gửi:$2')
