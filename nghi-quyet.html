@@ -594,8 +594,8 @@
 
         function fixIctKinhGuiLayout(docXml) {
             const ictChiBo = 'Công nghệ Thông tin và Truyền thông';
-            const leadingSpaces = ' '.repeat(13);
-            const recipientSpaces = ' '.repeat(12);
+            const leadingSpaces = ' '.repeat(11);
+            const recipientSpaces = ' '.repeat(14);
             let fixNextRecipientLine = false;
             const textOnly = (xml) => xml.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
             const trimSpaceRunsBefore = (paragraph, pattern) => paragraph.replace(
