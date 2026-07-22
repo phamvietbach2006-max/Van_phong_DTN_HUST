@@ -56,8 +56,8 @@ const sampleNghiQuyetXml = [
 ].join('');
 const fixedNghiQuyetXml = sandbox.fixIctKinhGuiLayout(sampleNghiQuyetXml);
 assert(!fixedNghiQuyetXml.includes('w:firstLine="720"'));
-assert(fixedNghiQuyetXml.includes(`<w:t xml:space="preserve">${' '.repeat(11)}Kính </w:t>`));
+assert(fixedNghiQuyetXml.includes(`<w:t xml:space="preserve">${' '.repeat(9)}Kính </w:t>`));
 assert(fixedNghiQuyetXml.includes('<w:t xml:space="preserve">gửi:</w:t></w:r><w:r><w:t xml:space="preserve"> - </w:t>'));
-assert(fixedNghiQuyetXml.includes(`<w:t xml:space="preserve">${' '.repeat(14)}- Đảng </w:t>`));
+assert(fixedNghiQuyetXml.includes(`<w:t xml:space="preserve">${' '.repeat(16)}- Đảng </w:t>`));
 
 console.log('Nghị quyết Thường vụ check passed');
