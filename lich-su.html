@@ -17,14 +17,14 @@
     <header class="top-header">
         <div class="header-container">
             <div class="logo-group">
-                <img src="logo.png" alt="Logo YUMOFFICE" class="header-logo" onerror="this.style.display='none'">
+                <img src="logo.png" alt="Logo hệ thống" class="header-logo" onerror="this.style.display='none'">
                 <div class="site-title">
                     <div class="main-title">VĂN PHÒNG ĐOÀN THANH NIÊN</div>
                     <div class="sub-title">Đại học Bách khoa Hà Nội</div>
                 </div>
             </div>
             <div class="action-buttons">
-                <span class="version-badge">YUMOFFICE v2.0</span>
+                <span class="version-badge">Phiên bản 3.0</span>
             </div>
         </div>
     </header>
@@ -34,7 +34,7 @@
             <a href="index.html">TRANG CHỦ</a>
             <a href="https://docs.google.com/spreadsheets/d/11Z_n_19ldXi3ZFsTS6Vn9K6Y87g5BbgPQdHOfeJmxow/edit?usp=sharing" target="_blank" rel="noopener noreferrer">HỒ SƠ ĐẢNG</a>
             <a href="ban-nhan-xet.html">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
-            <a href="#" class="disabled-link" aria-disabled="true" tabindex="-1">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="nghi-quyet.html">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="https://husteduvn-my.sharepoint.com/:x:/r/personal/dtn_hust_edu_vn/Documents/C%C3%B4ng%20v%C4%83n%20nhi%E1%BB%87m%20k%E1%BB%B3%2036/%5BV%C4%82N%20PH%C3%92NG%20%C4%90O%C3%80N%5D%20S%E1%BB%95%20%C4%91%C4%83ng%20k%C3%BD%20C%C3%B4ng%20v%C4%83n%20%C4%91i%202026.xlsx?d=w3c7b2d02c90a43a896c16a8bc1db2b25&amp;csf=1&amp;web=1&amp;e=fWuJts" target="_blank" rel="noopener noreferrer">SỔ CÔNG VĂN</a>
             <a href="kho-tai-lieu.html">KHO TÀI LIỆU</a>
             <a href="lich-su.html" class="active" aria-current="page">LỊCH SỬ TẠO VĂN BẢN</a>
@@ -88,7 +88,7 @@
         <div class="footer-content">
             <p><strong>Bản quyền thuộc về Đoàn Thanh niên Đại học Bách khoa Hà Nội</strong></p>
             <p>Địa chỉ: Phòng C1-226, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
-            <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ YUMOFFICE 2026</p>
+            <p>Hệ thống hỗ trợ quản lý văn phòng nghiệp vụ 2026</p>
         </div>
     </footer>
 
@@ -148,7 +148,7 @@
         function loadHistory() {
             const historyBody = document.getElementById('historyBody');
             const filterValue = document.getElementById('filterType').value;
-            let historyData = JSON.parse(localStorage.getItem('yumHistory')) || [];
+            let historyData = JSON.parse(localStorage.getItem('officeHistory')) || [];
 
             if (filterValue !== 'all') {
                 historyData = historyData.filter(item => item.type === filterValue);
@@ -210,7 +210,7 @@
             
             if (userInput !== null) {
                 if (userInput.trim().toUpperCase() === "XOA") {
-                    localStorage.removeItem('yumHistory');
+                    localStorage.removeItem('officeHistory');
                     await localforage.clear(); 
                     loadHistory();
                     

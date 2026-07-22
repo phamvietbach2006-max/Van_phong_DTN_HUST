@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    const STORAGE_KEY = 'yumoffice-theme';
+    const STORAGE_KEY = 'office-theme';
     const THEMES = ['default', 'dark', 'light'];
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const body = document.body;
@@ -45,7 +45,7 @@
         resetBentoTransforms();
         resetBorderGlow();
 
-        window.dispatchEvent(new CustomEvent('yumoffice:themechange', {
+        window.dispatchEvent(new CustomEvent('office:themechange', {
             detail: { theme: currentTheme }
         }));
     }
@@ -97,7 +97,7 @@
     }
 
     function createGooeyFilter() {
-        if (document.getElementById('yum-gooey-filter')) return;
+        if (document.getElementById('office-gooey-filter')) return;
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '0');
         svg.setAttribute('height', '0');
@@ -105,7 +105,7 @@
         svg.style.position = 'fixed';
         svg.innerHTML = `
             <defs>
-                <filter id="yum-gooey-filter" x="-45%" y="-180%" width="190%" height="460%" color-interpolation-filters="sRGB">
+                <filter id="office-gooey-filter" x="-45%" y="-180%" width="190%" height="460%" color-interpolation-filters="sRGB">
                     <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
                     <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
                     <feComposite in="SourceGraphic" in2="goo" operator="atop" />
@@ -255,7 +255,7 @@
 
         activate(activeAnchor, false);
         navContainer.addEventListener('scroll', () => updateEffectPosition(activeAnchor), { passive: true });
-        window.addEventListener('yumoffice:themechange', () => {
+        window.addEventListener('office:themechange', () => {
             window.requestAnimationFrame(() => updateEffectPosition(activeAnchor));
         });
 

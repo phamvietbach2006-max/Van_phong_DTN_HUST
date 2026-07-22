@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo Bản Nhận Xét - Hệ thống Văn phòng Đoàn</title>
+    <title>Tạo Nghị quyết giới thiệu Đoàn viên vào Đảng - Hệ thống Văn phòng Đoàn</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="theme-enhancements.css">
     <link rel="stylesheet" href="polish.css">
@@ -450,7 +450,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script defer src="theme-system.js"></script>
 </head>
-<body class="page-ban-nhan-xet">
+<body class="page-ban-nhan-xet page-nghi-quyet">
     <header class="top-header">
         <div class="header-container">
             <div class="logo-group">
@@ -471,8 +471,8 @@
         <div class="nav-container">
             <a href="index.html">TRANG CHỦ</a>
             <a href="https://docs.google.com/spreadsheets/d/11Z_n_19ldXi3ZFsTS6Vn9K6Y87g5BbgPQdHOfeJmxow/edit?usp=sharing" target="_blank" rel="noopener noreferrer">HỒ SƠ ĐẢNG</a>
-            <a href="ban-nhan-xet.html" class="active" aria-current="page">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
-            <a href="nghi-quyet.html">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
+            <a href="ban-nhan-xet.html">BẢN NHẬN XÉT CHUYỂN ĐẢNG CHÍNH THỨC</a>
+            <a href="nghi-quyet.html" class="active" aria-current="page">NGHỊ QUYẾT GIỚI THIỆU ĐOÀN VIÊN VÀO ĐẢNG</a>
             <a href="https://husteduvn-my.sharepoint.com/:x:/r/personal/dtn_hust_edu_vn/Documents/C%C3%B4ng%20v%C4%83n%20nhi%E1%BB%87m%20k%E1%BB%B3%2036/%5BV%C4%82N%20PH%C3%92NG%20%C4%90O%C3%80N%5D%20S%E1%BB%95%20%C4%91%C4%83ng%20k%C3%BD%20C%C3%B4ng%20v%C4%83n%20%C4%91i%202026.xlsx?d=w3c7b2d02c90a43a896c16a8bc1db2b25&amp;csf=1&amp;web=1&amp;e=fWuJts" target="_blank" rel="noopener noreferrer">SỔ CÔNG VĂN</a>
             <a href="kho-tai-lieu.html">KHO TÀI LIỆU</a>
             <a href="lich-su.html">LỊCH SỬ TẠO VĂN BẢN</a>
@@ -484,9 +484,9 @@
         <section class="review-hero" aria-labelledby="reviewTitle">
             <div>
                 <div class="review-eyebrow">Tạo văn bản từ dữ liệu Excel</div>
-                <h2 id="reviewTitle" class="section-title">Tạo bản nhận xét đảng viên</h2>
+                <h2 id="reviewTitle" class="section-title">Tạo nghị quyết giới thiệu Đoàn viên vào Đảng</h2>
                 <p class="review-summary">
-                    Trang dùng sẵn <strong>Mau_Ban_Nhan_Xet.docx</strong>. Đồng chí chỉ cần chọn file Excel, kiểm tra bảng xem trước và xuất file Word tổng hợp.
+                    Trang dùng sẵn <strong>Mau_Nghi_Quyet.docx</strong>. Đồng chí chỉ cần chọn file Excel, kiểm tra bảng xem trước và xuất file Word tổng hợp.
                 </p>
             </div>
             <aside class="review-note" aria-label="Ghi chú nhanh">
@@ -496,18 +496,18 @@
             </aside>
         </section>
 
-        <section class="review-workflow" aria-label="Quy trình tạo bản nhận xét">
+        <section class="review-workflow" aria-label="Quy trình tạo nghị quyết giới thiệu">
             <article class="review-step-card review-step-card--template" aria-label="Mẫu Word đã được lưu sẵn">
                 <span class="review-step-label">Bước 1</span>
                 <h3>Mẫu Word sẵn sàng</h3>
                 <p>Trang sử dụng trực tiếp mẫu đã lưu trên Drive/GitHub, không cần tải mẫu lên lại.</p>
-                <span class="review-template-file">Mau_Ban_Nhan_Xet.docx</span>
+                <span class="review-template-file">Mau_Nghi_Quyet.docx</span>
             </article>
 
             <label id="excelUploadCard" class="upload-box review-step-card review-step-card--excel" for="excelFile">
                 <span class="review-step-label">Bước 2</span>
                 <h3>Chọn dữ liệu Excel</h3>
-                <p>Chọn file danh sách cần trộn. Hệ thống sẽ tự nhận diện cột họ tên, GPA, điểm rèn luyện và thông tin họp.</p>
+                <p>Chọn file danh sách cần trộn. Hệ thống sẽ tự nhận diện cột họ tên, GPA, điểm rèn luyện, thông tin họp và thời gian họp Thường vụ.</p>
                 <span class="review-card-action">Chọn file Excel (.xlsx)</span>
                 <input type="file" id="excelFile" accept=".xlsx">
                 <span id="excelFileName" class="review-file-state">Chưa chọn file Excel</span>
@@ -516,7 +516,7 @@
 
         <div class="review-action-panel">
             <button class="btn-submit" onclick="previewData()">Kiểm tra dữ liệu và xuất file</button>
-            <p>Trước khi xuất, trang sẽ mở bảng xem trước để đồng chí rà soát và chỉnh mức đánh giá nếu cần.</p>
+            <p>Trước khi xuất, trang sẽ mở bảng xem trước để đồng chí rà soát ngày họp Thường vụ và chỉnh mức đánh giá nếu cần.</p>
         </div>
 
         <div id="statusBox" class="status-message" role="status" aria-live="polite"></div>
@@ -543,7 +543,7 @@
 
     <div id="previewModalOverlay" class="modal-overlay">
         <div class="modal-box review-preview-modal">
-            <div class="modal-title">KIỂM TRA VÀ CHỈNH SỬA ĐÁNH GIÁ</div>
+            <div class="modal-title">KIỂM TRA VÀ CHỈNH SỬA DỮ LIỆU NGHỊ QUYẾT</div>
             <div class="modal-message review-modal-copy">
                 Vui lòng rà soát lại kết quả tự động đánh giá của hệ thống. Đồng chí có thể chủ động thay đổi mức xếp loại ở 2 cột cuối cùng bằng menu thả xuống trước khi xuất file.
             </div>
@@ -553,6 +553,7 @@
                         <tr>
                             <th class="cell-center cell-narrow">STT</th>
                             <th>Họ và tên</th>
+                            <th class="cell-center">Họp Thường vụ</th>
                             <th class="cell-center">GPA 2024.2</th>
                             <th class="cell-center">GPA 2025.1</th>
                             <th class="cell-center">TB 2 kỳ</th>
@@ -567,7 +568,7 @@
             </div>
             <div class="modal-buttons">
                 <button class="btn-modal btn-modal-cancel" onclick="document.getElementById('previewModalOverlay').style.display='none'">Hủy thao tác</button>
-                <button class="btn-modal btn-modal-confirm" onclick="executeFinalExport()">Xuất bản nhận xét</button>
+                <button class="btn-modal btn-modal-confirm" onclick="executeFinalExport()">Xuất nghị quyết</button>
             </div>
         </div>
     </div>
@@ -576,7 +577,7 @@
         window.pendingStudents = [];
         window.missingDataWarnings = [];
         window.currentYear = new Date().getFullYear();
-        const WORD_TEMPLATE_PATH = 'Mau_Ban_Nhan_Xet.docx';
+        const WORD_TEMPLATE_PATH = 'Mau_Nghi_Quyet.docx';
 
         async function loadWordTemplate() {
             try {
@@ -799,8 +800,9 @@
             if (!hasAverageGpa && !hasGpa242) missing.push("GPA 2024.2");
             if (!hasAverageGpa && !hasGpa251) missing.push("GPA 2025.1");
             if (!hasColumn(headers, ['drl', 'diemrenluyen', 'renluyen'])) missing.push("Điểm rèn luyện");
-            if (!hasColumn(headers, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan'])) missing.push("Ngày họp Đoàn trường/LCĐ");
-            if (!hasColumn(headers, ['sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv'])) missing.push("Số Bản nhận xét");
+            if (!hasColumn(headers, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan', 'thuongvu'])) missing.push("Ngày họp Đoàn trường/LCĐ");
+            if (!hasColumn(headers, ['thoigianhopthuongvu', 'ngayhopthuongvu', 'hopthuongvu'])) missing.push("Thời gian họp Thường vụ");
+            if (!hasColumn(headers, ['sonq', 'songhiquyet', 'sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv'])) missing.push("Số Nghị quyết");
             return missing;
         }
 
@@ -956,13 +958,18 @@
                             validationErrors.push(`<b class="warning-name">${safeName}</b>: Điểm rèn luyện sai định dạng hoặc ngoài khoảng 0-100`);
                         }
 
-                        const ngayHopRaw = getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan']);
+                        const ngayHopRaw = getColValue(row, ['ngayhopdoantruong', 'ngayhoplcd', 'dongysouv', 'doantruonglcd', 'ngayhop', 'thoigian'], ['chidoan', 'thuongvu']);
                         let ngayHop = parseDate(ngayHopRaw);
                         if(ngayHop === "") missingFields.push("Ngày họp Đoàn trường/LCĐ");
                         else if (!isValidDateValue(ngayHopRaw)) validationErrors.push(`<b class="warning-name">${safeName}</b>: Ngày họp không đúng định dạng`);
 
-                        let soBNX = getColValue(row, ['sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv']);
-                        if(!soBNX) missingFields.push("Số Bản nhận xét");
+                        const thoiGianHopThuongVuRaw = getColValue(row, ['thoigianhopthuongvu', 'ngayhopthuongvu', 'hopthuongvu']);
+                        let thoiGianHopThuongVu = parseDate(thoiGianHopThuongVuRaw);
+                        if(thoiGianHopThuongVu === "") missingFields.push("Thời gian họp Thường vụ");
+                        else if (!isValidDateValue(thoiGianHopThuongVuRaw)) validationErrors.push(`<b class="warning-name">${safeName}</b>: Thời gian họp Thường vụ không đúng định dạng`);
+
+                        let soBNX = getColValue(row, ['sonq', 'songhiquyet', 'sobnx', 'sobannhanxet', 'stt', 'tt'], ['maso', 'mssv']);
+                        if(!soBNX) missingFields.push("Số Nghị quyết");
 
                         let tenDoanTruong = getColValue(row, ['doantruong', 'lienchi', 'lcd'], ['ngay', 'thoigian', 'hop']);
                         let tenChiBo = getColValue(row, ['chibo', 'tencb']);
@@ -984,6 +991,7 @@
                             gpaObj: gpaObj,
                             drlObj: drlObj,
                             ngayHop: ngayHop,
+                            thoiGianHopThuongVu: thoiGianHopThuongVu,
                             soBNX: soBNX,
                             tenChiBo: tenChiBo,
                             tenDoanTruong: tenDoanTruong,
@@ -1021,6 +1029,7 @@
                         trHtml += `<tr>
                             <td class="cell-center cell-strong">${i + 1}</td>
                             <td class="student-name">${student.HoTen}</td>
+                            <td class="cell-center">${student.thoiGianHopThuongVu || "-"}</td>
                             <td class="cell-center">${student.gpa242}</td>
                             <td class="cell-center">${student.gpa251}</td>
                             <td class="cell-center cell-strong">${student.tbGpaRaw}</td>
@@ -1085,6 +1094,7 @@
                     danhSachHoSo.push({
                         STT: student.soBNX || "......",
                         ThoiGian: student.ngayHop || `ngày......tháng......năm ${window.currentYear}`,
+                        ThoiGianHopThuongvu: student.thoiGianHopThuongVu || `ngày......tháng......năm ${window.currentYear}`,
                         TenChiBo: student.tenChiBo || "......................",
                         TenDoanTruong: student.tenDoanTruong || "......................",
                         HoTen: student.HoTen,
@@ -1141,7 +1151,7 @@
 
                 const now = new Date();
                 const dateStr = `${String(now.getDate()).padStart(2, '0')}_${String(now.getMonth() + 1).padStart(2, '0')}_${now.getFullYear()}`;
-                const finalFileName = `Tong_Hop_Ban_Nhan_Xet_${dateStr}.docx`;
+                const finalFileName = `Tong_Hop_Nghi_Quyet_${dateStr}.docx`;
 
                 saveAs(docOutput, finalFileName);
                 
@@ -1153,7 +1163,7 @@
                     id: fileId,
                     time: timeString,
                     fileName: finalFileName,
-                    type: "Bản nhận xét Đảng viên",
+                    type: "Nghị quyết giới thiệu",
                     count: window.pendingStudents.length + " người",
                     status: "Thành công"
                 };
@@ -1162,7 +1172,7 @@
                 historyData.unshift(historyRecord);
                 localStorage.setItem('officeHistory', JSON.stringify(historyData));
 
-                showStatus(`Hoàn tất. Đã gộp tự động ${window.pendingStudents.length} hồ sơ thành 1 file Word.`, "success");
+                showStatus(`Hoàn tất. Đã gộp tự động ${window.pendingStudents.length} nghị quyết thành 1 file Word.`, "success");
 
                 if (window.missingDataWarnings.length > 0) {
                     let alertMsg = `Hệ thống đã xuất file Word tổng <b>thành công</b>, nhưng quá trình quét phát hiện một số sinh viên bị bỏ trống dữ liệu quan trọng trong Excel. Vui lòng kiểm tra lại file Word vừa tải về để điền bổ sung:<br><br>`;

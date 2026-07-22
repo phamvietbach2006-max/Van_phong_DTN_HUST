@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
 
 /*
- * Modern theme layer for YUMOFFICE.
+ * Modern theme layer for the office system.
  * The existing stylesheet remains the source of truth for the default theme.
  * Everything below is scoped to data-theme="dark" or data-theme="light".
  */
@@ -474,7 +474,7 @@ body[data-theme="light"] .gooey-effect {
 }
 
 .gooey-effect--filter {
-    filter: url('#yum-gooey-filter');
+    filter: url('#office-gooey-filter');
 }
 
 .gooey-effect--filter::after {
@@ -627,7 +627,7 @@ body[data-theme="light"] .hero-banner {
 
 body[data-theme="dark"] .hero-banner::after,
 body[data-theme="light"] .hero-banner::after {
-    content: "V2.0";
+    content: "V3.0";
     position: absolute;
     right: clamp(16px, 4vw, 48px);
     bottom: -0.2em;
