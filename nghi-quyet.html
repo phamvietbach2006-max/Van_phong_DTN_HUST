@@ -595,23 +595,36 @@
         function fixIctKinhGuiLayout(docXml) {
             const ictChiBo = 'Công nghệ Thông tin và Truyền thông';
             const leadingSpaces = ' '.repeat(13);
+            const recipientSpaces = ' '.repeat(12);
             let fixNextRecipientLine = false;
+            const textOnly = (xml) => xml.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+            const trimSpaceRunsBefore = (paragraph, pattern) => paragraph.replace(
+                new RegExp('(?:<w:r(?:\\s[^>]*)?>(?:<w:rPr>[\\s\\S]*?<\\/w:rPr>)?<w:t xml:space="preserve">\\s*<\\/w:t><\\/w:r>)+(?=' + pattern + ')'),
+                ''
+            );
 
             return docXml.replace(/<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g, (paragraph) => {
-                if (paragraph.includes('Kính gửi:') && paragraph.includes(ictChiBo)) {
+                if (textOnly(paragraph).includes('Kính gửi:') && textOnly(paragraph).includes(ictChiBo)) {
                     fixNextRecipientLine = true;
+                    paragraph = trimSpaceRunsBefore(paragraph, '<w:r(?:\\s[^>]*)?>[\\s\\S]*?<w:t(?:\\s[^>]*)?>\\s*Kính\\s*<\\/w:t>');
                     return paragraph
-                        .replace(/<w:ind\b[^>]*\bw:left="1080"[^>]*\/>/, '')
+                        .replace(/<w:ind\b[^>]*\b(?:w:left="1080"|w:firstLine="720")[^>]*\/>/g, '')
                         .replace(/(<w:t(?:\s[^>]*)?>)\s*Kính gửi:(<\/w:t>)/, `$1${leadingSpaces}Kính gửi:$2`)
+                        .replace(/(<w:t(?:\s[^>]*)?>)\s*Kính\s*(<\/w:t>)/, `$1${leadingSpaces}Kính $2`)
+                        .replace(/(<w:t(?:\s[^>]*)?>)\s*gửi:\s*(<\/w:t>)/, '$1gửi:$2')
+                        .replace(/(<w:t(?:\s[^>]*)?>)\s*-\s*(<\/w:t>)/, '$1 - $2')
                         .replace(/(<w:t(?:\s[^>]*)?>)\s*-\s*Chi ủy Chi bộ Sinh viên\s*(<\/w:t>)/, '$1 - Chi ủy Chi bộ Sinh viên$2');
                 }
 
                 if (fixNextRecipientLine) {
                     fixNextRecipientLine = false;
-                    return paragraph.replace(
-                        /(<w:t xml:space="preserve">)\s*(- Đảng uỷ Đại học Bách khoa Hà Nội\.<\/w:t>)/,
-                        '$1            $2'
-                    );
+                    paragraph = trimSpaceRunsBefore(paragraph, '<w:r(?:\\s[^>]*)?>[\\s\\S]*?<w:t(?:\\s[^>]*)?>\\s*-\\s*Đảng');
+                    return paragraph
+                        .replace(
+                            /(<w:t xml:space="preserve">)\s*(- Đảng uỷ Đại học Bách khoa Hà Nội\.<\/w:t>)/,
+                            `$1${recipientSpaces}$2`
+                        )
+                        .replace(/(<w:t(?:\s[^>]*)?>)\s*-\s*Đảng\s*(<\/w:t>)/, `$1${recipientSpaces}- Đảng $2`);
                 }
 
                 return paragraph;
